@@ -65,7 +65,9 @@
       transition: color 0.3s ease;
       white-space: nowrap;
 
-      &:hover { color: var(--sand-gold-light); }
+      &:hover {
+        color: var(--sand-gold-light);
+      }
     }
   }
 
@@ -84,7 +86,9 @@
     transition: background 0.25s;
     flex-shrink: 0;
 
-    &:hover { background: rgba(255, 255, 255, 0.2); }
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
   }
 
   // Hamburger button
@@ -102,7 +106,9 @@
     flex-shrink: 0;
     transition: background 0.25s;
 
-    &:hover { background: rgba(255, 255, 255, 0.16); }
+    &:hover {
+      background: rgba(255, 255, 255, 0.16);
+    }
 
     span {
       display: block;
@@ -115,11 +121,14 @@
   }
 
   &.nav--dark {
+
     .nav__links a,
     .nav__contact-item {
       color: #1A1615 !important;
 
-      &:hover { color: #5C3D2E !important; }
+      &:hover {
+        color: #5C3D2E !important;
+      }
     }
 
     .nav__mobile-phone,
@@ -127,13 +136,18 @@
       background: rgba(0, 0, 0, 0.08);
       border-color: rgba(0, 0, 0, 0.15);
 
-      span { background: #1A1615; }
+      span {
+        background: #1A1615;
+      }
 
-      svg { color: #1A1615; }
+      svg {
+        color: #1A1615;
+      }
     }
   }
 
   @media (max-width: 767px) {
+
     &__links,
     &__contact {
       display: none;
@@ -184,9 +198,14 @@
     color: #ffffff;
     transition: background 0.25s;
 
-    &:hover { background: rgba(255, 255, 255, 0.18); }
+    &:hover {
+      background: rgba(255, 255, 255, 0.18);
+    }
 
-    svg { width: 18px; height: 18px; }
+    svg {
+      width: 18px;
+      height: 18px;
+    }
   }
 
   &__nav {
@@ -210,7 +229,9 @@
       text-decoration: none;
       transition: color 0.2s;
 
-      &:hover { color: var(--sand-gold-light); }
+      &:hover {
+        color: var(--sand-gold-light);
+      }
     }
   }
 
@@ -234,7 +255,9 @@
     display: flex;
     align-items: center;
 
-    &:hover { color: var(--sand-gold-light); }
+    &:hover {
+      color: var(--sand-gold-light);
+    }
   }
 }
 
@@ -542,8 +565,13 @@
         padding: 0.7rem 0.6rem;
         border-radius: 12px;
 
-        h3 { font-size: 0.8rem; }
-        p  { font-size: 0.6rem; }
+        h3 {
+          font-size: 0.8rem;
+        }
+
+        p {
+          font-size: 0.6rem;
+        }
       }
     }
   }
@@ -698,8 +726,15 @@
   }
 
   @keyframes ring-pulse {
-    from { transform: scale(1);    opacity: 0.6; }
-    to   { transform: scale(1.05); opacity: 0.45; }
+    from {
+      transform: scale(1);
+      opacity: 0.6;
+    }
+
+    to {
+      transform: scale(1.05);
+      opacity: 0.45;
+    }
   }
 
   // Layer 3: Floating Capsule CTA overlapping bottom rim of window
@@ -897,8 +932,13 @@
     }
 
     &__headline {
-      &-sub { font-size: clamp(1.3rem, 6vw, 2rem); }
-      &-main { font-size: clamp(1.8rem, 10.5vw, 3.2rem); }
+      &-sub {
+        font-size: clamp(1.3rem, 6vw, 2rem);
+      }
+
+      &-main {
+        font-size: clamp(1.8rem, 10.5vw, 3.2rem);
+      }
     }
 
     &__window-entity {

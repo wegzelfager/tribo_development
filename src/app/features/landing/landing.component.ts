@@ -55,6 +55,7 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
   @ViewChild('ascentProgress')  ascentProgress?: ElementRef<HTMLDivElement>;
   @ViewChild('blueprintLayer')  blueprintLayer?: ElementRef<HTMLDivElement>;
   @ViewChild('wordmarkEl')      wordmarkEl?: ElementRef<HTMLDivElement>;
+  @ViewChild('ascentJetImg')    ascentJetImg?: ElementRef<HTMLImageElement>;
  
   mobileMenuOpen = false;
  
@@ -65,6 +66,9 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
   private tickerCb?: (time: number) => void;
   private mouseMoveHandler?: (e: MouseEvent) => void;
   private destroyed = false;
+  // Lenis already smooths the scroll, so scrub must NOT add a second long smoothing
+  private scrubValue: number | boolean = 0.6;
+  private onLoadRefresh?: () => void;
  
   constructor(
     @Inject(PLATFORM_ID) private platformId: object,
@@ -115,6 +119,23 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
       );
  
       this.initValueAnim();
+ 
+      // Decode the heavy images while the browser is idle, so nothing has to be
+      // decoded/painted for the first time at the moment a section enters the screen.
+      const idle: (cb: () => void) => void =
+        (window as any).requestIdleCallback ?? ((cb: () => void) => setTimeout(cb, 600));
+      idle(() => {
+        [this.jetImg?.nativeElement, this.ascentJetImg?.nativeElement]
+          .forEach(img => img?.decode?.().catch(() => {}));
+      });
+ 
+      // Late layout shifts (fonts, images) move trigger positions -> re-measure once
+      const refresh = () => ScrollTrigger.refresh();
+      (document as any).fonts?.ready?.then(refresh);
+      if (document.readyState !== 'complete') {
+        this.onLoadRefresh = refresh;
+        window.addEventListener('load', refresh, { once: true });
+      }
     });
   }
  
@@ -133,6 +154,7 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
       touchMultiplier: 2,
     }) as LenisInstance;
  
+    this.scrubValue = true; // 1:1 with Lenis' already-smoothed scroll
     this.tickerCb = (time: number) => this.lenis!.raf(time * 1000);
     this.gsap.ticker.add(this.tickerCb);
     this.gsap.ticker.lagSmoothing(0);
@@ -158,13 +180,21 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     document.addEventListener('mousemove', this.mouseMoveHandler, { passive: true });
   }
  
-  // One-time intro (the ring pulse is now pure CSS, see SCSS)
+  // One-time intro. It animates the INNER children, never the same elements the
+  // scrubbed timeline animates, so a fast scroll during the intro can't corrupt them.
   private initEntrance(): void {
     const gsap = this.gsap;
-    gsap.from([this.heroTextLeft.nativeElement, this.heroTextRight.nativeElement],
-      { opacity: 0, y: 40, duration: 1.2, ease: 'power3.out', stagger: 0.15, delay: 0.3 });
-    gsap.from(this.windowWrap.nativeElement,
-      { opacity: 0, scale: 0.88, duration: 1.4, ease: 'expo.out', delay: 0.2 });
+    const texts = [
+      ...Array.from(this.heroTextLeft.nativeElement.children),
+      ...Array.from(this.heroTextRight.nativeElement.children),
+    ];
+    gsap.from(texts,
+      { opacity: 0, y: 40, duration: 1.2, ease: 'power3.out', stagger: 0.12, delay: 0.3, clearProps: 'opacity,transform' });
+    const entity = this.windowWrap.nativeElement.firstElementChild;
+    if (entity) {
+      gsap.from(entity,
+        { opacity: 0, scale: 0.88, duration: 1.4, ease: 'expo.out', delay: 0.2, clearProps: 'opacity,transform' });
+    }
   }
  
   // ─── HERO: window zoom → ascent layer (same values as before) ──────────────
@@ -202,10 +232,8 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
         start: 'top top',
         end: isMobile ? '+=250%' : '+=350%',
         pin: true,
-        scrub: 1.2,
+        scrub: this.scrubValue,
         anticipatePin: 1,
-        fastScrollEnd: true,
-        preventOverlaps: true,
         invalidateOnRefresh: true,
         onToggle: (self) => {
           heavy.forEach(el => el.style.willChange = self.isActive ? 'transform, opacity' : 'auto');
@@ -315,7 +343,7 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
         start: 'top top',
         end: CFG.SCROLL_LENGTH,
         pin: true,
-        scrub: 1,
+        scrub: this.scrubValue,
         anticipatePin: 1,
         invalidateOnRefresh: true,
         onToggle: (self) => heavy.forEach(el => el.style.willChange = self.isActive ? 'transform, opacity' : 'auto'),
@@ -356,6 +384,7 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     this.ST?.getAll().forEach(t => t.kill());
     if (this.tickerCb && this.gsap) this.gsap.ticker.remove(this.tickerCb);
     this.lenis?.destroy();
+    if (this.onLoadRefresh) window.removeEventListener('load', this.onLoadRefresh);
     if (this.mouseMoveHandler) document.removeEventListener('mousemove', this.mouseMoveHandler);
   }
 }
