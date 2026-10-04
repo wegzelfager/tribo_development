@@ -30,6 +30,7 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
   @ViewChild('heroSection')     heroSection!: ElementRef<HTMLElement>;
   @ViewChild('heroBg')          heroBg!: ElementRef<HTMLDivElement>;
   @ViewChild('windowWrap')      windowWrap!: ElementRef<HTMLDivElement>;
+  @ViewChild('skyLayer')        skyLayer?: ElementRef<HTMLDivElement>;   // NEW: used to compute the zoom
   @ViewChild('windowRing')      windowRing!: ElementRef<HTMLDivElement>;
   @ViewChild('windowPill')      windowPill!: ElementRef<HTMLDivElement>;
   @ViewChild('skyWatermark')    skyWatermark!: ElementRef<HTMLDivElement>;
@@ -85,8 +86,6 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
  
-    // Everything below runs OUTSIDE Angular's zone: scroll, mousemove and the
-    // GSAP ticker never trigger change detection.
     this.zone.runOutsideAngular(async () => {
       const [{ gsap }, { ScrollTrigger }] = await Promise.all([
         import('gsap'),
@@ -96,9 +95,14 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
  
       gsap.registerPlugin(ScrollTrigger);
       ScrollTrigger.config({ limitCallbacks: true, ignoreMobileResize: true });
-      gsap.defaults({ force3D: true });
+      // CHANGED: removed gsap.defaults({ force3D: true }).
+      // "true" keeps every animated element on its own GPU layer permanently
+      // (more VRAM, worse on phones). The default "auto" promotes only while animating.
       this.gsap = gsap;
       this.ST = ScrollTrigger;
+ 
+      // NEW: reduced motion -> no pin, no scrub, no Lenis. The SCSS shows the static state.
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
  
       await this.initLenis();
       if (this.destroyed) return;
@@ -106,8 +110,6 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
       this.initCursor();
       this.initEntrance();
  
-      // Separate timelines per breakpoint. gsap.matchMedia reverts and rebuilds
-      // them automatically on resize / rotation (no manual resize handler needed).
       this.mm = gsap.matchMedia();
       this.mm.add(
         { isMobile: '(max-width: 767px)', isDesktop: '(min-width: 768px)' },
@@ -120,8 +122,6 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
  
       this.initValueAnim();
  
-      // Decode the heavy images while the browser is idle, so nothing has to be
-      // decoded/painted for the first time at the moment a section enters the screen.
       const idle: (cb: () => void) => void =
         (window as any).requestIdleCallback ?? ((cb: () => void) => setTimeout(cb, 600));
       idle(() => {
@@ -142,16 +142,15 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
   // Lenis only on desktop pointers; touch devices use native scroll (much cheaper).
   private async initLenis(): Promise<void> {
     const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (!fine || reduced) return;
+    if (!fine) return;
  
-    const { default: Lenis } = await import('@studio-freight/lenis');
+    // CHANGED: "@studio-freight/lenis" was renamed to "lenis" (npm i lenis)
+    const { default: Lenis } = await import('lenis');
     this.lenis = new (Lenis as any)({
       duration: 1.2,
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
-      wheelMultiplier: 1,
-      touchMultiplier: 2,
+      autoRaf: false, // we drive it from the GSAP ticker below
     }) as LenisInstance;
  
     this.scrubValue = true; // 1:1 with Lenis' already-smoothed scroll
@@ -161,7 +160,6 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     this.lenis.on('scroll', this.ST.update);
   }
  
-  // Custom cursor: desktop pointers only; quickTo = zero new tweens per mousemove
   private initCursor(): void {
     if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
     const gsap = this.gsap;
@@ -180,8 +178,6 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     document.addEventListener('mousemove', this.mouseMoveHandler, { passive: true });
   }
  
-  // One-time intro. It animates the INNER children, never the same elements the
-  // scrubbed timeline animates, so a fast scroll during the intro can't corrupt them.
   private initEntrance(): void {
     const gsap = this.gsap;
     const texts = [
@@ -197,12 +193,13 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     }
   }
  
-  // ─── HERO: window zoom → ascent layer (same values as before) ──────────────
+  // ─── HERO: window zoom → ascent layer ──────────────────────────────────────
   private buildHero(isMobile: boolean): void {
     const gsap = this.gsap;
     const hero      = this.heroSection.nativeElement;
     const bg        = this.heroBg.nativeElement;
     const wrap      = this.windowWrap.nativeElement;
+    const sky       = this.skyLayer?.nativeElement;
     const ring      = this.windowRing?.nativeElement;
     const pill      = this.windowPill?.nativeElement;
     const tLeft     = this.heroTextLeft.nativeElement;
@@ -217,14 +214,27 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
                         .filter(Boolean) as HTMLElement[];
     const nav       = this.navbar?.nativeElement;
  
-    if (jetWrap) gsap.set(jetWrap, { xPercent: -50, yPercent: -50, z: 0 });
-    gsap.set(wrap, { x: 0, y: 0, z: 0, transformOrigin: 'center center' });
+    if (jetWrap) gsap.set(jetWrap, { xPercent: -50, yPercent: -50 });
+    gsap.set(wrap, { x: 0, y: 0, transformOrigin: 'center center' });
  
-    // will-change only while the pin is active, on a short list of elements
-    const heavy = [wrap, ring, pill, cloudText, ascent, left, right, jetWrap, ...cards]
+    // CHANGED: the zoom is computed from the real aperture size instead of a fixed 9.
+    // Fixed 9 shows the edges on wide screens (>~1700px) and over-scales on phones
+    // (a bigger scale = a bigger GPU surface for nothing).
+    // offsetWidth/Height ignore transforms, so this is safe even mid-entrance.
+    const zoomTarget = (): number => {
+      if (!sky || !sky.offsetWidth || !sky.offsetHeight) return isMobile ? 6 : 9;
+      const cover = Math.max(window.innerWidth / sky.offsetWidth, window.innerHeight / sky.offsetHeight);
+      return cover * 1.45; // the aperture is an ellipse: x1.45 so the screen corners are covered too
+    };
+ 
+    // CHANGED: wrap and ring are NOT in this list anymore.
+    // will-change:transform on the element being scaled freezes the raster scale
+    // (the browser keeps the 1x texture and stretches it -> blur at 9x).
+    // If a very weak device drops frames, add `wrap` back and accept some blur.
+    const heavy = [pill, cloudText, ascent, left, right, jetWrap, ...cards]
                     .filter(Boolean) as HTMLElement[];
     let navDark = false;
-    let threshold = 0.53; // recalculated below from the real timeline duration
+    let threshold = 0.53;
  
     const tl = gsap.timeline({
       scrollTrigger: {
@@ -237,8 +247,7 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
         invalidateOnRefresh: true,
         onToggle: (self) => {
           heavy.forEach(el => el.style.willChange = self.isActive ? 'transform, opacity' : 'auto');
-          // pauses the CSS ring pulse while scrolling (see SCSS)
-          hero.classList.toggle('hero--active', self.isActive);
+          hero.classList.toggle('hero--active', self.isActive); // SCSS pauses the ring pulse with this
         },
         onUpdate: (self) => {
           if (!nav) return;
@@ -248,26 +257,29 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
       }
     });
  
-    // STAGE 1 → 2: window zoom, headlines exit
+    // STAGE 1 → 2
     tl
-      .to(wrap, { scale: 9, ease: 'power2.in', duration: 0.65 }, 0)
+      .to(wrap, { scale: zoomTarget, ease: 'power2.in', duration: 0.65 }, 0)
       .to(watermark, { opacity: 0, duration: 0.05 }, 0)
       .to([tLeft, tRight], { opacity: 0, y: -35, ease: 'power1.out', duration: 0.2 }, 0);
  
     if (pill) tl.to(pill, { opacity: 0, scale: 0.8, ease: 'power1.out', duration: 0.15 }, 0);
-    if (ring) tl.to(ring, { scale: 10, opacity: 0, ease: 'power2.in', duration: 0.4 }, 0);
+    // CHANGED: the ring sits inside `wrap`, which is already scaled, so scaling it x10 on top
+    // only made a huge box-shadow surface. Fade it out instead.
+    if (ring) tl.to(ring, { opacity: 0, ease: 'power1.out', duration: 0.2 }, 0);
     tl.to(bg, { opacity: 0, ease: 'power1.in', duration: 0.35 }, 0.15);
  
-    // STAGE 2: cloud text
+    // STAGE 2: cloud text. CHANGED: autoAlpha (opacity + visibility) so that hidden
+    // full-screen layers are skipped by the compositor completely.
     if (cloudText) {
-      tl.fromTo(cloudText, { opacity: 0, y: 30 },
-          { opacity: 1, y: 0, ease: 'power2.out', duration: 0.14 }, 0.28)
-        .to(cloudText, { opacity: 0, y: -25, ease: 'power2.in', duration: 0.12 }, 0.46);
+      tl.fromTo(cloudText, { autoAlpha: 0, y: 30 },
+          { autoAlpha: 1, y: 0, ease: 'power2.out', duration: 0.14 }, 0.28)
+        .to(cloudText, { autoAlpha: 0, y: -25, ease: 'power2.in', duration: 0.12 }, 0.46);
     }
  
     // STAGE 3: ascent layer
     if (ascent) {
-      tl.fromTo(ascent, { opacity: 0 }, { opacity: 1, ease: 'power1.inOut', duration: 0.18 }, 0.48);
+      tl.fromTo(ascent, { autoAlpha: 0 }, { autoAlpha: 1, ease: 'power1.inOut', duration: 0.18 }, 0.48);
     }
     if (left) {
       tl.fromTo(left, { x: -70, opacity: 0 }, { x: 0, opacity: 1, ease: 'power2.out', duration: 0.22 }, 0.54);
@@ -285,21 +297,23 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
         { y: 0, opacity: 1, stagger: 0.06, ease: 'back.out(1.4)', duration: 0.18 }, 0.68);
     }
  
-    // Navbar colour = a CSS class toggled at the same moment as before (position 0.52)
     threshold = 0.52 / tl.duration();
  
-    // Navbar goes back to light text when the dark "value" section arrives
+    // CHANGED: refreshPriority -1. This trigger measures the value section, which sits AFTER
+    // the two pinned sections. If it refreshes before their pin-spacers exist, its start
+    // position is wrong (nav stays dark/light at the wrong time, especially after resize).
     if (nav && this.valueSection) {
       this.ST.create({
         trigger: this.valueSection.nativeElement,
         start: 'top 64px',
+        refreshPriority: -1,
         onEnter: () => nav.classList.remove('nav--dark'),
         onLeaveBack: () => nav.classList.add('nav--dark'),
       });
     }
   }
  
-  // ─── 650ER ASCENT SECTION (values unchanged; mobile/desktop via matchMedia) ─
+  // ─── 650ER ASCENT SECTION ──────────────────────────────────────────────────
   private buildAscent(isMobile: boolean): void {
     const gsap = this.gsap;
     const CFG = {
@@ -328,7 +342,7 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     ] as HTMLElement[];
  
     gsap.set(jetWrap, { xPercent: -50, yPercent: 0, scale: 1 });
-    if (blueprint) gsap.set(blueprint, { yPercent: 0, z: 0 });
+    if (blueprint) gsap.set(blueprint, { yPercent: 0 });
     if (wordmark)  gsap.set(wordmark, { y: CFG.WORD_FROM_Y, opacity: 0 });
     if (p1)        gsap.set(p1, { y: 0, opacity: 1 });
     if (specItems.length) gsap.set(specItems, { opacity: 0, y: 30 });
@@ -347,7 +361,6 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
         anticipatePin: 1,
         invalidateOnRefresh: true,
         onToggle: (self) => heavy.forEach(el => el.style.willChange = self.isActive ? 'transform, opacity' : 'auto'),
-        // direct style write: cheaper than gsap.set on every scroll frame
         onUpdate: (self) => { if (progress) progress.style.transform = `scaleX(${self.progress})`; },
       },
     });
@@ -367,6 +380,7 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
       trigger: this.valueSection.nativeElement,
       start: 'top 80%',
       once: true,
+      refreshPriority: -1, // CHANGED: refresh after the pinned sections above it (see buildHero)
       onEnter: () => {
         cells.forEach(c => c.style.willChange = 'opacity, transform');
         gsap.to(cells, {
