@@ -227,12 +227,9 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
       return cover * 1.45; // the aperture is an ellipse: x1.45 so the screen corners are covered too
     };
  
-    // CHANGED: wrap and ring are NOT in this list anymore.
-    // will-change:transform on the element being scaled freezes the raster scale
-    // (the browser keeps the 1x texture and stretches it -> blur at 9x).
-    // If a very weak device drops frames, add `wrap` back and accept some blur.
-    const heavy = [pill, cloudText, ascent, left, right, jetWrap, ...cards]
-                    .filter(Boolean) as HTMLElement[];
+
+   const heavy = [wrap, pill, cloudText, ascent, left, right, jetWrap, ...cards]
+                .filter(Boolean) as HTMLElement[];
     let navDark = false;
     let threshold = 0.53;
  

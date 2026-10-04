@@ -68,14 +68,14 @@
  
         <!-- Layer 1: sky behind the window aperture (LCP image: eager + high priority) -->
         <div class="hero__sky-layer" #skyLayer>
-          <img class="hero__sky-img" src="/sky_view.jpg"
-               alt="Clear high altitude sky with soft white clouds"
-               loading="eager" fetchpriority="high" decoding="async" />
+<img class="hero__sky-img" src="/assets/images/sky_view.webp"
+     alt="Clear high altitude sky with soft white clouds"
+     loading="eager" fetchpriority="high" decoding="async" />
           <div class="hero__sky-watermark" #skyWatermark>Jesko Jets</div>
         </div>
  
         <!-- Layer 2: window frame (transparent PNG/WebP) -->
-        <img class="hero__window-img" src="/window_frame.png"
+        <img class="hero__window-img" src="/window_frame.webp"
              alt="Luxury private jet cabin window frame"
              loading="eager" fetchpriority="high" decoding="async" #windowImg />
  
@@ -169,7 +169,7 @@
  
       <!-- Center SUV (explicit size avoids layout shift) -->
       <div class="ascent__jet-wrap">
-        <img class="ascent__jet" src="assets/images/suv-cutout.png"
+        <img class="ascent__jet" src="assets/images/suv-cutout.webp"
              alt="Luxury 4x4 SUV" width="472" height="1030"
              loading="eager" decoding="async" #jetImg />
       </div>

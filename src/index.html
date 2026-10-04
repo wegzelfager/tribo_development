@@ -7,26 +7,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0e0b0a">
   <meta name="description" content="TRIBO connects elite travelers with the world's finest private jets, safaris, and exclusive expeditions through a trusted escrow-secured marketplace.">
- 
+
   <meta property="og:title" content="TRIBO — Luxury Travel & Private Jet Marketplace">
   <meta property="og:description" content="Experience the future of luxury travel. Book private jets, safaris, and exclusive destinations through TRIBO's AI-powered platform.">
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary_large_image">
   <!-- TODO: add <meta property="og:image" content="https://YOUR-DOMAIN/og-image.jpg"> (1200x630) so shared links get a preview -->
- 
+
   <link rel="icon" type="image/x-icon" href="favicon.ico">
- 
+
   <!-- Paint the dark background immediately: no white flash before the CSS bundle arrives -->
   <style>
     html, body { margin: 0; background: #0e0b0a; }
   </style>
- 
+
   <!-- LCP images: start downloading before Angular boots.
-       The href must match the <img src> in the template exactly, otherwise it is downloaded twice.
-       After converting to AVIF/WebP, update BOTH this and the template. -->
-  <link rel="preload" as="image" href="/sky_view.jpg" fetchpriority="high">
-  <link rel="preload" as="image" href="/window_frame.png" fetchpriority="high">
- 
+       The href must match the <img src> in the template exactly, otherwise it is downloaded twice. -->
+  <link rel="preload" as="image" href="/assets/images/sky_view.webp" type="image/webp" fetchpriority="high">
+  <link rel="preload" as="image" href="/window_frame.webp" type="image/webp" fetchpriority="high">
+
   <!-- Fonts: ONE request for all three families, non-blocking (swap), so text is never held back -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
