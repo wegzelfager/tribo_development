@@ -1,7 +1,7 @@
 import {
   Component, OnInit, OnDestroy, AfterViewInit,
   ElementRef, ViewChild, ViewChildren, QueryList,
-  PLATFORM_ID, Inject
+  PLATFORM_ID, Inject, NgZone, ChangeDetectionStrategy
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { gsap } from 'gsap';
@@ -25,7 +25,8 @@ interface LenisInstance {
   standalone: true,
   imports: [],
   templateUrl: './landing.component.html',
-  styleUrl: './landing.component.scss'
+  styleUrl: './landing.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
 
@@ -78,7 +79,10 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
   private resizeDebounce: ReturnType<typeof setTimeout> | null = null;
   private ascentMM?: ReturnType<typeof ScrollTrigger.matchMedia>;
 
-  constructor(@Inject(PLATFORM_ID) private platformId: object) {}
+  constructor(
+    @Inject(PLATFORM_ID) private platformId: object,
+    private zone: NgZone,
+  ) {}
 
   ngOnInit(): void {}
 
@@ -93,12 +97,16 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
-    requestAnimationFrame(() => {
-      this.initLenis();
-      this.initCursor();
-      this.initHeroAnim();
-      this.initAscentMatchMedia();
-      this.initValueAnim();
+    // Run all animation code outside Angular's zone so GSAP/scroll never
+    // trigger change detection on every animation frame.
+    this.zone.runOutsideAngular(() => {
+      requestAnimationFrame(() => {
+        this.initLenis();
+        this.initCursor();
+        this.initHeroAnim();
+        this.initAscentMatchMedia();
+        this.initValueAnim();
+      });
     });
   }
 
@@ -169,10 +177,7 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
     gsap.from([tLeft, tRight], { opacity: 0, y: 40, duration: 1.2, ease: 'power3.out', stagger: 0.15, delay: 0.3 });
     gsap.from(wrap, { opacity: 0, scale: 0.88, duration: 1.4, ease: 'expo.out', delay: 0.2 });
 
-    // Pulsing ring ambient animation
-    if (ring) {
-      gsap.to(ring, { scale: 1.05, opacity: 0.45, duration: 2.4, ease: 'sine.inOut', repeat: -1, yoyo: true });
-    }
+    // Ring pulse is now a pure CSS animation (see .hero__window-ring in SCSS).
 
     // Pre-promote all animated elements to GPU compositor layers
     gsap.set(wrap, {
@@ -204,7 +209,8 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
         invalidateOnRefresh: true,
         onToggle: (self) => {
           wrap.style.willChange = self.isActive ? 'transform' : 'auto';
-          if (ring) ring.style.willChange = self.isActive ? 'transform, opacity' : 'auto';
+          // Pause CSS ring animation while the zoom is scrubbing
+          if (ring) ring.classList.toggle('anim-paused', self.isActive);
           if (pill) pill.style.willChange = self.isActive ? 'opacity, transform' : 'auto';
           if (cloudText) cloudText.style.willChange = self.isActive ? 'opacity, transform' : 'auto';
           if (ascent) ascent.style.willChange = self.isActive ? 'opacity' : 'auto';
@@ -212,6 +218,8 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
           if (right) right.style.willChange = self.isActive ? 'opacity, transform' : 'auto';
           if (jetWrap) jetWrap.style.willChange = self.isActive ? 'transform' : 'auto';
           cards.forEach(c => c.style.willChange = self.isActive ? 'opacity, transform' : 'auto');
+          // Switch navbar dark/light via CSS class instead of tweening color on each link
+          if (nav) nav.classList.toggle('nav--light', self.progress > 0.5);
         },
       }
     });

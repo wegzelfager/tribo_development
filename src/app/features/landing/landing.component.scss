@@ -75,10 +75,8 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.22);
     align-items: center;
     justify-content: center;
     color: #ffffff;
@@ -97,11 +95,9 @@
     width: 40px;
     height: 40px;
     padding: 11px 10px;
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.18);
     border-radius: 10px;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
     cursor: pointer;
     flex-shrink: 0;
     transition: background 0.25s;
@@ -294,9 +290,7 @@
       left: 0;
       right: 0;
       height: 33.333vh;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      background: linear-gradient(180deg, rgba(210, 228, 236, 0.45) 0%, rgba(216, 231, 240, 0.2) 65%, transparent 100%);
+      background: linear-gradient(180deg, rgba(210, 228, 236, 0.55) 0%, rgba(216, 231, 240, 0.28) 65%, transparent 100%);
       pointer-events: none;
       z-index: 1;
     }
@@ -428,7 +422,6 @@
       background: transparent !important;
       border: none !important;
       box-shadow: none !important;
-      filter: drop-shadow(0 25px 35px rgba(0, 0, 0, 0.22)) drop-shadow(0 10px 18px rgba(92, 61, 46, 0.25));
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
       image-rendering: -webkit-optimize-contrast;
@@ -652,9 +645,6 @@
     object-position: center 30%;
     transform: scale(1.12);
     backface-visibility: hidden;
-    // Prevents render-blur during GPU scaling of high-res asset
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: crisp-edges;
   }
 
   &__sky-watermark {
@@ -686,13 +676,9 @@
     -webkit-backface-visibility: hidden;
     // translate3d forces compositor path; prevents blur artifact during parent scale
     transform: translate3d(0, 0, 0);
-    // Preserve sharpness of high-res PNG during parent zoom transform
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: crisp-edges;
-    filter: drop-shadow(0 20px 50px rgba(0, 0, 0, 0.65)) drop-shadow(0 0 45px rgba(180, 130, 90, 0.22));
   }
 
-  // Ambient gold glow ring around window
+  // Ambient gold glow ring around window — pure CSS so no GSAP tick during scroll
   &__window-ring {
     position: absolute;
     inset: -14px;
@@ -701,12 +687,19 @@
     box-shadow: 0 0 35px rgba(200, 150, 90, 0.18);
     pointer-events: none;
     transform-origin: center center;
-    // will-change toggled dynamically by GSAP onToggle lifecycle
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
-    // translate3d(0,0,0) pre-promotes this to its own GPU compositor layer
-    transform: translate3d(0, 0, 0);
     z-index: 0;
+    animation: ring-pulse 2.4s ease-in-out infinite alternate;
+
+    &.anim-paused {
+      animation-play-state: paused;
+    }
+  }
+
+  @keyframes ring-pulse {
+    from { transform: scale(1);    opacity: 0.6; }
+    to   { transform: scale(1.05); opacity: 0.45; }
   }
 
   // Layer 3: Floating Capsule CTA overlapping bottom rim of window
@@ -1275,12 +1268,9 @@
   width: auto;
   height: clamp(550px, 125vh, 1400px); // bleed past bottom — creates dramatic scale
   object-fit: contain;
-  filter: drop-shadow(-20px 30px 25px rgba(40, 30, 20, 0.35));
-  mix-blend-mode: multiply; // dissolves white bg into gradient
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   user-select: none;
-  image-rendering: -webkit-optimize-contrast;
 
   @media (max-width: 799px) {
     width: 112vw;
