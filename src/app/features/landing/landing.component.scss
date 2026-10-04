@@ -1,7 +1,10 @@
 // ─── LANDING WRAPPER ────────────────────────────────────────────────────────
 .landing-wrap {
-  background: var(--dark-luxury);
-  overflow: hidden;
+  --vh-gap: 0px;
+
+  @supports (height: 100lvh) {
+    --vh-gap: calc(100lvh - 100svh);
+  }
 }
 
 // ─── NAVIGATION ─────────────────────────────────────────────────────────────
@@ -265,8 +268,10 @@
 .hero {
   position: relative;
   width: 100%;
-  min-height: 100svh;
-  height: 100svh;
+  height: 100vh;
+  min-height: 100vh;
+  height: 100lvh;
+  min-height: 100lvh;
   overflow: hidden;
   background: radial-gradient(ellipse 70% 60% at 50% 50%, #2A1E17 0%, #171210 50%, #0E0B0A 100%);
 
@@ -454,7 +459,7 @@
 
     .ascent__cards {
       position: absolute;
-      bottom: 2.2rem;
+      bottom: calc(2.2rem + var(--vh-gap));
       left: 0;
       right: 0;
       display: flex;
@@ -849,8 +854,8 @@
   // Right Content: "We are distinction"
   &__text-right {
     position: absolute;
+    bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px) + var(--vh-gap));
     right: clamp(1.25rem, 4.5vw, 4.5rem);
-    bottom: 14%;
     z-index: 3;
     width: clamp(140px, 28vw, 480px);
     // will-change toggled dynamically by GSAP onToggle
@@ -1088,7 +1093,8 @@
 .ascent-section {
   position: relative;
   width: 100%;
-  height: 100svh; // 100svh avoids iOS bar flicker on pin
+  height: 100vh;
+  height: 100lvh;
   overflow: hidden;
   contain: layout style;
 }
@@ -1243,7 +1249,7 @@
 // Bottom center scroll hint — only visible in Phase 1
 .ascent__scroll-hint {
   position: absolute;
-  bottom: clamp(1.5rem, 3vh, 3rem);
+  bottom: calc(clamp(1.5rem, 3vh, 3rem) + var(--vh-gap));
   left: 0;
   right: 0;
   margin: auto;
@@ -1458,6 +1464,7 @@
   right: 0;
   margin: auto;
   width: fit-content;
+  bottom: calc(1.2rem + var(--vh-gap));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1526,6 +1533,7 @@
   .ascent__specs-right {
     position: static;
     width: 100%;
+    bottom: calc(clamp(4rem, 10vh, 8rem) + var(--vh-gap));
     max-width: 400px;
   }
 

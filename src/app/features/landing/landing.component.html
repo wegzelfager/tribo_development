@@ -1,323 +1,323 @@
-<div class="landing-wrap">
- 
-  <!-- Custom Cursor (desktop pointers only, see TS) -->
-  <div class="cursor" #cursor></div>
-  <div class="cursor-follower" #cursorFollower></div>
- 
-  <!-- Navigation -->
-  <nav class="nav" #navbar>
-    <div class="nav__left">
-      <ul class="nav__links">
-        <li><a href="#about">About</a></li>
-        <li><a href="#fleet">Our Fleet</a></li>
-        <li><a href="#advantages">Advantages</a></li>
-        <li><a href="#global">Global</a></li>
-      </ul>
-    </div>
- 
-    <div class="nav__right">
-      <div class="nav__contact">
-        <a href="tel:+971544325050" class="nav__contact-item">+971 54 432 5050</a>
-        <a href="mailto:info@jeskojets.com" class="nav__contact-item">info&#64;jeskojets.com</a>
+  <div class="landing-wrap">
+  
+    <!-- Custom Cursor (desktop pointers only, see TS) -->
+    <div class="cursor" #cursor></div>
+    <div class="cursor-follower" #cursorFollower></div>
+  
+    <!-- Navigation -->
+    <nav class="nav" #navbar>
+      <div class="nav__left">
+        <ul class="nav__links">
+          <li><a href="#about">About</a></li>
+          <li><a href="#fleet">Our Fleet</a></li>
+          <li><a href="#advantages">Advantages</a></li>
+          <li><a href="#global">Global</a></li>
+        </ul>
       </div>
- 
-      <a href="tel:+971544325050" class="nav__mobile-phone" aria-label="Call us" id="nav-mobile-phone">
-        <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
-          <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
-        </svg>
-      </a>
- 
-      <button class="nav__hamburger" id="nav-hamburger" aria-label="Open menu"
-              [attr.aria-expanded]="mobileMenuOpen" (click)="toggleMobileMenu()">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-    </div>
-  </nav>
- 
-  <!-- Mobile Overlay Menu -->
-  <div class="nav-overlay" id="nav-overlay" [class.nav-overlay--open]="mobileMenuOpen">
-    <button class="nav-overlay__close" id="nav-overlay-close" aria-label="Close menu" (click)="toggleMobileMenu()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-        <path d="M18 6L6 18M6 6l12 12"/>
-      </svg>
-    </button>
-    <nav class="nav-overlay__nav" aria-label="Mobile navigation">
-      <ul class="nav-overlay__links">
-        <li><a href="#about" (click)="toggleMobileMenu()">About</a></li>
-        <li><a href="#fleet" (click)="toggleMobileMenu()">Our Fleet</a></li>
-        <li><a href="#advantages" (click)="toggleMobileMenu()">Advantages</a></li>
-        <li><a href="#global" (click)="toggleMobileMenu()">Global</a></li>
-      </ul>
-      <div class="nav-overlay__contact">
-        <a href="tel:+971544325050" class="nav-overlay__phone">+971 54 432 5050</a>
-        <a href="mailto:info@jeskojets.com" class="nav-overlay__email">info&#64;jeskojets.com</a>
+  
+      <div class="nav__right">
+        <div class="nav__contact">
+          <a href="tel:+971544325050" class="nav__contact-item">+971 54 432 5050</a>
+          <a href="mailto:info@jeskojets.com" class="nav__contact-item">info&#64;jeskojets.com</a>
+        </div>
+  
+        <a href="tel:+971544325050" class="nav__mobile-phone" aria-label="Call us" id="nav-mobile-phone">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+            <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+          </svg>
+        </a>
+  
+        <button class="nav__hamburger" id="nav-hamburger" aria-label="Open menu"
+                [attr.aria-expanded]="mobileMenuOpen" (click)="toggleMobileMenu()">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
       </div>
     </nav>
-  </div>
- 
-  <!-- HERO -->
-  <section class="hero" #heroSection id="hero" aria-label="Hero - Airplane Window Experience">
- 
-    <div class="hero__bg" #heroBg></div>
- 
-    <!-- GSAP zoom target -->
-    <div class="hero__window-wrap" #windowWrap>
-      <div class="hero__window-entity">
- 
-        <!-- Layer 1: sky behind the window aperture (LCP image: eager + high priority) -->
-        <div class="hero__sky-layer" #skyLayer>
-<img class="hero__sky-img" src="/assets/images/sky_view.webp"
-     alt="Clear high altitude sky with soft white clouds"
-     loading="eager" fetchpriority="high" decoding="async" />
-          <div class="hero__sky-watermark" #skyWatermark>Jesko Jets</div>
-        </div>
- 
-        <!-- Layer 2: window frame (transparent PNG/WebP) -->
-        <img class="hero__window-img" src="/window_frame.webp"
-             alt="Luxury private jet cabin window frame"
-             loading="eager" fetchpriority="high" decoding="async" #windowImg />
- 
-        <div class="hero__window-ring" #windowRing></div>
- 
-        <div class="hero__window-pill" #windowPill>
-          <button class="hero__pill-btn" id="hero-cta-book" aria-label="Book the Flight">
-            <span class="hero__pill-text">Book the Flight</span>
-            <span class="hero__pill-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
-              </svg>
-            </span>
-          </button>
-        </div>
- 
-      </div>
-    </div>
- 
-    <!-- Stage 2: cloud text -->
-    <div class="hero__cloud-overlay" #cloudOverlay>
-      <div class="hero__cloud-content">
-        <h2 class="hero__cloud-title">TRIBO is a private travel platform...</h2>
-        <p class="hero__cloud-subtitle">Luxury that moves with you</p>
-      </div>
-    </div>
- 
-    <!-- Left: "We are movement" -->
-    <div class="hero__text-left" #heroTextLeft>
-      <h1 class="hero__headline">
-        <span class="hero__headline-sub">We are</span>
-        <span class="hero__headline-main">movement</span>
-      </h1>
-      <div class="hero__narrative">
-        <p class="hero__narrative-title">Your<br/>freedom to<br/>enjoy life</p>
-        <div class="hero__dash" aria-hidden="true"></div>
-        <p class="hero__desc">Every flight is designed around your comfort, time, and ambitions — so you can focus on what truly matters, while we take care of everything else.</p>
-      </div>
-    </div>
- 
-    <!-- Right: "We are distinction" + scroll indicator -->
-    <div class="hero__text-right" #heroTextRight>
-      <h2 class="hero__headline">
-        <span class="hero__headline-sub">We are</span>
-        <span class="hero__headline-main">distinction</span>
-      </h2>
- 
-      <div class="hero__scroll-block">
-        <div class="hero__scroll-divider" aria-hidden="true"></div>
-        <div class="hero__scroll-meta">
-          <div class="hero__scroll-action">
-            <span class="hero__scroll-chevrons" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <path d="M6 9l6 6 6-6M6 4l6 6 6-6M6 14l6 6 6-6"/>
-              </svg>
-            </span>
-            <span class="hero__scroll-txt">SCROLL DOWN</span>
-          </div>
-          <span class="hero__scroll-dest">TO START THE JOURNEY</span>
-        </div>
-      </div>
-    </div>
- 
-    <!-- Stage 3: ascent layer -->
-    <div class="hero__ascent-layer" #ascentLayer>
-      <div class="ascent__bg"></div>
-      <div class="ascent__cloud-horizon" aria-hidden="true"></div>
- 
-      <div class="ascent__layout">
-        <div class="ascent__title-left" #ascentLeft>
-          <h2 class="ascent__big-text">Fly in</h2>
-          <p class="ascent__sub-text">Luxury<br/>that moves<br/>with you</p>
-        </div>
- 
-        <div class="ascent__title-right" #ascentRight>
-          <h2 class="ascent__big-text">Luxury</h2>
-          <div class="ascent__meta-strip">
-            <div class="ascent__meta-divider" aria-hidden="true"></div>
-            <div class="ascent__meta-row">
-              <span class="ascent__meta-brand">LAND CRUISER</span>
-              <span class="ascent__meta-model">300 VXR</span>
-            </div>
-            <div class="ascent__spec-row">
-              <div>Range<br/><strong>750 KM</strong></div>
-              <div>Speed<br/><strong>210 KM/H</strong></div>
-              <div>Capacity<br/><strong>7 Seats</strong></div>
-            </div>
-          </div>
-        </div>
-      </div>
- 
-      <!-- Center SUV (explicit size avoids layout shift) -->
-      <div class="ascent__jet-wrap">
-        <img class="ascent__jet" src="assets/images/suv-cutout.webp"
-             alt="Luxury 4x4 SUV" width="472" height="1030"
-             loading="eager" decoding="async" #jetImg />
-      </div>
- 
-      <div class="ascent__cards">
-        <div class="ascent__card" #card1><h3>100%</h3><p>Full Escrow Protection on every booking</p></div>
-        <div class="ascent__card" #card2><h3>500+</h3><p>Curated Safaris &amp; private expeditions worldwide</p></div>
-        <div class="ascent__card" #card3><h3>AI Engine</h3><p>Smart itinerary optimization powered by intelligence</p></div>
-      </div>
-    </div>
- 
-  </section>
- 
-  <!-- TAKEOFF / 650ER pinned section -->
-  <section class="ascent-section" #ascentSection id="fleet" aria-label="Gulfstream 650ER Aircraft Specification">
- 
-    <div class="ascent__bg"></div>
-    <div class="ascent__blueprint" #blueprintLayer aria-hidden="true"></div>
-    <div class="ascent__wordmark" #wordmarkEl aria-hidden="true">650ER</div>
- 
-    <div class="ascent__phase1" #phase1Layer>
-      <div class="ascent__p1-title-block">
-        <p class="ascent__p1-label">Gulfstream</p>
-        <h2 class="ascent__p1-model">650ER</h2>
-      </div>
-      <div class="ascent__p1-right-block">
-        <h3 class="ascent__p1-header">Ultra-long-range Aircraft</h3>
-        <div class="ascent__p1-divider" aria-hidden="true"></div>
-        <p class="ascent__p1-access">Direct access to private travel</p>
-        <p class="ascent__p1-desc">A true time-saving machine. It brings Tokyo and New York an hour closer, and at 92% of the speed of sound it can circle the globe with just a single stop.</p>
-      </div>
-      <div class="ascent__scroll-hint" #scrollHint>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-          <path d="M12 5v14M5 12l7 7 7-7"/>
+  
+    <!-- Mobile Overlay Menu -->
+    <div class="nav-overlay" id="nav-overlay" [class.nav-overlay--open]="mobileMenuOpen">
+      <button class="nav-overlay__close" id="nav-overlay-close" aria-label="Close menu" (click)="toggleMobileMenu()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M18 6L6 18M6 6l12 12"/>
         </svg>
-        <span>Scroll to take off</span>
-      </div>
-    </div>
- 
-    <!-- GSAP owns yPercent/scale here — no CSS transform -->
-    <div class="ascent__jet-wrapper" #jetWrapper>
-      <img class="ascent__jet-photo" src="assets/images/jet-photoreal.webp"
-           alt="Gulfstream 650ER private jet, top-down view, nose pointing up"
-           loading="eager" fetchpriority="low" decoding="async" #ascentJetImg />
-    </div>
- 
-    <div class="ascent__specs-left" #specsLeft>
-      <div class="ascent__spec-item">
-        <span class="ascent__spec-label">Maximum operating range</span>
-        <strong class="ascent__spec-value">11,263 km</strong>
-      </div>
-      <div class="ascent__spec-item">
-        <span class="ascent__spec-label">Speed</span>
-        <strong class="ascent__spec-value">480 knots</strong>
-      </div>
-      <div class="ascent__spec-item">
-        <span class="ascent__spec-label">Passenger capacity</span>
-        <strong class="ascent__spec-value">Up to 12 seats (+1 cabin server)</strong>
-      </div>
-      <div class="ascent__spec-item">
-        <span class="ascent__spec-label">Cabin (L × W × H)</span>
-        <strong class="ascent__spec-value">14.05 × 2.49 × 1.92 m</strong>
-      </div>
-    </div>
- 
-    <div class="ascent__specs-right" #specsRight>
-      <div class="ascent__spec-item">
-        <span class="ascent__spec-label">Endurance</span>
-        <strong class="ascent__spec-value">14 hrs (max for European-based aircraft)</strong>
-      </div>
-      <div class="ascent__spec-item">
-        <span class="ascent__spec-label">Baggage capacity</span>
-        <strong class="ascent__spec-value">5.52 m³</strong>
-      </div>
-      <div class="ascent__spec-item">
-        <span class="ascent__spec-label">Cruising altitude</span>
-        <strong class="ascent__spec-value">15,544 m</strong>
-      </div>
-    </div>
- 
-    <div class="ascent__cta-btn" #ascentCta>
-      <button id="ascent-cta-book" aria-label="Book the Gulfstream 650ER flight">
-        Book the Flight
-        <span class="ascent__cta-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="currentColor">
-            <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
-          </svg>
-        </span>
       </button>
+      <nav class="nav-overlay__nav" aria-label="Mobile navigation">
+        <ul class="nav-overlay__links">
+          <li><a href="#about" (click)="toggleMobileMenu()">About</a></li>
+          <li><a href="#fleet" (click)="toggleMobileMenu()">Our Fleet</a></li>
+          <li><a href="#advantages" (click)="toggleMobileMenu()">Advantages</a></li>
+          <li><a href="#global" (click)="toggleMobileMenu()">Global</a></li>
+        </ul>
+        <div class="nav-overlay__contact">
+          <a href="tel:+971544325050" class="nav-overlay__phone">+971 54 432 5050</a>
+          <a href="mailto:info@jeskojets.com" class="nav-overlay__email">info&#64;jeskojets.com</a>
+        </div>
+      </nav>
     </div>
- 
-    <div class="ascent__progress" aria-hidden="true">
-      <div class="ascent__progress-track">
-        <div class="ascent__progress-fill" #ascentProgress></div>
+  
+    <!-- HERO -->
+    <section class="hero" #heroSection id="hero" aria-label="Hero - Airplane Window Experience">
+  
+      <div class="hero__bg" #heroBg></div>
+  
+      <!-- GSAP zoom target -->
+      <div class="hero__window-wrap" #windowWrap>
+        <div class="hero__window-entity">
+  
+          <!-- Layer 1: sky behind the window aperture (LCP image: eager + high priority) -->
+          <div class="hero__sky-layer" #skyLayer>
+  <img class="hero__sky-img" src="/assets/images/sky_view.webp"
+      alt="Clear high altitude sky with soft white clouds"
+      loading="eager" fetchpriority="high" decoding="async" />
+            <div class="hero__sky-watermark" #skyWatermark>Jesko Jets</div>
+          </div>
+  
+          <!-- Layer 2: window frame (transparent PNG/WebP) -->
+          <img class="hero__window-img" src="/window_frame.webp"
+              alt="Luxury private jet cabin window frame"
+              loading="eager" fetchpriority="high" decoding="async" #windowImg />
+  
+          <div class="hero__window-ring" #windowRing></div>
+  
+          <div class="hero__window-pill" #windowPill>
+            <button class="hero__pill-btn" id="hero-cta-book" aria-label="Book the Flight">
+              <span class="hero__pill-text">Book the Flight</span>
+              <span class="hero__pill-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
+                </svg>
+              </span>
+            </button>
+          </div>
+  
+        </div>
       </div>
-      <span class="ascent__progress-label">SCROLL TO REVEAL</span>
-    </div>
- 
-  </section>
- 
-  <!-- VALUE -->
-  <section class="value" #valueSection id="advantages" aria-label="B2B and C2C Value Proposition">
-    <div class="value__header">
-      <p class="value__eyebrow">Why Tribo</p>
-      <h2 class="value__title">Where <em>trust</em> meets<br/>extraordinary journeys</h2>
-    </div>
-    <div class="value__grid">
-      <div class="value__cell value__cell--highlight" #valueCell>
-        <div class="value__icon" aria-hidden="true">🔒</div>
-        <h3 class="value__cell-title">Secure Escrow</h3>
-        <p class="value__cell-desc">Every transaction held in full escrow until service delivery is confirmed. Zero financial risk.</p>
-        <p class="value__stat">100%</p>
+  
+      <!-- Stage 2: cloud text -->
+      <div class="hero__cloud-overlay" #cloudOverlay>
+        <div class="hero__cloud-content">
+          <h2 class="hero__cloud-title">TRIBO is a private travel platform...</h2>
+          <p class="hero__cloud-subtitle">Luxury that moves with you</p>
+        </div>
       </div>
-      <div class="value__cell" #valueCell>
-        <div class="value__icon" aria-hidden="true">🌍</div>
-        <h3 class="value__cell-title">Global Network</h3>
-        <p class="value__cell-desc">Access exclusive B2B operator partners and C2C luxury travel experiences across 120+ countries.</p>
-        <p class="value__stat">120+</p>
+  
+      <!-- Left: "We are movement" -->
+      <div class="hero__text-left" #heroTextLeft>
+        <h1 class="hero__headline">
+          <span class="hero__headline-sub">We are</span>
+          <span class="hero__headline-main">movement</span>
+        </h1>
+        <div class="hero__narrative">
+          <p class="hero__narrative-title">Your<br/>freedom to<br/>enjoy life</p>
+          <div class="hero__dash" aria-hidden="true"></div>
+          <p class="hero__desc">Every flight is designed around your comfort, time, and ambitions — so you can focus on what truly matters, while we take care of everything else.</p>
+        </div>
       </div>
-      <div class="value__cell" #valueCell>
-        <div class="value__icon" aria-hidden="true">✈️</div>
-        <h3 class="value__cell-title">Private Fleet Access</h3>
-        <p class="value__cell-desc">Instant booking of private jets, helicopters, and superyachts with real-time availability.</p>
+  
+      <!-- Right: "We are distinction" + scroll indicator -->
+      <div class="hero__text-right" #heroTextRight>
+        <h2 class="hero__headline">
+          <span class="hero__headline-sub">We are</span>
+          <span class="hero__headline-main">distinction</span>
+        </h2>
+  
+        <div class="hero__scroll-block">
+          <div class="hero__scroll-divider" aria-hidden="true"></div>
+          <div class="hero__scroll-meta">
+            <div class="hero__scroll-action">
+              <span class="hero__scroll-chevrons" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M6 9l6 6 6-6M6 4l6 6 6-6M6 14l6 6 6-6"/>
+                </svg>
+              </span>
+              <span class="hero__scroll-txt">SCROLL DOWN</span>
+            </div>
+            <span class="hero__scroll-dest">TO START THE JOURNEY</span>
+          </div>
+        </div>
       </div>
-      <div class="value__cell value__cell--wide" #valueCell>
-        <div class="value__icon" aria-hidden="true">🤖</div>
-        <h3 class="value__cell-title">AI-Powered Itinerary Engine</h3>
-        <p class="value__cell-desc">Our proprietary AI orchestrates every touchpoint of your journey — hyper-personalized experiences at scale.</p>
-        <p class="value__stat">Next-Gen</p>
+  
+      <!-- Stage 3: ascent layer -->
+      <div class="hero__ascent-layer" #ascentLayer>
+        <div class="ascent__bg"></div>
+        <div class="ascent__cloud-horizon" aria-hidden="true"></div>
+  
+        <div class="ascent__layout">
+          <div class="ascent__title-left" #ascentLeft>
+            <h2 class="ascent__big-text">Fly in</h2>
+            <p class="ascent__sub-text">Luxury<br/>that moves<br/>with you</p>
+          </div>
+  
+          <div class="ascent__title-right" #ascentRight>
+            <h2 class="ascent__big-text">Luxury</h2>
+            <div class="ascent__meta-strip">
+              <div class="ascent__meta-divider" aria-hidden="true"></div>
+              <div class="ascent__meta-row">
+                <span class="ascent__meta-brand">LAND CRUISER</span>
+                <span class="ascent__meta-model">300 VXR</span>
+              </div>
+              <div class="ascent__spec-row">
+                <div>Range<br/><strong>750 KM</strong></div>
+                <div>Speed<br/><strong>210 KM/H</strong></div>
+                <div>Capacity<br/><strong>7 Seats</strong></div>
+              </div>
+            </div>
+          </div>
+        </div>
+  
+        <!-- Center SUV (explicit size avoids layout shift) -->
+        <div class="ascent__jet-wrap">
+          <img class="ascent__jet" src="assets/images/suv-cutout.webp"
+              alt="Luxury 4x4 SUV" width="472" height="1030"
+              loading="eager" decoding="async" #jetImg />
+        </div>
+  
+        <div class="ascent__cards">
+          <div class="ascent__card" #card1><h3>100%</h3><p>Full Escrow Protection on every booking</p></div>
+          <div class="ascent__card" #card2><h3>500+</h3><p>Curated Safaris &amp; private expeditions worldwide</p></div>
+          <div class="ascent__card" #card3><h3>AI Engine</h3><p>Smart itinerary optimization powered by intelligence</p></div>
+        </div>
       </div>
-      <div class="value__cell" #valueCell>
-        <div class="value__icon" aria-hidden="true">🏆</div>
-        <h3 class="value__cell-title">500+ Safari Operators</h3>
-        <p class="value__cell-desc">Verified operators with real reviews, insurance certification, and Tribo quality seals on every listing.</p>
-        <p class="value__stat">500+</p>
+  
+    </section>
+  
+    <!-- TAKEOFF / 650ER pinned section -->
+    <section class="ascent-section" #ascentSection id="fleet" aria-label="Gulfstream 650ER Aircraft Specification">
+  
+      <div class="ascent__bg"></div>
+      <div class="ascent__blueprint" #blueprintLayer aria-hidden="true"></div>
+      <div class="ascent__wordmark" #wordmarkEl aria-hidden="true">650ER</div>
+  
+      <div class="ascent__phase1" #phase1Layer>
+        <div class="ascent__p1-title-block">
+          <p class="ascent__p1-label">Gulfstream</p>
+          <h2 class="ascent__p1-model">650ER</h2>
+        </div>
+        <div class="ascent__p1-right-block">
+          <h3 class="ascent__p1-header">Ultra-long-range Aircraft</h3>
+          <div class="ascent__p1-divider" aria-hidden="true"></div>
+          <p class="ascent__p1-access">Direct access to private travel</p>
+          <p class="ascent__p1-desc">A true time-saving machine. It brings Tokyo and New York an hour closer, and at 92% of the speed of sound it can circle the globe with just a single stop.</p>
+        </div>
+        <div class="ascent__scroll-hint" #scrollHint>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path d="M12 5v14M5 12l7 7 7-7"/>
+          </svg>
+          <span>Scroll to take off</span>
+        </div>
       </div>
-    </div>
-  </section>
- 
-  <!-- FOOTER -->
-  <footer class="footer" id="global">
-    <div class="footer__brand">Tri<span>b</span>o</div>
-    <p class="footer__copy">© 2025 Tribo. All rights reserved.</p>
-    <ul class="footer__links">
-      <li><a href="#privacy">Privacy</a></li>
-      <li><a href="#terms">Terms</a></li>
-      <li><a href="#contact">Contact</a></li>
-    </ul>
-  </footer>
- 
-</div>
+  
+      <!-- GSAP owns yPercent/scale here — no CSS transform -->
+      <div class="ascent__jet-wrapper" #jetWrapper>
+        <img class="ascent__jet-photo" src="assets/images/jet-photoreal.webp"
+            alt="Gulfstream 650ER private jet, top-down view, nose pointing up"
+            loading="eager" fetchpriority="low" decoding="async" #ascentJetImg />
+      </div>
+  
+      <div class="ascent__specs-left" #specsLeft>
+        <div class="ascent__spec-item">
+          <span class="ascent__spec-label">Maximum operating range</span>
+          <strong class="ascent__spec-value">11,263 km</strong>
+        </div>
+        <div class="ascent__spec-item">
+          <span class="ascent__spec-label">Speed</span>
+          <strong class="ascent__spec-value">480 knots</strong>
+        </div>
+        <div class="ascent__spec-item">
+          <span class="ascent__spec-label">Passenger capacity</span>
+          <strong class="ascent__spec-value">Up to 12 seats (+1 cabin server)</strong>
+        </div>
+        <div class="ascent__spec-item">
+          <span class="ascent__spec-label">Cabin (L × W × H)</span>
+          <strong class="ascent__spec-value">14.05 × 2.49 × 1.92 m</strong>
+        </div>
+      </div>
+  
+      <div class="ascent__specs-right" #specsRight>
+        <div class="ascent__spec-item">
+          <span class="ascent__spec-label">Endurance</span>
+          <strong class="ascent__spec-value">14 hrs (max for European-based aircraft)</strong>
+        </div>
+        <div class="ascent__spec-item">
+          <span class="ascent__spec-label">Baggage capacity</span>
+          <strong class="ascent__spec-value">5.52 m³</strong>
+        </div>
+        <div class="ascent__spec-item">
+          <span class="ascent__spec-label">Cruising altitude</span>
+          <strong class="ascent__spec-value">15,544 m</strong>
+        </div>
+      </div>
+  
+      <div class="ascent__cta-btn" #ascentCta>
+        <button id="ascent-cta-book" aria-label="Book the Gulfstream 650ER flight">
+          Book the Flight
+          <span class="ascent__cta-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
+            </svg>
+          </span>
+        </button>
+      </div>
+  
+      <div class="ascent__progress" aria-hidden="true">
+        <div class="ascent__progress-track">
+          <div class="ascent__progress-fill" #ascentProgress></div>
+        </div>
+        <span class="ascent__progress-label">SCROLL TO REVEAL</span>
+      </div>
+  
+    </section>
+  
+    <!-- VALUE -->
+    <section class="value" #valueSection id="advantages" aria-label="B2B and C2C Value Proposition">
+      <div class="value__header">
+        <p class="value__eyebrow">Why Tribo</p>
+        <h2 class="value__title">Where <em>trust</em> meets<br/>extraordinary journeys</h2>
+      </div>
+      <div class="value__grid">
+        <div class="value__cell value__cell--highlight" #valueCell>
+          <div class="value__icon" aria-hidden="true">🔒</div>
+          <h3 class="value__cell-title">Secure Escrow</h3>
+          <p class="value__cell-desc">Every transaction held in full escrow until service delivery is confirmed. Zero financial risk.</p>
+          <p class="value__stat">100%</p>
+        </div>
+        <div class="value__cell" #valueCell>
+          <div class="value__icon" aria-hidden="true">🌍</div>
+          <h3 class="value__cell-title">Global Network</h3>
+          <p class="value__cell-desc">Access exclusive B2B operator partners and C2C luxury travel experiences across 120+ countries.</p>
+          <p class="value__stat">120+</p>
+        </div>
+        <div class="value__cell" #valueCell>
+          <div class="value__icon" aria-hidden="true">✈️</div>
+          <h3 class="value__cell-title">Private Fleet Access</h3>
+          <p class="value__cell-desc">Instant booking of private jets, helicopters, and superyachts with real-time availability.</p>
+        </div>
+        <div class="value__cell value__cell--wide" #valueCell>
+          <div class="value__icon" aria-hidden="true">🤖</div>
+          <h3 class="value__cell-title">AI-Powered Itinerary Engine</h3>
+          <p class="value__cell-desc">Our proprietary AI orchestrates every touchpoint of your journey — hyper-personalized experiences at scale.</p>
+          <p class="value__stat">Next-Gen</p>
+        </div>
+        <div class="value__cell" #valueCell>
+          <div class="value__icon" aria-hidden="true">🏆</div>
+          <h3 class="value__cell-title">500+ Safari Operators</h3>
+          <p class="value__cell-desc">Verified operators with real reviews, insurance certification, and Tribo quality seals on every listing.</p>
+          <p class="value__stat">500+</p>
+        </div>
+      </div>
+    </section>
+  
+    <!-- FOOTER -->
+    <footer class="footer" id="global">
+      <div class="footer__brand">Tri<span>b</span>o</div>
+      <p class="footer__copy">© 2025 Tribo. All rights reserved.</p>
+      <ul class="footer__links">
+        <li><a href="#privacy">Privacy</a></li>
+        <li><a href="#terms">Terms</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </footer>
+  
+  </div>
