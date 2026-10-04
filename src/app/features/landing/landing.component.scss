@@ -1,0 +1,1588 @@
+// ─── LANDING WRAPPER ────────────────────────────────────────────────────────
+.landing-wrap {
+  background: var(--dark-luxury);
+  overflow: hidden;
+}
+
+// ─── NAVIGATION ─────────────────────────────────────────────────────────────
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: clamp(0.85rem, 2.2vw, 2.2rem) clamp(1.25rem, 4.5vw, 4.5rem);
+
+  &__left {
+    display: flex;
+    align-items: center;
+  }
+
+  &__right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  &__links {
+    display: flex;
+    gap: clamp(1rem, 2.5vw, 3.2rem);
+    list-style: none;
+
+    a {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(0.75rem, 0.9vw, 0.85rem);
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      color: #ffffff;
+      text-decoration: none;
+      transition: color 0.3s ease, opacity 0.3s ease;
+      opacity: 0.95;
+      white-space: nowrap;
+
+      &:hover {
+        opacity: 1;
+        color: var(--sand-gold-light);
+      }
+    }
+  }
+
+  &__contact {
+    display: flex;
+    align-items: center;
+    gap: clamp(0.75rem, 2vw, 2.5rem);
+
+    &-item {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(0.72rem, 0.9vw, 0.85rem);
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      color: #ffffff;
+      text-decoration: none;
+      transition: color 0.3s ease;
+      white-space: nowrap;
+
+      &:hover { color: var(--sand-gold-light); }
+    }
+  }
+
+  // Mobile phone icon button
+  &__mobile-phone {
+    display: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    text-decoration: none;
+    transition: background 0.25s;
+    flex-shrink: 0;
+
+    &:hover { background: rgba(255, 255, 255, 0.2); }
+  }
+
+  // Hamburger button
+  &__hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 40px;
+    height: 40px;
+    padding: 11px 10px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.25s;
+
+    &:hover { background: rgba(255, 255, 255, 0.16); }
+
+    span {
+      display: block;
+      width: 100%;
+      height: 1.5px;
+      background: #ffffff;
+      border-radius: 2px;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+  }
+
+  &.nav--dark {
+    .nav__links a,
+    .nav__contact-item {
+      color: #1A1615 !important;
+
+      &:hover { color: #5C3D2E !important; }
+    }
+
+    .nav__mobile-phone,
+    .nav__hamburger {
+      background: rgba(0, 0, 0, 0.08);
+      border-color: rgba(0, 0, 0, 0.15);
+
+      span { background: #1A1615; }
+
+      svg { color: #1A1615; }
+    }
+  }
+
+  @media (max-width: 767px) {
+    &__links,
+    &__contact {
+      display: none;
+    }
+
+    &__mobile-phone,
+    &__hamburger {
+      display: flex;
+    }
+  }
+}
+
+// ─── MOBILE NAV OVERLAY ────────────────────────────────────────────────────────
+.nav-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: radial-gradient(ellipse 80% 60% at 50% 30%, #2A1E17 0%, #0E0B0A 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-8px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+
+  &--open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  &__close {
+    position: absolute;
+    top: 1.2rem;
+    right: 1.25rem;
+    width: 44px;
+    height: 44px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #ffffff;
+    transition: background 0.25s;
+
+    &:hover { background: rgba(255, 255, 255, 0.18); }
+
+    svg { width: 18px; height: 18px; }
+  }
+
+  &__nav {
+    text-align: center;
+    width: 100%;
+  }
+
+  &__links {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    margin-bottom: 3rem;
+
+    a {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2rem, 10vw, 3.5rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: rgba(255, 255, 255, 0.9);
+      text-decoration: none;
+      transition: color 0.2s;
+
+      &:hover { color: var(--sand-gold-light); }
+    }
+  }
+
+  &__contact {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  &__phone,
+  &__email {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: rgba(255, 255, 255, 0.6);
+    text-decoration: none;
+    transition: color 0.2s;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+
+    &:hover { color: var(--sand-gold-light); }
+  }
+}
+
+
+.hero {
+  position: relative;
+  width: 100%;
+  min-height: 100svh;
+  height: 100svh;
+  overflow: hidden;
+  background: radial-gradient(ellipse 70% 60% at 50% 50%, #2A1E17 0%, #171210 50%, #0E0B0A 100%);
+
+  // Warm ambient spotlight centered behind airplane window
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(200, 150, 110, 0.24) 0%, rgba(130, 85, 55, 0.12) 40%, transparent 68%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  &__bg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 70% at 50% 50%, rgba(190, 140, 100, 0.12) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 1;
+    // will-change managed by GSAP onToggle — not declared statically to avoid VRAM waste
+  }
+
+  // ── Post-Zoom Ascent Layer (Stage 3) ──────────────────────────────────────
+  &__ascent-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    opacity: 0;
+    pointer-events: none;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform: translate3d(0, 0, 0);
+
+    .ascent__bg {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, #C2DCED 0%, #D8E7F0 45%, #EADBCE 85%, #E3D4C5 100%);
+      z-index: 0;
+    }
+
+    .ascent__cloud-horizon {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 33.333vh;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      background: linear-gradient(180deg, rgba(210, 228, 236, 0.45) 0%, rgba(216, 231, 240, 0.2) 65%, transparent 100%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .ascent__layout {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 clamp(3.5rem, 6vw, 7rem);
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    .ascent__title-left {
+      pointer-events: auto;
+      max-width: 380px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .ascent__title-right {
+      pointer-events: auto;
+      width: clamp(280px, 28vw, 420px);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      text-align: right;
+    }
+
+    .ascent__big-text {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(3.4rem, 7.2vw, 7.2rem);
+      font-weight: 800;
+      letter-spacing: -0.035em;
+      line-height: 0.92;
+      color: #1A1615;
+    }
+
+    .ascent__sub-text {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(0.85rem, 1.1vw, 1.05rem);
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      line-height: 1.45;
+      color: #1A1615;
+      margin-top: 1.5rem;
+      max-width: 220px;
+      text-align: left;
+    }
+
+    .ascent__meta-strip {
+      width: 100%;
+      margin-top: clamp(2.5rem, 4.5vw, 4.5rem);
+      text-align: left;
+    }
+
+    .ascent__meta-divider {
+      width: 100%;
+      border-top: 1px solid rgba(0, 0, 0, 0.15);
+      margin-bottom: 0.85rem;
+    }
+
+    .ascent__meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(0.72rem, 0.85vw, 0.82rem);
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      color: #1A1615;
+      text-transform: uppercase;
+    }
+
+    .ascent__spec-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 1.5rem;
+      margin-top: 1rem;
+
+      div {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 0.65rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: rgba(26, 22, 21, 0.65);
+        line-height: 1.4;
+
+        strong {
+          display: block;
+          font-size: 0.78rem;
+          font-weight: 700;
+          color: #1A1615;
+          margin-top: 0.15rem;
+        }
+      }
+    }
+
+    // Center SUV: Only front half emerges from bottom of viewport
+    .ascent__jet-wrap {
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      width: clamp(340px, 32vw, 480px);
+      height: auto;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      background: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
+      overflow: visible;
+      z-index: 2;
+      pointer-events: none;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      will-change: transform;
+    }
+
+    .ascent__jet {
+      display: block;
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      filter: drop-shadow(0 25px 35px rgba(0, 0, 0, 0.22)) drop-shadow(0 10px 18px rgba(92, 61, 46, 0.25));
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      image-rendering: -webkit-optimize-contrast;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .ascent__cards {
+      position: absolute;
+      bottom: 2.2rem;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      z-index: 4;
+      pointer-events: none;
+    }
+
+    .ascent__card {
+      pointer-events: auto;
+      background: rgba(26, 22, 21, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 16px;
+      padding: 1.3rem 1.6rem;
+      width: 210px;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.12);
+      opacity: 0;
+      transform: translate3d(0, 30px, 0);
+
+      h3 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--sand-gold-light);
+        margin-bottom: 0.35rem;
+      }
+
+      p {
+        font-size: 0.72rem;
+        color: rgba(250, 247, 242, 0.7);
+        line-height: 1.5;
+      }
+    }
+
+    // ── ASCENT LAYER MOBILE ──────────────────────────────────────────────────
+    @media (max-width: 767px) {
+      .ascent__layout {
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        text-align: center;
+        padding: calc(4.2rem + env(safe-area-inset-top, 0px)) 1.25rem calc(8rem + env(safe-area-inset-bottom, 0px));
+      }
+
+      .ascent__title-left,
+      .ascent__title-right {
+        width: 100%;
+        max-width: none;
+        align-items: center;
+        text-align: center;
+      }
+
+      .ascent__big-text {
+        font-size: clamp(2.4rem, 13vw, 3.8rem);
+        text-align: center;
+      }
+
+      .ascent__sub-text {
+        margin-top: 0.5rem;
+        font-size: 0.72rem;
+        text-align: center;
+        max-width: none;
+      }
+
+      .ascent__meta-strip {
+        width: 100%;
+        margin-top: 0.65rem;
+      }
+
+      .ascent__meta-row {
+        justify-content: space-between;
+      }
+
+      .ascent__spec-row {
+        display: none;
+      }
+
+      .ascent__jet-wrap {
+        top: 48%;
+        bottom: auto !important;
+        left: 50%;
+        height: clamp(280px, 45svh, 430px);
+        width: auto;
+        max-width: 82vw;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 2;
+      }
+
+      .ascent__jet {
+        height: 100%;
+        width: auto;
+        max-width: 100%;
+        object-fit: contain;
+        margin: 0 auto;
+      }
+
+      .ascent__cards {
+        bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+        gap: 0.5rem;
+        padding-inline: 1.25rem;
+        justify-content: center;
+      }
+
+      .ascent__card {
+        width: calc((100% - 1rem) / 3);
+        padding: 0.7rem 0.6rem;
+        border-radius: 12px;
+
+        h3 { font-size: 0.8rem; }
+        p  { font-size: 0.6rem; }
+      }
+    }
+  }
+
+  // ── Cloud Transition Text Overlay: "TRIBO is a private travel platform..." ─
+  &__cloud-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem clamp(2rem, 5vw, 5rem);
+    pointer-events: none;
+    opacity: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform: translate3d(0, 35px, 0);
+  }
+
+  &__cloud-content {
+    max-width: 960px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  &__cloud-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2rem, 4.4vw, 4.2rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    color: #ffffff;
+    text-shadow: 0 4px 24px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.35);
+  }
+
+  &__cloud-subtitle {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(0.85rem, 1.2vw, 1.1rem);
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.95);
+    margin-top: 1.25rem;
+    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.45);
+  }
+
+  // ── GSAP scaling target — contains sky layer + frame + pill ───────────────
+  &__window-wrap {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform-origin: center center;
+    // will-change toggled dynamically by GSAP onToggle — static declaration wastes VRAM
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    // translate3d(0,0,0) forces matrix3d compositor path (GPU layer) before any animation
+    transform: translate3d(0, 0, 0);
+    z-index: 2;
+    isolation: isolate;
+  }
+
+  // ── Inner window entity (exact proportion to match reference) ──────────────
+  &__window-entity {
+    position: relative;
+    width: clamp(260px, 62vw, 460px);
+    height: clamp(360px, 78vh, 680px);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  // Layer 1: Bright Blue Sky & Clouds behind window aperture
+  &__sky-layer {
+    position: absolute;
+    top: 25.5%;
+    left: 23.5%;
+    right: 23.5%;
+    bottom: 25.5%;
+    border-radius: 46% 46% 48% 48% / 42% 42% 48% 48%;
+    overflow: hidden;
+    z-index: 1;
+    box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.45);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform: translateZ(0);
+  }
+
+  &__sky-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 30%;
+    transform: scale(1.12);
+    backface-visibility: hidden;
+    // Prevents render-blur during GPU scaling of high-res asset
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+
+  &__sky-watermark {
+    position: absolute;
+    top: 52%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(1rem, 1.5vw, 1.35rem);
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    color: rgba(255, 255, 255, 0.92);
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+    pointer-events: none;
+    white-space: nowrap;
+    user-select: none;
+  }
+
+  // Layer 2: Transparent High-Res Airplane Window Frame
+  &__window-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    z-index: 2;
+    pointer-events: none;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    // translate3d forces compositor path; prevents blur artifact during parent scale
+    transform: translate3d(0, 0, 0);
+    // Preserve sharpness of high-res PNG during parent zoom transform
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    filter: drop-shadow(0 20px 50px rgba(0, 0, 0, 0.65)) drop-shadow(0 0 45px rgba(180, 130, 90, 0.22));
+  }
+
+  // Ambient gold glow ring around window
+  &__window-ring {
+    position: absolute;
+    inset: -14px;
+    border-radius: 46% 46% 48% 48% / 42% 42% 48% 48%;
+    border: 1.5px solid rgba(210, 165, 115, 0.28);
+    box-shadow: 0 0 35px rgba(200, 150, 90, 0.18);
+    pointer-events: none;
+    transform-origin: center center;
+    // will-change toggled dynamically by GSAP onToggle lifecycle
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    // translate3d(0,0,0) pre-promotes this to its own GPU compositor layer
+    transform: translate3d(0, 0, 0);
+    z-index: 0;
+  }
+
+  // Layer 3: Floating Capsule CTA overlapping bottom rim of window
+  &__window-pill {
+    position: absolute;
+    bottom: 3.5%;
+    left: 50%;
+    transform: translate3d(-50%, 0, 0);
+    z-index: 10;
+    // will-change toggled dynamically by GSAP onToggle
+  }
+
+  &__pill-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.4rem 0.45rem 0.4rem 1.4rem;
+    background: #ffffff;
+    color: #120e0c;
+    border: none;
+    border-radius: 100px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    white-space: nowrap;
+
+    &:hover {
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.55);
+    }
+  }
+
+  &__pill-text {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #120e0c;
+  }
+
+  &__pill-icon {
+    width: 28px;
+    height: 28px;
+    background: #120e0c;
+    color: #ffffff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    svg {
+      width: 14px;
+      height: 14px;
+      transform: rotate(45deg);
+    }
+  }
+
+  // Left Content: "We are movement"
+  &__text-left {
+    position: absolute;
+    left: clamp(1.25rem, 4.5vw, 4.5rem);
+    top: 50%;
+    transform: translate3d(0, -50%, 0);
+    z-index: 3;
+    max-width: clamp(140px, 28vw, 380px);
+    // will-change toggled dynamically by GSAP onToggle
+  }
+
+  &__headline {
+    font-family: 'Syne', sans-serif;
+    color: #ffffff;
+    line-height: 0.95;
+    overflow-wrap: normal;
+    word-break: keep-all;
+
+    &-sub {
+      display: block;
+      font-size: clamp(1.5rem, 7vw, 4rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    &-main {
+      display: block;
+      font-size: clamp(2.2rem, 11vw, 5.6rem);
+      font-weight: 800;
+      letter-spacing: -0.035em;
+    }
+  }
+
+  &__narrative {
+    margin-top: 2rem;
+
+    &-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(1.1rem, 5vw, 1.6rem);
+      font-weight: 700;
+      line-height: 1.25;
+      color: #ffffff;
+    }
+  }
+
+  &__dash {
+    width: 32px;
+    height: 1.5px;
+    background: rgba(255, 255, 255, 0.8);
+    margin: 1.25rem 0;
+  }
+
+  &__desc {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(0.82rem, 3.8vw, 0.9rem);
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.85);
+    max-width: 290px;
+  }
+
+  // Right Content: "We are distinction"
+  &__text-right {
+    position: absolute;
+    right: clamp(1.25rem, 4.5vw, 4.5rem);
+    bottom: 14%;
+    z-index: 3;
+    width: clamp(140px, 28vw, 480px);
+    // will-change toggled dynamically by GSAP onToggle
+  }
+
+  &__scroll-block {
+    margin-top: 3.5rem;
+  }
+
+  &__scroll-divider {
+    width: 100%;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.45);
+    margin-bottom: 1rem;
+  }
+
+  &__scroll-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: #ffffff;
+  }
+
+  &__scroll-action {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  &__scroll-chevrons {
+    display: flex;
+    align-items: center;
+    width: 14px;
+    height: 14px;
+
+    svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(90deg);
+    }
+  }
+
+  // ── MOBILE LAYOUT (max-width: 767px) ──────────────────────────────────────
+  @media (max-width: 767px) {
+    &__text-left {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: calc(4.6rem + env(safe-area-inset-top, 0px));
+      bottom: auto;
+      max-width: none;
+      padding-inline: 1.25rem;
+      transform: translate3d(0, 0, 0);
+    }
+
+    &__text-right {
+      position: absolute;
+      left: 0;
+      right: 0;
+      width: auto;
+      bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
+      padding-inline: 1.25rem;
+    }
+
+    &__narrative {
+      display: none;
+    }
+
+    &__headline {
+      &-sub { font-size: clamp(1.3rem, 6vw, 2rem); }
+      &-main { font-size: clamp(1.8rem, 10.5vw, 3.2rem); }
+    }
+
+    &__window-entity {
+      width: clamp(220px, 68vw, 320px);
+      height: clamp(280px, 52vh, 460px);
+    }
+
+    &__window-pill {
+      bottom: 5%;
+    }
+
+    &__scroll-block {
+      margin-top: 1rem;
+    }
+
+    &__scroll-meta {
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+    }
+
+    &__scroll-dest {
+      display: none;
+    }
+  }
+}
+
+
+
+// ─── VALUE GRID SECTION ──────────────────────────────────────────────────────
+.value {
+  padding: 8rem 3rem;
+  background: var(--dark-luxury);
+
+  &__header {
+    max-width: 700px;
+    margin-bottom: 5rem;
+  }
+
+  &__eyebrow {
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--sand-gold);
+    margin-bottom: 1.25rem;
+  }
+
+  &__title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.2rem, 4vw, 3.5rem);
+    font-weight: 900;
+    line-height: 1.1;
+    color: var(--light-sand);
+
+    em {
+      font-style: italic;
+      color: var(--sand-gold);
+    }
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5px;
+    background: rgba(200, 157, 102, 0.1);
+    border: 1px solid rgba(200, 157, 102, 0.1);
+    border-radius: 20px;
+    overflow: hidden;
+  }
+
+  &__cell {
+    background: var(--dark-luxury);
+    padding: 3rem 2.5rem;
+    // will-change toggled dynamically: activated just before anim, released after
+    opacity: 0;
+    transform: translate3d(0, 30px, 0);
+    transition: background 0.4s ease;
+
+    &:hover {
+      background: rgba(200, 157, 102, 0.06);
+    }
+
+    &--wide {
+      grid-column: span 2;
+    }
+
+    &--highlight {
+      background: rgba(200, 157, 102, 0.07);
+    }
+  }
+
+  &__icon {
+    width: 44px;
+    height: 44px;
+    background: rgba(200, 157, 102, 0.15);
+    border: 1px solid rgba(200, 157, 102, 0.25);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    font-size: 1.2rem;
+  }
+
+  &__cell-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--light-sand);
+    margin-bottom: 0.75rem;
+  }
+
+  &__cell-desc {
+    font-size: 0.8rem;
+    line-height: 1.7;
+    color: rgba(250, 247, 242, 0.45);
+    max-width: 320px;
+  }
+
+  &__stat {
+    font-family: 'Playfair Display', serif;
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: var(--sand-gold);
+    line-height: 1;
+    margin-top: 1rem;
+  }
+}
+
+// ─── TAKEOFF HERO — ASCENT SECTION ──────────────────────────────────────────
+// Architecture: 8 absolutely-positioned layers inside a 100svh pinned section.
+// GSAP animates ONLY transform + opacity — no layout reads in scroll callbacks.
+
+// ─── CSS Variables for the Takeoff palette ───────────────────────────────────
+:host {
+  --tk-ink: #2b2320; // dark brown text
+  --tk-muted: #8d827b; // muted label color
+  --tk-cream: #fbf5ec; // cream lightest bg
+  --tk-taupe: #7f7470; // warm taupe darkest bg
+  --tk-grid: rgba(43, 35, 32, 0.09); // blueprint grid lines
+  --tk-ring: rgba(43, 35, 32, 0.06); // blueprint radial rings
+
+  @media (prefers-color-scheme: dark) {
+    --tk-ink: #f5ede6;
+    --tk-muted: #a09490;
+    --tk-cream: #1a1210;
+    --tk-taupe: #3a2e2b;
+    --tk-grid: rgba(245, 237, 230, 0.07);
+    --tk-ring: rgba(245, 237, 230, 0.05);
+  }
+}
+
+.ascent-section {
+  position: relative;
+  width: 100%;
+  height: 100svh; // 100svh avoids iOS bar flicker on pin
+  overflow: hidden;
+  contain: layout style;
+}
+
+// ── Layer 1: gradient background ─────────────────────────────────────────────
+.ascent__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(180deg, var(--tk-taupe) 0%, var(--tk-cream) 100%);
+}
+
+// ── Layer 2: Blueprint CSS grid — height 200vh so it can slide without gaps ──
+.ascent__blueprint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -100vh; // extends 1 viewport above: room to slide DOWN
+  height: 200vh;
+  z-index: 1;
+  will-change: transform; // compositor only — GSAP moves yPercent
+  pointer-events: none;
+
+  // CSS-only blueprint grid: two repeating linear gradients (64px, 1px lines)
+  background-image:
+    repeating-linear-gradient(0deg, var(--tk-grid) 0px, var(--tk-grid) 1px, transparent 1px, transparent 64px),
+    repeating-linear-gradient(90deg, var(--tk-grid) 0px, var(--tk-grid) 1px, transparent 1px, transparent 64px);
+  background-size: 64px 64px;
+
+  // Two thin concentric radial rings in the vertical center
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 48% 24% at 50% 50%, transparent 90%, var(--tk-ring) 91%, transparent 92%),
+      radial-gradient(ellipse 70% 35% at 50% 50%, transparent 90%, var(--tk-ring) 91%, transparent 92%);
+  }
+}
+
+// ── Layer 3: Giant wordmark ───────────────────────────────────────────────────
+.ascent__wordmark {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 56vh;
+  z-index: 2;
+  text-align: center;
+  margin: auto;
+  pointer-events: none;
+  will-change: transform;
+
+  font-family: 'Syne', 'Inter Tight', sans-serif;
+  font-size: clamp(5rem, 15vw, 15rem);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 0.9;
+  color: var(--tk-ink);
+
+  // Starts hidden — GSAP: y:150, opacity:0 → y:-30, opacity:1
+  opacity: 0;
+
+  @media (max-width: 799px) {
+    font-size: 27vw;
+    top: 40vh;
+  }
+}
+
+// ── Layer 4: Phase-1 intro text ───────────────────────────────────────────────
+.ascent__phase1 {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+}
+
+// Top-left title block
+.ascent__p1-title-block {
+  position: absolute;
+  top: clamp(5rem, 8vh, 8rem);
+  left: clamp(2rem, 5vw, 5rem);
+}
+
+.ascent__p1-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(0.65rem, 0.8vw, 0.75rem);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tk-muted);
+  margin-bottom: 0.3rem;
+}
+
+.ascent__p1-model {
+  font-family: 'Syne', 'Inter Tight', sans-serif;
+  font-size: clamp(4rem, 10vw, 10rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 0.88;
+  color: var(--tk-ink);
+  margin: 0;
+}
+
+// Top-right editorial block
+.ascent__p1-right-block {
+  position: absolute;
+  top: clamp(5rem, 8vh, 8rem);
+  right: clamp(2rem, 5vw, 5rem);
+  width: clamp(220px, 24vw, 340px);
+
+  @media (max-width: 799px) {
+    display: none;
+  }
+}
+
+.ascent__p1-header {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(1.2rem, 2vw, 1.8rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.12;
+  color: var(--tk-ink);
+  margin: 0 0 1.2rem;
+}
+
+.ascent__p1-divider {
+  width: 100%;
+  height: 1px;
+  background: rgba(43, 35, 32, 0.15);
+  margin-bottom: 1rem;
+}
+
+.ascent__p1-access {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(0.55rem, 0.65vw, 0.62rem);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--tk-muted);
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.ascent__p1-desc {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(0.72rem, 0.85vw, 0.8rem);
+  line-height: 1.7;
+  color: rgba(43, 35, 32, 0.6);
+  max-width: 280px;
+}
+
+// Bottom center scroll hint — only visible in Phase 1
+.ascent__scroll-hint {
+  position: absolute;
+  bottom: clamp(1.5rem, 3vh, 3rem);
+  left: 0;
+  right: 0;
+  margin: auto;
+  width: fit-content;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  pointer-events: none;
+
+  svg {
+    width: 20px;
+    height: 20px;
+    color: var(--tk-muted);
+    animation: hint-bounce 2s ease-in-out infinite;
+  }
+
+  span {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--tk-muted);
+  }
+}
+
+@keyframes hint-bounce {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(6px);
+  }
+}
+
+// ── Layer 5: Jet image ────────────────────────────────────────────────────────
+// Centered via left:50% — GSAP handles xPercent:-50 centering (never CSS translateX)
+.ascent__jet-wrapper {
+  position: absolute;
+  left: 50%;
+  top: 12vh; // nose starts near top of viewport
+  z-index: 4;
+  pointer-events: none;
+  overflow: visible;
+  will-change: transform; // pre-promote to compositor (GSAP sets yPercent/scale)
+  background: transparent !important;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.ascent__jet-photo {
+  display: block;
+  width: auto;
+  height: clamp(550px, 125vh, 1400px); // bleed past bottom — creates dramatic scale
+  object-fit: contain;
+  filter: drop-shadow(-20px 30px 25px rgba(40, 30, 20, 0.35));
+  mix-blend-mode: multiply; // dissolves white bg into gradient
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  user-select: none;
+  image-rendering: -webkit-optimize-contrast;
+
+  @media (max-width: 799px) {
+    width: 112vw;
+    height: auto;
+  }
+}
+
+// ── Layers 6 & 7: Spec columns ────────────────────────────────────────────────
+// Left column: bottom-left, opacity 0 (GSAP animates in)
+.ascent__specs-left {
+  position: absolute;
+  left: clamp(2rem, 5vw, 5rem);
+  bottom: clamp(4rem, 10vh, 8rem);
+  z-index: 7;
+  width: clamp(200px, 28vw, 380px);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+
+  @media (max-width: 799px) {
+    width: 46%;
+    left: 3vw;
+    bottom: 6rem;
+  }
+}
+
+// Right column: bottom-right, opacity 0 (GSAP animates in)
+.ascent__specs-right {
+  position: absolute;
+  right: clamp(2rem, 5vw, 5rem);
+  bottom: clamp(4rem, 10vh, 8rem);
+  z-index: 7;
+  width: clamp(200px, 28vw, 380px);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+
+  @media (max-width: 799px) {
+    width: 46%;
+    right: 3vw;
+    bottom: 6rem;
+  }
+}
+
+// Individual spec item: 1px top divider, label + value
+.ascent__spec-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.65rem 0;
+  border-top: 1px solid rgba(43, 35, 32, 0.12);
+}
+
+.ascent__spec-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(0.52rem, 0.6vw, 0.6rem);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--tk-muted);
+  line-height: 1.3;
+
+  @media (max-width: 799px) {
+    font-size: 0.55rem;
+  }
+}
+
+.ascent__spec-value {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(0.7rem, 0.9vw, 0.85rem);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--tk-ink);
+  line-height: 1.3;
+
+  @media (max-width: 799px) {
+    font-size: 0.7rem;
+  }
+}
+
+// ── Layer 8: Book CTA pill ────────────────────────────────────────────────────
+.ascent__cta-btn {
+  position: absolute;
+  bottom: clamp(1.5rem, 3vh, 3rem);
+  left: 0;
+  right: 0;
+  margin: auto; // center horizontally — never use CSS translateX (conflicts GSAP)
+  width: fit-content;
+  z-index: 8;
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.85rem 0.85rem 0.85rem 1.8rem;
+    background: #fff;
+    color: var(--tk-ink);
+    border: 1px solid rgba(43, 35, 32, 0.12);
+    border-radius: 100px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(0.72rem, 0.85vw, 0.8rem);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow:
+      0 8px 30px rgba(43, 35, 32, 0.12),
+      0 2px 8px rgba(43, 35, 32, 0.08);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 40px rgba(43, 35, 32, 0.18), 0 4px 12px rgba(43, 35, 32, 0.12);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--tk-ink);
+      outline-offset: 3px;
+    }
+
+    &:active {
+      transform: translateY(-1px);
+    }
+  }
+}
+
+.ascent__cta-icon {
+  width: 32px;
+  height: 32px;
+  background: var(--tk-ink);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  svg {
+    width: 14px;
+    height: 14px;
+    transform: rotate(45deg);
+    fill: #fff;
+  }
+}
+
+// ── Scroll progress indicator ─────────────────────────────────────────────────
+.ascent__progress {
+  position: absolute;
+  bottom: 1.2rem;
+  left: 0;
+  right: 0;
+  margin: auto;
+  width: fit-content;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  z-index: 9;
+  pointer-events: none;
+}
+
+.ascent__progress-track {
+  width: 100px;
+  height: 1px;
+  background: rgba(43, 35, 32, 0.14);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.ascent__progress-fill {
+  width: 100%;
+  height: 100%;
+  background: rgba(43, 35, 32, 0.65);
+  transform-origin: left center;
+  transform: scaleX(0);
+  border-radius: 2px;
+}
+
+.ascent__progress-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--tk-muted);
+}
+
+// ── prefers-reduced-motion: show final state statically, no pin/scrub ─────────
+@media (prefers-reduced-motion: reduce) {
+  .ascent-section {
+    height: auto;
+    overflow: visible;
+  }
+
+  .ascent__phase1 {
+    display: none;
+  }
+
+  .ascent__wordmark {
+    opacity: 1;
+    transform: none;
+    top: 8vh;
+    font-size: clamp(4rem, 12vw, 12rem);
+  }
+
+  .ascent__jet-wrapper {
+    top: auto;
+    left: auto;
+    position: relative;
+    margin: 0 auto 2rem;
+  }
+
+  .ascent__jet-photo {
+    height: auto;
+    width: clamp(280px, 60vw, 600px);
+  }
+
+  .ascent__specs-left,
+  .ascent__specs-right {
+    position: static;
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .ascent__blueprint {
+    display: none;
+  }
+}
+
+// ─── FOOTER ──────────────────────────────────────────────────────────────────
+.footer {
+  border-top: 1px solid rgba(200, 157, 102, 0.15);
+  padding: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  &__brand {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    color: var(--light-sand);
+
+    span {
+      color: var(--sand-gold);
+    }
+  }
+
+  &__copy {
+    font-size: 0.7rem;
+    color: rgba(250, 247, 242, 0.3);
+    letter-spacing: 0.08em;
+  }
+
+  &__links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+
+    a {
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(250, 247, 242, 0.35);
+      text-decoration: none;
+      transition: color 0.3s;
+
+      &:hover {
+        color: var(--sand-gold);
+      }
+    }
+  }
+}
+
+// ─── GLOBAL MOBILE OVERRIDES (max-width: 767px) ──────────────────────────────
+@media (max-width: 767px) {
+  .value {
+    padding: 4rem 1.25rem;
+
+    &__grid {
+      grid-template-columns: 1fr;
+    }
+
+    &__cell {
+      padding: 2rem 1.5rem;
+    }
+
+    &__cell--wide {
+      grid-column: auto;
+    }
+  }
+
+  .footer {
+    flex-direction: column;
+    gap: 1.25rem;
+    padding: 2rem 1.25rem;
+    text-align: center;
+
+    &__links {
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem 1.5rem;
+    }
+  }
+}

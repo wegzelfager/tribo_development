@@ -1,0 +1,80 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 560" fill="none">
+  <defs>
+    <linearGradient id="fuselageGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#7A5240"/>
+      <stop offset="30%" stop-color="#C4A882"/>
+      <stop offset="50%" stop-color="#E8D5B8"/>
+      <stop offset="70%" stop-color="#C4A882"/>
+      <stop offset="100%" stop-color="#7A5240"/>
+    </linearGradient>
+    <linearGradient id="wingGradL" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5C3D2E" stop-opacity="0.9"/>
+      <stop offset="60%" stop-color="#9B7558"/>
+      <stop offset="100%" stop-color="#C4A882" stop-opacity="0.6"/>
+    </linearGradient>
+    <linearGradient id="wingGradR" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#5C3D2E" stop-opacity="0.9"/>
+      <stop offset="60%" stop-color="#9B7558"/>
+      <stop offset="100%" stop-color="#C4A882" stop-opacity="0.6"/>
+    </linearGradient>
+    <linearGradient id="engineGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4A3020"/>
+      <stop offset="50%" stop-color="#8B6545"/>
+      <stop offset="100%" stop-color="#4A3020"/>
+    </linearGradient>
+    <filter id="jetShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="rgba(60,35,20,0.35)"/>
+    </filter>
+  </defs>
+  <g filter="url(#jetShadow)">
+    <!-- LEFT WING -->
+    <path d="M148 230 L148 268 L4 310 L8 296 L138 258 L138 230 Z" fill="url(#wingGradL)" stroke="#5C3D2E" stroke-width="1.2"/>
+    <line x1="148" y1="230" x2="10" y2="300" stroke="#D4B896" stroke-width="0.7" opacity="0.6"/>
+    <line x1="138" y1="245" x2="60" y2="278" stroke="#5C3D2E" stroke-width="0.5" opacity="0.5"/>
+    <line x1="138" y1="255" x2="35" y2="291" stroke="#5C3D2E" stroke-width="0.5" opacity="0.5"/>
+    <path d="M4 310 L8 296 L12 308 Z" fill="#5C3D2E"/>
+    <path d="M4 310 L0 322 L8 318 L8 296 Z" fill="#5C3D2E" stroke="#4A2E1E" stroke-width="0.8"/>
+    <!-- RIGHT WING -->
+    <path d="M172 230 L172 268 L316 310 L312 296 L182 258 L182 230 Z" fill="url(#wingGradR)" stroke="#5C3D2E" stroke-width="1.2"/>
+    <line x1="172" y1="230" x2="310" y2="300" stroke="#D4B896" stroke-width="0.7" opacity="0.6"/>
+    <line x1="182" y1="245" x2="260" y2="278" stroke="#5C3D2E" stroke-width="0.5" opacity="0.5"/>
+    <line x1="182" y1="255" x2="285" y2="291" stroke="#5C3D2E" stroke-width="0.5" opacity="0.5"/>
+    <path d="M316 310 L312 296 L308 308 Z" fill="#5C3D2E"/>
+    <path d="M316 310 L320 322 L312 318 L312 296 Z" fill="#5C3D2E" stroke="#4A2E1E" stroke-width="0.8"/>
+    <!-- HORIZONTAL STABILIZERS -->
+    <path d="M148 430 L148 450 L68 468 L70 456 L144 442 Z" fill="#7A5240" stroke="#5C3D2E" stroke-width="1"/>
+    <path d="M68 468 L64 480 L70 478 L70 456 Z" fill="#5C3D2E"/>
+    <path d="M172 430 L172 450 L252 468 L250 456 L176 442 Z" fill="#7A5240" stroke="#5C3D2E" stroke-width="1"/>
+    <path d="M252 468 L256 480 L250 478 L250 456 Z" fill="#5C3D2E"/>
+    <!-- FUSELAGE -->
+    <path d="M160 18 C170 18 182 28 184 50 L186 100 C188 108 190 116 190 126 L192 200 C194 210 194 220 192 230 L188 310 C188 320 188 330 186 340 L182 400 C180 415 178 425 174 435 L170 480 C168 498 165 510 160 515 C155 510 152 498 150 480 L146 435 C142 425 140 415 138 400 L134 340 C132 330 132 320 132 310 L128 230 C126 220 126 210 128 200 L130 126 C130 116 132 108 134 100 L136 50 C138 28 150 18 160 18 Z" fill="url(#fuselageGrad)" stroke="#5C3D2E" stroke-width="1.4"/>
+    <line x1="160" y1="30" x2="160" y2="508" stroke="#EDE0D0" stroke-width="1" opacity="0.5"/>
+    <!-- Cockpit -->
+    <path d="M155 58 Q160 50 165 58 L166 80 Q163 84 160 85 Q157 84 154 80 Z" fill="#3A2A1A" stroke="#5C3D2E" stroke-width="0.8" opacity="0.9"/>
+    <!-- Cabin windows left -->
+    <rect x="140" y="105" width="10" height="7" rx="2" fill="#3A2A1A" opacity="0.7"/>
+    <rect x="140" y="122" width="10" height="7" rx="2" fill="#3A2A1A" opacity="0.7"/>
+    <rect x="140" y="139" width="10" height="7" rx="2" fill="#3A2A1A" opacity="0.7"/>
+    <rect x="140" y="156" width="10" height="7" rx="2" fill="#3A2A1A" opacity="0.7"/>
+    <rect x="140" y="173" width="10" height="7" rx="2" fill="#3A2A1A" opacity="0.7"/>
+    <rect x="140" y="190" width="10" height="7" rx="2" fill="#3A2A1A" opacity="0.7"/>
+    <!-- Cabin windows right -->
+    <rect x="170" y="105" width="10" height="7" rx="2" fill="#3A2A1A" opacity="0.7"/>
+    <rect x="170" y="122" width="10" height="7" rx="2" fill="#3A2A1A" opacity="0.7"/>
+    <rect x="170" y="139" width="10" height="7" rx="2" fill="#3A2A1A" opacity="0.7"/>
+    <rect x="170" y="156" width="10" height="7" rx="2" fill="#3A2A1A" opacity="0.7"/>
+    <rect x="170" y="173" width="10" height="7" rx="2" fill="#3A2A1A" opacity="0.7"/>
+    <rect x="170" y="190" width="10" height="7" rx="2" fill="#3A2A1A" opacity="0.7"/>
+    <!-- LEFT ENGINE -->
+    <path d="M142 355 C138 350 136 360 136 370 L138 400 C138 408 140 412 144 412 L148 412 C152 412 154 408 154 400 L156 370 C156 360 154 350 150 355 Z" fill="url(#engineGrad)" stroke="#4A2E1E" stroke-width="1.2"/>
+    <ellipse cx="146" cy="358" rx="7" ry="4.5" fill="#2A1A10" stroke="#5C3D2E" stroke-width="0.8"/>
+    <ellipse cx="146" cy="408" rx="5" ry="3" fill="#2A1A10" stroke="#4A2E1E" stroke-width="0.8"/>
+    <!-- RIGHT ENGINE -->
+    <path d="M170 355 C166 350 164 360 164 370 L166 400 C166 408 168 412 172 412 L176 412 C180 412 182 408 182 400 L184 370 C184 360 182 350 178 355 Z" fill="url(#engineGrad)" stroke="#4A2E1E" stroke-width="1.2"/>
+    <ellipse cx="174" cy="358" rx="7" ry="4.5" fill="#2A1A10" stroke="#5C3D2E" stroke-width="0.8"/>
+    <ellipse cx="174" cy="408" rx="5" ry="3" fill="#2A1A10" stroke="#4A2E1E" stroke-width="0.8"/>
+    <!-- VERTICAL TAIL FIN -->
+    <path d="M157 415 L157 500 Q160 515 163 500 L163 415 Z" fill="#7A5240" stroke="#5C3D2E" stroke-width="1"/>
+    <line x1="160" y1="415" x2="160" y2="510" stroke="#C4A882" stroke-width="0.6" opacity="0.5"/>
+  </g>
+</svg>
