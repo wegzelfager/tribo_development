@@ -1,45 +1,37 @@
 import {
-  Component, OnInit, OnDestroy, AfterViewInit,
+  Component, AfterViewInit, OnDestroy,
   ElementRef, ViewChild, ViewChildren, QueryList,
   PLATFORM_ID, Inject, NgZone, ChangeDetectionStrategy
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-gsap.registerPlugin(ScrollTrigger);
-
-// Prevent overlapping scrub animations from fighting each other on fast reverse scroll
-ScrollTrigger.config({ limitCallbacks: true, ignoreMobileResize: true });
-// Force all GSAP tweens to use matrix3d (GPU path) even for 2-D transforms
-gsap.defaults({ force3D: true });
-
+ 
+type GSAPType = typeof import('gsap').gsap;
+type STType = typeof import('gsap/ScrollTrigger').ScrollTrigger;
+ 
 interface LenisInstance {
   on(event: string, cb: (e: { scroll: number }) => void): void;
   destroy(): void;
   raf(time: number): void;
 }
-
+ 
 @Component({
   selector: 'app-landing',
   standalone: true,
   imports: [],
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
-
+export class LandingComponent implements AfterViewInit, OnDestroy {
+ 
   @ViewChild('cursor')          cursorEl!: ElementRef<HTMLDivElement>;
   @ViewChild('cursorFollower')  cursorFollowerEl!: ElementRef<HTMLDivElement>;
   @ViewChild('navbar')          navbar!: ElementRef<HTMLElement>;
   @ViewChild('heroSection')     heroSection!: ElementRef<HTMLElement>;
   @ViewChild('heroBg')          heroBg!: ElementRef<HTMLDivElement>;
   @ViewChild('windowWrap')      windowWrap!: ElementRef<HTMLDivElement>;
-  @ViewChild('windowImg')       windowImg!: ElementRef<HTMLImageElement>;
   @ViewChild('windowRing')      windowRing!: ElementRef<HTMLDivElement>;
   @ViewChild('windowPill')      windowPill!: ElementRef<HTMLDivElement>;
-  @ViewChild('skyLayer')        skyLayer!: ElementRef<HTMLDivElement>;
   @ViewChild('skyWatermark')    skyWatermark!: ElementRef<HTMLDivElement>;
   @ViewChild('heroTextLeft')    heroTextLeft!: ElementRef<HTMLDivElement>;
   @ViewChild('heroTextRight')   heroTextRight!: ElementRef<HTMLDivElement>;
@@ -53,65 +45,85 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('card3')           card3!: ElementRef<HTMLDivElement>;
   @ViewChild('valueSection')    valueSection!: ElementRef<HTMLElement>;
   @ViewChildren('valueCell')    valueCells!: QueryList<ElementRef<HTMLDivElement>>;
-
-  // ── Ascent Scroll Section refs (3-Phase) ──────────────────────────────
+ 
   @ViewChild('ascentSection')   ascentSection?: ElementRef<HTMLElement>;
   @ViewChild('phase1Layer')     phase1Layer?: ElementRef<HTMLDivElement>;
   @ViewChild('specsLeft')       specsLeft?: ElementRef<HTMLDivElement>;
   @ViewChild('specsRight')      specsRight?: ElementRef<HTMLDivElement>;
   @ViewChild('jetWrapper')      jetWrapper?: ElementRef<HTMLDivElement>;
-  @ViewChild('ascentJetImg')    ascentJetImg?: ElementRef<HTMLImageElement>;
-  @ViewChild('jetInterior')    jetInterior?: ElementRef<HTMLImageElement>; // Phase 3 blueprint
   @ViewChild('ascentCta')       ascentCta?: ElementRef<HTMLDivElement>;
   @ViewChild('ascentProgress')  ascentProgress?: ElementRef<HTMLDivElement>;
-  @ViewChild('blueprintLayer')  blueprintLayer?: ElementRef<HTMLDivElement>;  // slides DOWN opposite to jet
-  @ViewChild('wordmarkEl')      wordmarkEl?: ElementRef<HTMLDivElement>;       // giant "650ER" rises from below
-  @ViewChild('scrollHint')      scrollHint?: ElementRef<HTMLDivElement>;       // "Scroll to take off" hint
-
-
-
+  @ViewChild('blueprintLayer')  blueprintLayer?: ElementRef<HTMLDivElement>;
+  @ViewChild('wordmarkEl')      wordmarkEl?: ElementRef<HTMLDivElement>;
+ 
   mobileMenuOpen = false;
-
-  private lenis!: LenisInstance;
-  private mouseMoveHandler!: (e: MouseEvent) => void;
-  private gsapTickerCb!: (time: number) => void;
-  private resizeHandler!: () => void;
-  private resizeDebounce: ReturnType<typeof setTimeout> | null = null;
-  private ascentMM?: ReturnType<typeof ScrollTrigger.matchMedia>;
-
+ 
+  private gsap!: GSAPType;
+  private ST!: STType;
+  private lenis?: LenisInstance;
+  private mm?: ReturnType<GSAPType['matchMedia']>;
+  private tickerCb?: (time: number) => void;
+  private mouseMoveHandler?: (e: MouseEvent) => void;
+  private destroyed = false;
+ 
   constructor(
     @Inject(PLATFORM_ID) private platformId: object,
-    private zone: NgZone,
+    private zone: NgZone
   ) {}
-
-  ngOnInit(): void {}
-
+ 
   toggleMobileMenu(): void {
     this.mobileMenuOpen = !this.mobileMenuOpen;
     if (isPlatformBrowser(this.platformId)) {
       document.body.style.overflow = this.mobileMenuOpen ? 'hidden' : '';
-      const btn = document.getElementById('nav-hamburger');
-      if (btn) btn.setAttribute('aria-expanded', String(this.mobileMenuOpen));
     }
   }
-
+ 
   ngAfterViewInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
-    // Run all animation code outside Angular's zone so GSAP/scroll never
-    // trigger change detection on every animation frame.
-    this.zone.runOutsideAngular(() => {
-      requestAnimationFrame(() => {
-        this.initLenis();
-        this.initCursor();
-        this.initHeroAnim();
-        this.initAscentMatchMedia();
-        this.initValueAnim();
-      });
+ 
+    // Everything below runs OUTSIDE Angular's zone: scroll, mousemove and the
+    // GSAP ticker never trigger change detection.
+    this.zone.runOutsideAngular(async () => {
+      const [{ gsap }, { ScrollTrigger }] = await Promise.all([
+        import('gsap'),
+        import('gsap/ScrollTrigger')
+      ]);
+      if (this.destroyed) return;
+ 
+      gsap.registerPlugin(ScrollTrigger);
+      ScrollTrigger.config({ limitCallbacks: true, ignoreMobileResize: true });
+      gsap.defaults({ force3D: true });
+      this.gsap = gsap;
+      this.ST = ScrollTrigger;
+ 
+      await this.initLenis();
+      if (this.destroyed) return;
+ 
+      this.initCursor();
+      this.initEntrance();
+ 
+      // Separate timelines per breakpoint. gsap.matchMedia reverts and rebuilds
+      // them automatically on resize / rotation (no manual resize handler needed).
+      this.mm = gsap.matchMedia();
+      this.mm.add(
+        { isMobile: '(max-width: 767px)', isDesktop: '(min-width: 768px)' },
+        (ctx) => {
+          const isMobile = !!ctx.conditions?.['isMobile'];
+          this.buildHero(isMobile);
+          this.buildAscent(isMobile);
+        }
+      );
+ 
+      this.initValueAnim();
     });
   }
-
-  // AGENT 1: Lenis — driven exclusively by GSAP ticker (no dual RAF loop)
+ 
+  // Lenis only on desktop pointers; touch devices use native scroll (much cheaper).
   private async initLenis(): Promise<void> {
+    const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!fine || reduced) return;
+ 
     const { default: Lenis } = await import('@studio-freight/lenis');
     this.lenis = new (Lenis as any)({
       duration: 1.2,
@@ -120,87 +132,75 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
       wheelMultiplier: 1,
       touchMultiplier: 2,
     }) as LenisInstance;
-
-    // Single driver: GSAP ticker → Lenis. Never call lenis.raf() anywhere else.
-    this.gsapTickerCb = (time: number) => this.lenis.raf(time * 1000);
-    gsap.ticker.add(this.gsapTickerCb);
-    gsap.ticker.lagSmoothing(0);
-
-    // Let ScrollTrigger know about Lenis scroll position
-    this.lenis.on('scroll', ScrollTrigger.update);
-
-    // Refresh ScrollTrigger after fonts/images cause layout shifts — debounced 150ms
-    this.resizeHandler = () => {
-      if (this.resizeDebounce) clearTimeout(this.resizeDebounce);
-      this.resizeDebounce = setTimeout(() => ScrollTrigger.refresh(), 150);
-    };
-    window.addEventListener('resize', this.resizeHandler, { passive: true });
+ 
+    this.tickerCb = (time: number) => this.lenis!.raf(time * 1000);
+    this.gsap.ticker.add(this.tickerCb);
+    this.gsap.ticker.lagSmoothing(0);
+    this.lenis.on('scroll', this.ST.update);
   }
-
-  // Custom Cursor — uses quickTo() so zero new tweens are allocated on mousemove
+ 
+  // Custom cursor: desktop pointers only; quickTo = zero new tweens per mousemove
   private initCursor(): void {
-    const cursor   = this.cursorEl.nativeElement;
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    const gsap = this.gsap;
+    const cursor = this.cursorEl.nativeElement;
     const follower = this.cursorFollowerEl.nativeElement;
-
+ 
     const qcx = gsap.quickTo(cursor,   'x', { duration: 0.06, ease: 'none' });
     const qcy = gsap.quickTo(cursor,   'y', { duration: 0.06, ease: 'none' });
     const qfx = gsap.quickTo(follower, 'x', { duration: 0.18, ease: 'power2.out' });
     const qfy = gsap.quickTo(follower, 'y', { duration: 0.18, ease: 'power2.out' });
-
+ 
     this.mouseMoveHandler = (e: MouseEvent) => {
       qcx(e.clientX); qcy(e.clientY);
       qfx(e.clientX); qfy(e.clientY);
     };
     document.addEventListener('mousemove', this.mouseMoveHandler, { passive: true });
   }
-
-  // Unified Hero & Ascent Scroll Sequence
-  private initHeroAnim(): void {
-    const hero          = this.heroSection.nativeElement;
-    const bg            = this.heroBg.nativeElement;
-    const wrap          = this.windowWrap.nativeElement;
-    const ring          = this.windowRing?.nativeElement;
-    const pill          = this.windowPill?.nativeElement;
-    const tLeft         = this.heroTextLeft.nativeElement;
-    const tRight        = this.heroTextRight.nativeElement;
-    const watermark     = this.skyWatermark?.nativeElement;
-    const cloudText     = this.cloudOverlay?.nativeElement;
-    const ascent        = this.ascentLayer?.nativeElement;
-    const left          = this.ascentLeft?.nativeElement;
-    const right         = this.ascentRight?.nativeElement;
-    const jet           = this.jetImg?.nativeElement;
-    const jetWrap       = jet?.parentElement as HTMLElement;
-    const cards         = [this.card1?.nativeElement, this.card2?.nativeElement, this.card3?.nativeElement].filter(Boolean) as HTMLElement[];
-    const nav           = this.navbar?.nativeElement;
-
-    // Entrance animation
-    gsap.from([tLeft, tRight], { opacity: 0, y: 40, duration: 1.2, ease: 'power3.out', stagger: 0.15, delay: 0.3 });
-    gsap.from(wrap, { opacity: 0, scale: 0.88, duration: 1.4, ease: 'expo.out', delay: 0.2 });
-
-    // Ring pulse is now a pure CSS animation (see .hero__window-ring in SCSS).
-
-    // Pre-promote all animated elements to GPU compositor layers
-    gsap.set(wrap, {
-      x: 0, y: 0, z: 0,
-      transformOrigin: 'center center',
-      backfaceVisibility: 'hidden',
-      WebkitBackfaceVisibility: 'hidden',
-    });
-    if (ring) gsap.set(ring, { x: 0, y: 0, z: 0, transformOrigin: 'center center', backfaceVisibility: 'hidden' });
-    if (pill) gsap.set(pill, { x: 0, y: 0, z: 0, backfaceVisibility: 'hidden' });
-    if (cloudText) gsap.set(cloudText, { z: 0, backfaceVisibility: 'hidden' });
-    if (ascent) gsap.set(ascent, { z: 0, backfaceVisibility: 'hidden' });
-    if (left) gsap.set(left, { z: 0, backfaceVisibility: 'hidden' });
-    if (right) gsap.set(right, { z: 0, backfaceVisibility: 'hidden' });
-    if (jetWrap) gsap.set(jetWrap, { x: 0, y: 0, xPercent: -50, yPercent: -50, z: 0, backfaceVisibility: 'hidden' });
-    if (cards.length) gsap.set(cards, { z: 0, backfaceVisibility: 'hidden' });
-
-    // Single unified scroll sequence — pins heroSection and transitions seamlessly through all 3 stages
+ 
+  // One-time intro (the ring pulse is now pure CSS, see SCSS)
+  private initEntrance(): void {
+    const gsap = this.gsap;
+    gsap.from([this.heroTextLeft.nativeElement, this.heroTextRight.nativeElement],
+      { opacity: 0, y: 40, duration: 1.2, ease: 'power3.out', stagger: 0.15, delay: 0.3 });
+    gsap.from(this.windowWrap.nativeElement,
+      { opacity: 0, scale: 0.88, duration: 1.4, ease: 'expo.out', delay: 0.2 });
+  }
+ 
+  // ─── HERO: window zoom → ascent layer (same values as before) ──────────────
+  private buildHero(isMobile: boolean): void {
+    const gsap = this.gsap;
+    const hero      = this.heroSection.nativeElement;
+    const bg        = this.heroBg.nativeElement;
+    const wrap      = this.windowWrap.nativeElement;
+    const ring      = this.windowRing?.nativeElement;
+    const pill      = this.windowPill?.nativeElement;
+    const tLeft     = this.heroTextLeft.nativeElement;
+    const tRight    = this.heroTextRight.nativeElement;
+    const watermark = this.skyWatermark?.nativeElement;
+    const cloudText = this.cloudOverlay?.nativeElement;
+    const ascent    = this.ascentLayer?.nativeElement;
+    const left      = this.ascentLeft?.nativeElement;
+    const right     = this.ascentRight?.nativeElement;
+    const jetWrap   = this.jetImg?.nativeElement.parentElement as HTMLElement | null;
+    const cards     = [this.card1?.nativeElement, this.card2?.nativeElement, this.card3?.nativeElement]
+                        .filter(Boolean) as HTMLElement[];
+    const nav       = this.navbar?.nativeElement;
+ 
+    if (jetWrap) gsap.set(jetWrap, { xPercent: -50, yPercent: -50, z: 0 });
+    gsap.set(wrap, { x: 0, y: 0, z: 0, transformOrigin: 'center center' });
+ 
+    // will-change only while the pin is active, on a short list of elements
+    const heavy = [wrap, ring, pill, cloudText, ascent, left, right, jetWrap, ...cards]
+                    .filter(Boolean) as HTMLElement[];
+    let navDark = false;
+    let threshold = 0.53; // recalculated below from the real timeline duration
+ 
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: hero,
         start: 'top top',
-        end: '+=350%',
+        end: isMobile ? '+=250%' : '+=350%',
         pin: true,
         scrub: 1.2,
         anticipatePin: 1,
@@ -208,148 +208,106 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
         preventOverlaps: true,
         invalidateOnRefresh: true,
         onToggle: (self) => {
-          wrap.style.willChange = self.isActive ? 'transform' : 'auto';
-          // Pause CSS ring animation while the zoom is scrubbing
-          if (ring) ring.classList.toggle('anim-paused', self.isActive);
-          if (pill) pill.style.willChange = self.isActive ? 'opacity, transform' : 'auto';
-          if (cloudText) cloudText.style.willChange = self.isActive ? 'opacity, transform' : 'auto';
-          if (ascent) ascent.style.willChange = self.isActive ? 'opacity' : 'auto';
-          if (left) left.style.willChange = self.isActive ? 'opacity, transform' : 'auto';
-          if (right) right.style.willChange = self.isActive ? 'opacity, transform' : 'auto';
-          if (jetWrap) jetWrap.style.willChange = self.isActive ? 'transform' : 'auto';
-          cards.forEach(c => c.style.willChange = self.isActive ? 'opacity, transform' : 'auto');
-          // Switch navbar dark/light via CSS class instead of tweening color on each link
-          if (nav) nav.classList.toggle('nav--light', self.progress > 0.5);
+          heavy.forEach(el => el.style.willChange = self.isActive ? 'transform, opacity' : 'auto');
+          // pauses the CSS ring pulse while scrolling (see SCSS)
+          hero.classList.toggle('hero--active', self.isActive);
+        },
+        onUpdate: (self) => {
+          if (!nav) return;
+          const dark = self.progress >= threshold;
+          if (dark !== navDark) { navDark = dark; nav.classList.toggle('nav--dark', dark); }
         },
       }
     });
-
-    // ── STAGE 1 -> STAGE 2: Window Zoom & Initial Headlines Exit ────────────
+ 
+    // STAGE 1 → 2: window zoom, headlines exit
     tl
       .to(wrap, { scale: 9, ease: 'power2.in', duration: 0.65 }, 0)
       .to(watermark, { opacity: 0, duration: 0.05 }, 0)
       .to([tLeft, tRight], { opacity: 0, y: -35, ease: 'power1.out', duration: 0.2 }, 0);
-
+ 
     if (pill) tl.to(pill, { opacity: 0, scale: 0.8, ease: 'power1.out', duration: 0.15 }, 0);
     if (ring) tl.to(ring, { scale: 10, opacity: 0, ease: 'power2.in', duration: 0.4 }, 0);
     tl.to(bg, { opacity: 0, ease: 'power1.in', duration: 0.35 }, 0.15);
-
-    // ── STAGE 2: Mid-Scroll Cloud Transition Text Overlay ───────────────────
+ 
+    // STAGE 2: cloud text
     if (cloudText) {
-      tl.fromTo(cloudText,
-        { opacity: 0, y: 30 },
-        { opacity: 1, y: 0, ease: 'power2.out', duration: 0.14 },
-        0.28
-      )
-      .to(cloudText,
-        { opacity: 0, y: -25, ease: 'power2.in', duration: 0.12 },
-        0.46
-      );
+      tl.fromTo(cloudText, { opacity: 0, y: 30 },
+          { opacity: 1, y: 0, ease: 'power2.out', duration: 0.14 }, 0.28)
+        .to(cloudText, { opacity: 0, y: -25, ease: 'power2.in', duration: 0.12 }, 0.46);
     }
-
-    // ── STAGE 3: Post-Zoom Ascent Layer (Gradient, Aircraft & Typography) ───
+ 
+    // STAGE 3: ascent layer
     if (ascent) {
-      tl.fromTo(ascent,
-        { opacity: 0 },
-        { opacity: 1, ease: 'power1.inOut', duration: 0.18 },
-        0.48
-      );
+      tl.fromTo(ascent, { opacity: 0 }, { opacity: 1, ease: 'power1.inOut', duration: 0.18 }, 0.48);
     }
-
-    // Adapt navbar link colors so they stay high contrast against light blue/sand sky
-    if (nav) {
-      const navLinks = nav.querySelectorAll('a');
-      tl.to(navLinks, { color: '#1A1615', duration: 0.15, ease: 'power1.inOut' }, 0.52);
-    }
-
-    // Left Block: "Fly in" + "Luxury that moves with you"
     if (left) {
-      tl.fromTo(left,
-        { x: -70, opacity: 0 },
-        { x: 0, opacity: 1, ease: 'power2.out', duration: 0.22 },
-        0.54
-      );
+      tl.fromTo(left, { x: -70, opacity: 0 }, { x: 0, opacity: 1, ease: 'power2.out', duration: 0.22 }, 0.54);
     }
-
-    // Right Block: "Luxury" + GULFSTREAM / 650ER meta strip
     if (right) {
-      tl.fromTo(right,
-        { x: 70, opacity: 0 },
-        { x: 0, opacity: 1, ease: 'power2.out', duration: 0.22 },
-        0.54
-      );
+      tl.fromTo(right, { x: 70, opacity: 0 }, { x: 0, opacity: 1, ease: 'power2.out', duration: 0.22 }, 0.54);
     }
-
-    // Center SUV Card: Ascends smoothly into center
     if (jetWrap) {
       tl.fromTo(jetWrap,
-        { x: 0, xPercent: -50, yPercent: 40, scale: 0.8 },
-        { x: 0, xPercent: -50, yPercent: -50, scale: 1, ease: 'power2.out', duration: 0.38 },
-        0.52
-      );
+        { xPercent: -50, yPercent: 40, scale: 0.8 },
+        { xPercent: -50, yPercent: -50, scale: 1, ease: 'power2.out', duration: 0.38 }, 0.52);
     }
-
-    // Bottom Metric Cards: Stagger in
     if (cards.length) {
-      tl.fromTo(cards,
-        { y: 35, opacity: 0 },
-        { y: 0, opacity: 1, stagger: 0.06, ease: 'back.out(1.4)', duration: 0.18 },
-        0.68
-      );
+      tl.fromTo(cards, { y: 35, opacity: 0 },
+        { y: 0, opacity: 1, stagger: 0.06, ease: 'back.out(1.4)', duration: 0.18 }, 0.68);
+    }
+ 
+    // Navbar colour = a CSS class toggled at the same moment as before (position 0.52)
+    threshold = 0.52 / tl.duration();
+ 
+    // Navbar goes back to light text when the dark "value" section arrives
+    if (nav && this.valueSection) {
+      this.ST.create({
+        trigger: this.valueSection.nativeElement,
+        start: 'top 64px',
+        onEnter: () => nav.classList.remove('nav--dark'),
+        onLeaveBack: () => nav.classList.add('nav--dark'),
+      });
     }
   }
-
-  // ─── ASCENT matchMedia: rebuilds on mobile ↔ desktop swap ───────────────────
-  private initAscentMatchMedia(): void {
-    this.ascentMM = ScrollTrigger.matchMedia({
-      '(max-width: 767px)': () => { this.buildAscent(true); },
-      '(min-width: 768px)': () => { this.buildAscent(false); },
-    });
-  }
-
+ 
+  // ─── 650ER ASCENT SECTION (values unchanged; mobile/desktop via matchMedia) ─
   private buildAscent(isMobile: boolean): void {
-    // ── Tunables — change these to adjust the animation feel ─────────────────
+    const gsap = this.gsap;
     const CFG = {
-      JET_END_Y:        isMobile ? -70 : -140,
-      JET_END_SCALE:    isMobile ? 0.5 : 0.3,
-      BLUEPRINT_END_Y:  isMobile ? 20 : 40,
-      WORD_FROM_Y:      isMobile ? 75 : 150,
-      WORD_TO_Y:        isMobile ? -15 : -30,
-      SCROLL_LENGTH:    isMobile ? '+=150%' : '+=250%',
+      JET_END_Y:       isMobile ? -70 : -140,
+      JET_END_SCALE:   isMobile ? 0.5 : 0.3,
+      BLUEPRINT_END_Y: isMobile ? 20 : 40,
+      WORD_FROM_Y:     isMobile ? 75 : 150,
+      WORD_TO_Y:       isMobile ? -15 : -30,
+      SCROLL_LENGTH:   isMobile ? '+=150%' : '+=250%',
     };
-
-    // ── Element refs ─────────────────────────────────────────────────────────
-    const section    = this.ascentSection?.nativeElement   as HTMLElement;
-    const blueprint  = this.blueprintLayer?.nativeElement  as HTMLElement;
-    const wordmark   = this.wordmarkEl?.nativeElement      as HTMLElement;
-    const p1         = this.phase1Layer?.nativeElement     as HTMLElement;
-    const jetWrap    = this.jetWrapper?.nativeElement      as HTMLElement;
-    const sLeft      = this.specsLeft?.nativeElement       as HTMLElement;
-    const sRight     = this.specsRight?.nativeElement      as HTMLElement;
-    const cta        = this.ascentCta?.nativeElement       as HTMLElement;
-    const progress   = this.ascentProgress?.nativeElement  as HTMLElement;
-
+ 
+    const section   = this.ascentSection?.nativeElement;
+    const blueprint = this.blueprintLayer?.nativeElement;
+    const wordmark  = this.wordmarkEl?.nativeElement;
+    const p1        = this.phase1Layer?.nativeElement;
+    const jetWrap   = this.jetWrapper?.nativeElement;
+    const sLeft     = this.specsLeft?.nativeElement;
+    const sRight    = this.specsRight?.nativeElement;
+    const cta       = this.ascentCta?.nativeElement;
+    const progress  = this.ascentProgress?.nativeElement;
     if (!section || !jetWrap) return;
-
-    // ── Collect spec items for stagger ───────────────────────────────────────
-    const specItems: HTMLElement[] = [
+ 
+    const specItems = [
       ...(sLeft  ? Array.from(sLeft.querySelectorAll('.ascent__spec-item'))  : []),
       ...(sRight ? Array.from(sRight.querySelectorAll('.ascent__spec-item')) : []),
     ] as HTMLElement[];
-
-    // ── INITIAL STATES ────────────────────────────────────────────────────────
+ 
     gsap.set(jetWrap, { xPercent: -50, yPercent: 0, scale: 1 });
     if (blueprint) gsap.set(blueprint, { yPercent: 0, z: 0 });
-    if (wordmark) gsap.set(wordmark, { y: CFG.WORD_FROM_Y, opacity: 0 });
-    if (p1) gsap.set(p1, { y: 0, opacity: 1 });
+    if (wordmark)  gsap.set(wordmark, { y: CFG.WORD_FROM_Y, opacity: 0 });
+    if (p1)        gsap.set(p1, { y: 0, opacity: 1 });
     if (specItems.length) gsap.set(specItems, { opacity: 0, y: 30 });
-    if (cta) gsap.set(cta, { opacity: 0, y: 30 });
-
-    // ── GPU compositor pre-promotion ─────────────────────────────────────────
-    const gpuEls = [jetWrap, blueprint, wordmark, p1, sLeft, sRight, cta].filter(Boolean) as HTMLElement[];
-    gsap.set(gpuEls, { z: 0, backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' });
-
-    // ── MASTER SCROLL TIMELINE ────────────────────────────────────────────────
+    if (cta)       gsap.set(cta, { opacity: 0, y: 30 });
+ 
+    const heavy = [jetWrap, blueprint, wordmark, p1].filter(Boolean) as HTMLElement[];
+ 
     const tl = gsap.timeline({
       defaults: { ease: 'none' },
       scrollTrigger: {
@@ -360,85 +318,44 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
         scrub: 1,
         anticipatePin: 1,
         invalidateOnRefresh: true,
-        onToggle: (self) => {
-          const on = self.isActive;
-          jetWrap.style.willChange        = on ? 'transform'          : 'auto';
-          if (blueprint) blueprint.style.willChange = on ? 'transform' : 'auto';
-          if (wordmark)  wordmark.style.willChange  = on ? 'transform, opacity' : 'auto';
-          if (p1)        p1.style.willChange        = on ? 'opacity, transform' : 'auto';
-        },
-        onUpdate: (self) => {
-          if (progress) {
-            gsap.set(progress, { scaleX: self.progress, transformOrigin: 'left center' });
-          }
-        },
+        onToggle: (self) => heavy.forEach(el => el.style.willChange = self.isActive ? 'transform, opacity' : 'auto'),
+        // direct style write: cheaper than gsap.set on every scroll frame
+        onUpdate: (self) => { if (progress) progress.style.transform = `scaleX(${self.progress})`; },
       },
     });
-
-    // 0 → 0.75  JET
-    tl.to(jetWrap, {
-      xPercent: -50,
-      yPercent: CFG.JET_END_Y,
-      scale: CFG.JET_END_SCALE,
-      ease: 'power1.in',
-      duration: 0.75,
-    }, 0);
-
-    // 0 → 0.75  BLUEPRINT
-    if (blueprint) {
-      tl.to(blueprint, { yPercent: CFG.BLUEPRINT_END_Y, ease: 'power1.in', duration: 0.75 }, 0);
-    }
-
-    // 0 → 0.30  PHASE-1 TEXT
-    if (p1) {
-      tl.to(p1, { opacity: 0, y: 40, ease: 'power1.out', duration: 0.30 }, 0);
-    }
-
-    // 0.35 → 0.85  WORDMARK
-    if (wordmark) {
-      tl.to(wordmark, { y: CFG.WORD_TO_Y, opacity: 1, ease: 'power2.out', duration: 0.50 }, 0.35);
-    }
-
-    // 0.70 → 0.96  SPEC ITEMS + CTA
-    if (specItems.length) {
-      tl.to(specItems, { opacity: 1, y: 0, ease: 'power2.out', duration: 0.12, stagger: 0.02 }, 0.70);
-    }
-    if (cta) {
-      tl.to(cta, { opacity: 1, y: 0, ease: 'power2.out', duration: 0.12 }, 0.85);
-    }
+ 
+    tl.to(jetWrap, { xPercent: -50, yPercent: CFG.JET_END_Y, scale: CFG.JET_END_SCALE, ease: 'power1.in', duration: 0.75 }, 0);
+    if (blueprint) tl.to(blueprint, { yPercent: CFG.BLUEPRINT_END_Y, ease: 'power1.in', duration: 0.75 }, 0);
+    if (p1)        tl.to(p1, { opacity: 0, y: 40, ease: 'power1.out', duration: 0.30 }, 0);
+    if (wordmark)  tl.to(wordmark, { y: CFG.WORD_TO_Y, opacity: 1, ease: 'power2.out', duration: 0.50 }, 0.35);
+    if (specItems.length) tl.to(specItems, { opacity: 1, y: 0, ease: 'power2.out', duration: 0.12, stagger: 0.02 }, 0.70);
+    if (cta)       tl.to(cta, { opacity: 1, y: 0, ease: 'power2.out', duration: 0.12 }, 0.85);
   }
-
-
-  // Value Grid ScrollTrigger fade-in stagger
+ 
   private initValueAnim(): void {
+    const gsap = this.gsap;
     const cells = this.valueCells.toArray().map(r => r.nativeElement);
-    // Pre-promote GPU layers so the fade-in is compositor-only (no mid-animation rasterization)
-    gsap.set(cells, { z: 0, backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' });
-
-    ScrollTrigger.create({
+    this.ST.create({
       trigger: this.valueSection.nativeElement,
       start: 'top 80%',
+      once: true,
       onEnter: () => {
-        // Activate will-change just before the animation fires
         cells.forEach(c => c.style.willChange = 'opacity, transform');
         gsap.to(cells, {
           opacity: 1, y: 0, stagger: 0.1, duration: 0.8, ease: 'power3.out',
-          onComplete: () => {
-            // Release will-change after animation completes to free VRAM
-            cells.forEach(c => c.style.willChange = 'auto');
-          }
+          onComplete: () => cells.forEach(c => c.style.willChange = 'auto')
         });
       }
     });
   }
-
+ 
   ngOnDestroy(): void {
-    if (this.ascentMM) (this.ascentMM as any).revert();
-    if (this.resizeDebounce) clearTimeout(this.resizeDebounce);
-    ScrollTrigger.getAll().forEach(t => t.kill());
-    if (this.lenis) this.lenis.destroy();
-    if (this.gsapTickerCb) gsap.ticker.remove(this.gsapTickerCb);
+    this.destroyed = true;
+    document.body.style.overflow = '';
+    this.mm?.revert();
+    this.ST?.getAll().forEach(t => t.kill());
+    if (this.tickerCb && this.gsap) this.gsap.ticker.remove(this.tickerCb);
+    this.lenis?.destroy();
     if (this.mouseMoveHandler) document.removeEventListener('mousemove', this.mouseMoveHandler);
-    if (this.resizeHandler) window.removeEventListener('resize', this.resizeHandler);
   }
 }
