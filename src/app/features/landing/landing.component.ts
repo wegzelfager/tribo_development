@@ -214,7 +214,9 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
                         .filter(Boolean) as HTMLElement[];
     const nav       = this.navbar?.nativeElement;
  
-    if (jetWrap) gsap.set(jetWrap, { xPercent: -50, yPercent: -50 });
+    const jetStartY = isMobile ? 40 : 100;  // desktop: fully below the bottom edge
+    const jetEndY   = isMobile ? -50 : 50;  // desktop: half of the car below the bottom edge
+    if (jetWrap) gsap.set(jetWrap, { xPercent: -50, yPercent: isMobile ? -50 : jetStartY });
     gsap.set(wrap, { x: 0, y: 0, transformOrigin: 'center center' });
  
     // CHANGED: the zoom is computed from the real aperture size instead of a fixed 9.
@@ -224,7 +226,7 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     const zoomTarget = (): number => {
       if (!sky || !sky.offsetWidth || !sky.offsetHeight) return isMobile ? 6 : 9;
       const cover = Math.max(window.innerWidth / sky.offsetWidth, window.innerHeight / sky.offsetHeight);
-      return cover * 1.45; // the aperture is an ellipse: x1.45 so the screen corners are covered too
+      return cover * 1.6; // the aperture is an ellipse: x1.6 so the screen corners are covered too (enlarged sky layer)
     };
  
 
@@ -286,8 +288,8 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     }
     if (jetWrap) {
       tl.fromTo(jetWrap,
-        { xPercent: -50, yPercent: 40, scale: 0.8 },
-        { xPercent: -50, yPercent: -50, scale: 1, ease: 'power2.out', duration: 0.38 }, 0.52);
+        { xPercent: -50, yPercent: jetStartY, scale: 0.8 },
+        { xPercent: -50, yPercent: jetEndY, scale: 1, ease: 'power2.out', duration: 0.38 }, 0.52);
     }
     if (cards.length) {
       tl.fromTo(cards, { y: 35, opacity: 0 },

@@ -501,7 +501,7 @@
         justify-content: space-between;
         align-items: center;
         text-align: center;
-        padding: calc(4.2rem + env(safe-area-inset-top, 0px)) 1.25rem calc(8rem + env(safe-area-inset-bottom, 0px));
+        padding: calc(4.2rem + env(safe-area-inset-top, 0px)) 1.25rem calc(8rem + env(safe-area-inset-bottom, 0px) + var(--vh-gap));
       }
 
       .ascent__title-left,
@@ -559,7 +559,7 @@
       }
 
       .ascent__cards {
-        bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+        bottom: calc(1rem + env(safe-area-inset-bottom, 0px) + var(--vh-gap));
         gap: 0.5rem;
         padding-inline: 1.25rem;
         justify-content: center;
@@ -658,15 +658,31 @@
   // Layer 1: Bright Blue Sky & Clouds behind window aperture
   &__sky-layer {
     position: absolute;
-    top: 25.5%;
-    left: 23.5%;
-    right: 23.5%;
-    bottom: 25.5%;
-    border-radius: 46% 46% 48% 48% / 42% 42% 48% 48%;
+    // calibrate visually: temporarily set .hero__window-img opacity to .4 and outline the sky layer;
+    // the outline must sit fully inside the beige ring, outside the aperture and not touching the frame's outer edge.
+    top: 15%;
+    left: 13%;
+    right: 13%;
+    bottom: 11%;
+    border-radius: 38% / 30%;
     overflow: hidden;
     z-index: 1;
     box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.45);
-    // اتشال: backface-visibility و transform: translateZ(0)
+
+    // Glass + lighting composite — NO filter/backdrop-filter/mix-blend-mode (would hurt perf at 9x scale)
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      z-index: 2;
+      background:
+        linear-gradient(180deg, rgba(0, 0, 0, .38) 0%, transparent 30%),
+        linear-gradient(118deg, rgba(255, 255, 255, .20) 0%, transparent 30%, transparent 72%, rgba(255, 255, 255, .07) 100%),
+        linear-gradient(0deg, rgba(255, 224, 185, .20) 0%, transparent 38%),
+        radial-gradient(ellipse at 50% 45%, transparent 60%, rgba(6, 12, 28, .42) 100%);
+    }
   }
 
 
@@ -675,8 +691,13 @@
     height: 100%;
     object-fit: cover;
     object-position: center 30%;
-    transform: scale(1.12);
-    // اتشال: backface-visibility
+    // scale(1.12) ensures edges never show during drift; keep it as the base
+    animation: sky-drift 28s ease-in-out infinite alternate;
+  }
+
+  @keyframes sky-drift {
+    from { transform: scale(1.12) translate3d(-1.5%, 0, 0); }
+    to   { transform: scale(1.12) translate3d( 1.5%, 0, 0); }
   }
 
   &__sky-watermark {
@@ -685,14 +706,15 @@
     left: 50%;
     transform: translate(-50%, -50%);
     font-family: 'Space Grotesk', sans-serif;
-    font-size: clamp(1rem, 1.5vw, 1.35rem);
+    font-size: clamp(0.8rem, 1.2vw, 1.08rem); // ~80% of former size
     font-weight: 500;
     letter-spacing: 0.16em;
-    color: rgba(255, 255, 255, 0.92);
+    color: rgba(255, 255, 255, 0.6);
     text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
     pointer-events: none;
     white-space: nowrap;
     user-select: none;
+    z-index: 3; // above the ::after overlay on __sky-layer
   }
 
   // Layer 2: Transparent High-Res Airplane Window Frame
@@ -920,7 +942,7 @@
       left: 0;
       right: 0;
       width: auto;
-      bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
+      bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px) + var(--vh-gap));
       padding-inline: 1.25rem;
     }
 
@@ -964,6 +986,16 @@
 
 .hero--active .hero__window-ring {
   animation-play-state: paused;
+}
+
+.hero--active .hero__sky-img {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__sky-img {
+    animation: none;
+  }
 }
 
 
@@ -1324,7 +1356,7 @@
 .ascent__specs-left {
   position: absolute;
   left: clamp(2rem, 5vw, 5rem);
-  bottom: clamp(4rem, 10vh, 8rem);
+  bottom: calc(clamp(4rem, 10vh, 8rem) + var(--vh-gap));
   z-index: 7;
   width: clamp(200px, 28vw, 380px);
   display: flex;
@@ -1334,7 +1366,7 @@
   @media (max-width: 799px) {
     width: 46%;
     left: 3vw;
-    bottom: 6rem;
+    bottom: calc(6rem + var(--vh-gap));
   }
 }
 
@@ -1342,7 +1374,7 @@
 .ascent__specs-right {
   position: absolute;
   right: clamp(2rem, 5vw, 5rem);
-  bottom: clamp(4rem, 10vh, 8rem);
+  bottom: calc(clamp(4rem, 10vh, 8rem) + var(--vh-gap));
   z-index: 7;
   width: clamp(200px, 28vw, 380px);
   display: flex;
@@ -1352,7 +1384,7 @@
   @media (max-width: 799px) {
     width: 46%;
     right: 3vw;
-    bottom: 6rem;
+    bottom: calc(6rem + var(--vh-gap));
   }
 }
 
@@ -1395,7 +1427,7 @@
 // ── Layer 8: Book CTA pill ────────────────────────────────────────────────────
 .ascent__cta-btn {
   position: absolute;
-  bottom: clamp(1.5rem, 3vh, 3rem);
+  bottom: calc(clamp(1.5rem, 3vh, 3rem) + var(--vh-gap));
   left: 0;
   right: 0;
   margin: auto; // center horizontally — never use CSS translateX (conflicts GSAP)
