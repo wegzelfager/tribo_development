@@ -1,12 +1,11 @@
-// ─── LANDING WRAPPER ────────────────────────────────────────────────────────
 .landing-wrap {
   --vh-gap: 0px;
-
+ 
   @supports (height: 100lvh) {
     --vh-gap: calc(100lvh - 100svh);
   }
 }
-
+ 
 // ─── NAVIGATION ─────────────────────────────────────────────────────────────
 .nav {
   position: fixed;
@@ -18,23 +17,23 @@
   align-items: center;
   justify-content: space-between;
   padding: clamp(0.85rem, 2.2vw, 2.2rem) clamp(1.25rem, 4.5vw, 4.5rem);
-
+ 
   &__left {
     display: flex;
     align-items: center;
   }
-
+ 
   &__right {
     display: flex;
     align-items: center;
     gap: 0.75rem;
   }
-
+ 
   &__links {
     display: flex;
     gap: clamp(1rem, 2.5vw, 3.2rem);
     list-style: none;
-
+ 
     a {
       font-family: 'Space Grotesk', sans-serif;
       font-size: clamp(0.75rem, 0.9vw, 0.85rem);
@@ -45,19 +44,19 @@
       transition: color 0.3s ease, opacity 0.3s ease;
       opacity: 0.95;
       white-space: nowrap;
-
+ 
       &:hover {
         opacity: 1;
         color: var(--sand-gold-light);
       }
     }
   }
-
+ 
   &__contact {
     display: flex;
     align-items: center;
     gap: clamp(0.75rem, 2vw, 2.5rem);
-
+ 
     &-item {
       font-family: 'Space Grotesk', sans-serif;
       font-size: clamp(0.72rem, 0.9vw, 0.85rem);
@@ -67,13 +66,13 @@
       text-decoration: none;
       transition: color 0.3s ease;
       white-space: nowrap;
-
+ 
       &:hover {
         color: var(--sand-gold-light);
       }
     }
   }
-
+ 
   // Mobile phone icon button
   &__mobile-phone {
     display: none;
@@ -88,12 +87,12 @@
     text-decoration: none;
     transition: background 0.25s;
     flex-shrink: 0;
-
+ 
     &:hover {
       background: rgba(255, 255, 255, 0.2);
     }
   }
-
+ 
   // Hamburger button
   &__hamburger {
     display: none;
@@ -108,11 +107,11 @@
     cursor: pointer;
     flex-shrink: 0;
     transition: background 0.25s;
-
+ 
     &:hover {
       background: rgba(255, 255, 255, 0.16);
     }
-
+ 
     span {
       display: block;
       width: 100%;
@@ -122,47 +121,48 @@
       transition: transform 0.3s ease, opacity 0.3s ease;
     }
   }
-
+ 
+  // nav--dark = dark text for light backgrounds. The TS (setNavDark) decides when.
   &.nav--dark {
-
+ 
     .nav__links a,
     .nav__contact-item {
       color: #1A1615 !important;
-
+ 
       &:hover {
         color: #5C3D2E !important;
       }
     }
-
+ 
     .nav__mobile-phone,
     .nav__hamburger {
       background: rgba(0, 0, 0, 0.08);
       border-color: rgba(0, 0, 0, 0.15);
-
+ 
       span {
         background: #1A1615;
       }
-
+ 
       svg {
         color: #1A1615;
       }
     }
   }
-
+ 
   @media (max-width: 767px) {
-
+ 
     &__links,
     &__contact {
       display: none;
     }
-
+ 
     &__mobile-phone,
     &__hamburger {
       display: flex;
     }
   }
 }
-
+ 
 // ─── MOBILE NAV OVERLAY ────────────────────────────────────────────────────────
 .nav-overlay {
   position: fixed;
@@ -178,13 +178,13 @@
   pointer-events: none;
   transform: translateY(-8px);
   transition: opacity 0.35s ease, transform 0.35s ease;
-
+ 
   &--open {
     opacity: 1;
     pointer-events: auto;
     transform: translateY(0);
   }
-
+ 
   &__close {
     position: absolute;
     top: 1.2rem;
@@ -200,29 +200,29 @@
     cursor: pointer;
     color: #ffffff;
     transition: background 0.25s;
-
+ 
     &:hover {
       background: rgba(255, 255, 255, 0.18);
     }
-
+ 
     svg {
       width: 18px;
       height: 18px;
     }
   }
-
+ 
   &__nav {
     text-align: center;
     width: 100%;
   }
-
+ 
   &__links {
     list-style: none;
     display: flex;
     flex-direction: column;
     gap: 1.2rem;
     margin-bottom: 3rem;
-
+ 
     a {
       font-family: 'Syne', sans-serif;
       font-size: clamp(2rem, 10vw, 3.5rem);
@@ -231,20 +231,20 @@
       color: rgba(255, 255, 255, 0.9);
       text-decoration: none;
       transition: color 0.2s;
-
+ 
       &:hover {
         color: var(--sand-gold-light);
       }
     }
   }
-
+ 
   &__contact {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
     align-items: center;
   }
-
+ 
   &__phone,
   &__email {
     font-family: 'Space Grotesk', sans-serif;
@@ -257,14 +257,14 @@
     min-height: 44px;
     display: flex;
     align-items: center;
-
+ 
     &:hover {
       color: var(--sand-gold-light);
     }
   }
 }
-
-
+ 
+ 
 .hero {
   position: relative;
   width: 100%;
@@ -273,8 +273,11 @@
   height: 100lvh;
   min-height: 100lvh;
   overflow: hidden;
+  // FIX: own stacking context. The hero's inner z-indexes (2, 3, 5, 10) must never compete with
+  // the sections that come after it while the pin hands off.
+  isolation: isolate;
   background: radial-gradient(ellipse 70% 60% at 50% 50%, #2A1E17 0%, #171210 50%, #0E0B0A 100%);
-
+ 
   // Warm ambient spotlight centered behind airplane window
   &::before {
     content: '';
@@ -284,16 +287,16 @@
     pointer-events: none;
     z-index: 0;
   }
-
+ 
   &__bg {
     position: absolute;
     inset: 0;
     background: radial-gradient(ellipse 80% 70% at 50% 50%, rgba(190, 140, 100, 0.12) 0%, transparent 70%);
     pointer-events: none;
     z-index: 1;
-    // will-change managed by GSAP onToggle — not declared statically to avoid VRAM waste
+    // will-change managed by GSAP (buildHero) — not declared statically to avoid VRAM waste
   }
-
+ 
   // ── Post-Zoom Ascent Layer (Stage 3) ──────────────────────────────────────
   &__ascent-layer {
     position: absolute;
@@ -304,14 +307,14 @@
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
     transform: translate3d(0, 0, 0);
-
+ 
     .ascent__bg {
       position: absolute;
       inset: 0;
       background: linear-gradient(180deg, #C2DCED 0%, #D8E7F0 45%, #EADBCE 85%, #E3D4C5 100%);
       z-index: 0;
     }
-
+ 
     .ascent__cloud-horizon {
       position: absolute;
       top: 0;
@@ -322,7 +325,7 @@
       pointer-events: none;
       z-index: 1;
     }
-
+ 
     .ascent__layout {
       position: absolute;
       inset: 0;
@@ -333,7 +336,7 @@
       pointer-events: none;
       z-index: 3;
     }
-
+ 
     .ascent__title-left {
       pointer-events: auto;
       max-width: 380px;
@@ -341,7 +344,7 @@
       flex-direction: column;
       align-items: flex-start;
     }
-
+ 
     .ascent__title-right {
       pointer-events: auto;
       width: clamp(280px, 28vw, 420px);
@@ -350,7 +353,7 @@
       align-items: flex-end;
       text-align: right;
     }
-
+ 
     .ascent__big-text {
       font-family: 'Syne', sans-serif;
       font-size: clamp(3.4rem, 7.2vw, 7.2rem);
@@ -359,7 +362,7 @@
       line-height: 0.92;
       color: #1A1615;
     }
-
+ 
     .ascent__sub-text {
       font-family: 'Space Grotesk', sans-serif;
       font-size: clamp(0.85rem, 1.1vw, 1.05rem);
@@ -372,19 +375,19 @@
       max-width: 220px;
       text-align: left;
     }
-
+ 
     .ascent__meta-strip {
       width: 100%;
       margin-top: clamp(2.5rem, 4.5vw, 4.5rem);
       text-align: left;
     }
-
+ 
     .ascent__meta-divider {
       width: 100%;
       border-top: 1px solid rgba(0, 0, 0, 0.15);
       margin-bottom: 0.85rem;
     }
-
+ 
     .ascent__meta-row {
       display: flex;
       justify-content: space-between;
@@ -396,13 +399,13 @@
       color: #1A1615;
       text-transform: uppercase;
     }
-
+ 
     .ascent__spec-row {
       display: flex;
       justify-content: space-between;
       gap: 1.5rem;
       margin-top: 1rem;
-
+ 
       div {
         font-family: 'Space Grotesk', sans-serif;
         font-size: 0.65rem;
@@ -410,7 +413,7 @@
         text-transform: uppercase;
         color: rgba(26, 22, 21, 0.65);
         line-height: 1.4;
-
+ 
         strong {
           display: block;
           font-size: 0.78rem;
@@ -420,7 +423,7 @@
         }
       }
     }
-
+ 
     // Center SUV: Only front half emerges from bottom of viewport
     .ascent__jet-wrap {
       position: absolute;
@@ -441,7 +444,7 @@
       -webkit-backface-visibility: hidden;
       will-change: transform;
     }
-
+ 
     .ascent__jet {
       display: block;
       width: 100%;
@@ -456,7 +459,7 @@
       pointer-events: none;
       user-select: none;
     }
-
+ 
     .ascent__cards {
       position: absolute;
       bottom: calc(2.2rem + var(--vh-gap));
@@ -468,7 +471,7 @@
       z-index: 4;
       pointer-events: none;
     }
-
+ 
     .ascent__card {
       pointer-events: auto;
       background: rgba(26, 22, 21, 0.88);
@@ -479,21 +482,21 @@
       box-shadow: 0 16px 36px rgba(0, 0, 0, 0.12);
       opacity: 0;
       transform: translate3d(0, 30px, 0);
-
+ 
       h3 {
         font-size: 1.1rem;
         font-weight: 700;
         color: var(--sand-gold-light);
         margin-bottom: 0.35rem;
       }
-
+ 
       p {
         font-size: 0.72rem;
         color: rgba(250, 247, 242, 0.7);
         line-height: 1.5;
       }
     }
-
+ 
     // ── ASCENT LAYER MOBILE ──────────────────────────────────────────────────
     @media (max-width: 767px) {
       .ascent__layout {
@@ -503,7 +506,7 @@
         text-align: center;
         padding: calc(4.2rem + env(safe-area-inset-top, 0px)) 1.25rem calc(8rem + env(safe-area-inset-bottom, 0px) + var(--vh-gap));
       }
-
+ 
       .ascent__title-left,
       .ascent__title-right {
         width: 100%;
@@ -511,32 +514,32 @@
         align-items: center;
         text-align: center;
       }
-
+ 
       .ascent__big-text {
         font-size: clamp(2.4rem, 13vw, 3.8rem);
         text-align: center;
       }
-
+ 
       .ascent__sub-text {
         margin-top: 0.5rem;
         font-size: 0.72rem;
         text-align: center;
         max-width: none;
       }
-
+ 
       .ascent__meta-strip {
         width: 100%;
         margin-top: 0.65rem;
       }
-
+ 
       .ascent__meta-row {
         justify-content: space-between;
       }
-
+ 
       .ascent__spec-row {
         display: none;
       }
-
+ 
       .ascent__jet-wrap {
         top: 48%;
         bottom: auto !important;
@@ -549,7 +552,7 @@
         align-items: center;
         z-index: 2;
       }
-
+ 
       .ascent__jet {
         height: 100%;
         width: auto;
@@ -557,30 +560,30 @@
         object-fit: contain;
         margin: 0 auto;
       }
-
+ 
       .ascent__cards {
         bottom: calc(1rem + env(safe-area-inset-bottom, 0px) + var(--vh-gap));
         gap: 0.5rem;
         padding-inline: 1.25rem;
         justify-content: center;
       }
-
+ 
       .ascent__card {
         width: calc((100% - 1rem) / 3);
         padding: 0.7rem 0.6rem;
         border-radius: 12px;
-
+ 
         h3 {
           font-size: 0.8rem;
         }
-
+ 
         p {
           font-size: 0.6rem;
         }
       }
     }
   }
-
+ 
   // ── Cloud Transition Text Overlay: "TRIBO is a private travel platform..." ─
   &__cloud-overlay {
     position: absolute;
@@ -598,14 +601,14 @@
     -webkit-backface-visibility: hidden;
     transform: translate3d(0, 35px, 0);
   }
-
+ 
   &__cloud-content {
     max-width: 960px;
     display: flex;
     flex-direction: column;
     align-items: center;
   }
-
+ 
   &__cloud-title {
     font-family: 'Syne', sans-serif;
     font-size: clamp(2rem, 4.4vw, 4.2rem);
@@ -615,7 +618,7 @@
     color: #ffffff;
     text-shadow: 0 4px 24px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.35);
   }
-
+ 
   &__cloud-subtitle {
     font-family: 'Space Grotesk', sans-serif;
     font-size: clamp(0.85rem, 1.2vw, 1.1rem);
@@ -626,7 +629,7 @@
     margin-top: 1.25rem;
     text-shadow: 0 2px 14px rgba(0, 0, 0, 0.45);
   }
-
+ 
   // ── GSAP scaling target — contains sky layer + frame + pill ───────────────
   &__window-wrap {
     position: absolute;
@@ -635,7 +638,7 @@
     align-items: center;
     justify-content: center;
     transform-origin: center center;
-    // will-change toggled dynamically by GSAP onToggle — static declaration wastes VRAM
+    // will-change toggled dynamically by GSAP (buildHero) — static declaration wastes VRAM
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
     // translate3d(0,0,0) forces matrix3d compositor path (GPU layer) before any animation
@@ -643,7 +646,7 @@
     z-index: 2;
     isolation: isolate;
   }
-
+ 
   // ── Inner window entity (exact proportion to match reference) ──────────────
   &__window-entity {
     position: relative;
@@ -654,7 +657,7 @@
     align-items: center;
     justify-content: center;
   }
-
+ 
   // Layer 1: Bright Blue Sky & Clouds behind window aperture
   &__sky-layer {
     position: absolute;
@@ -668,7 +671,7 @@
     overflow: hidden;
     z-index: 1;
     box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.45);
-
+ 
     // Glass + lighting composite — NO filter/backdrop-filter/mix-blend-mode (would hurt perf at 9x scale)
     &::after {
       content: '';
@@ -684,8 +687,8 @@
         radial-gradient(ellipse at 50% 45%, transparent 60%, rgba(6, 12, 28, .42) 100%);
     }
   }
-
-
+ 
+ 
   &__sky-img {
     width: 100%;
     height: 100%;
@@ -694,12 +697,17 @@
     // scale(1.12) ensures edges never show during drift; keep it as the base
     animation: sky-drift 28s ease-in-out infinite alternate;
   }
-
+ 
   @keyframes sky-drift {
-    from { transform: scale(1.12) translate3d(-1.5%, 0, 0); }
-    to   { transform: scale(1.12) translate3d( 1.5%, 0, 0); }
+    from {
+      transform: scale(1.12) translate3d(-1.5%, 0, 0);
+    }
+ 
+    to {
+      transform: scale(1.12) translate3d(1.5%, 0, 0);
+    }
   }
-
+ 
   &__sky-watermark {
     position: absolute;
     top: 52%;
@@ -716,9 +724,9 @@
     user-select: none;
     z-index: 3; // above the ::after overlay on __sky-layer
   }
-
+ 
   // Layer 2: Transparent High-Res Airplane Window Frame
-
+ 
   &__window-img {
     position: absolute;
     inset: 0;
@@ -729,7 +737,7 @@
     pointer-events: none;
     // اتشال: backface-visibility و transform: translate3d(0,0,0)
   }
-
+ 
   // Ambient gold glow ring around window — pure CSS so no GSAP tick during scroll
   &__window-ring {
     position: absolute;
@@ -741,21 +749,21 @@
     transform-origin: center center;
     z-index: 0;
     animation: ring-pulse 2.4s ease-in-out infinite alternate;
-
+ 
   }
-
+ 
   @keyframes ring-pulse {
     from {
       transform: scale(1);
       opacity: 0.6;
     }
-
+ 
     to {
       transform: scale(1.05);
       opacity: 0.45;
     }
   }
-
+ 
   // Layer 3: Floating Capsule CTA overlapping bottom rim of window
   &__window-pill {
     position: absolute;
@@ -763,9 +771,9 @@
     left: 50%;
     transform: translate3d(-50%, 0, 0);
     z-index: 10;
-    // will-change toggled dynamically by GSAP onToggle
+    // will-change toggled dynamically by GSAP (buildHero)
   }
-
+ 
   &__pill-btn {
     display: inline-flex;
     align-items: center;
@@ -783,19 +791,19 @@
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
     transition: transform 0.25s ease, box-shadow 0.25s ease;
     white-space: nowrap;
-
+ 
     &:hover {
       transform: translateY(-2px) scale(1.03);
       box-shadow: 0 14px 40px rgba(0, 0, 0, 0.55);
     }
   }
-
+ 
   &__pill-text {
     font-size: 0.82rem;
     font-weight: 700;
     color: #120e0c;
   }
-
+ 
   &__pill-icon {
     width: 28px;
     height: 28px;
@@ -805,14 +813,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-
+ 
     svg {
       width: 14px;
       height: 14px;
       transform: rotate(45deg);
     }
   }
-
+ 
   // Left Content: "We are movement"
   &__text-left {
     position: absolute;
@@ -821,23 +829,23 @@
     transform: translate3d(0, -50%, 0);
     z-index: 3;
     max-width: clamp(140px, 28vw, 380px);
-    // will-change toggled dynamically by GSAP onToggle
+    // will-change toggled dynamically by GSAP (buildHero)
   }
-
+ 
   &__headline {
     font-family: 'Syne', sans-serif;
     color: #ffffff;
     line-height: 0.95;
     overflow-wrap: normal;
     word-break: keep-all;
-
+ 
     &-sub {
       display: block;
       font-size: clamp(1.5rem, 7vw, 4rem);
       font-weight: 700;
       letter-spacing: -0.02em;
     }
-
+ 
     &-main {
       display: block;
       font-size: clamp(2.2rem, 11vw, 5.6rem);
@@ -845,10 +853,10 @@
       letter-spacing: -0.035em;
     }
   }
-
+ 
   &__narrative {
     margin-top: 2rem;
-
+ 
     &-title {
       font-family: 'Syne', sans-serif;
       font-size: clamp(1.1rem, 5vw, 1.6rem);
@@ -857,14 +865,14 @@
       color: #ffffff;
     }
   }
-
+ 
   &__dash {
     width: 32px;
     height: 1.5px;
     background: rgba(255, 255, 255, 0.8);
     margin: 1.25rem 0;
   }
-
+ 
   &__desc {
     font-family: 'Space Grotesk', sans-serif;
     font-size: clamp(0.82rem, 3.8vw, 0.9rem);
@@ -872,7 +880,7 @@
     color: rgba(255, 255, 255, 0.85);
     max-width: 290px;
   }
-
+ 
   // Right Content: "We are distinction"
   &__text-right {
     position: absolute;
@@ -880,20 +888,20 @@
     right: clamp(1.25rem, 4.5vw, 4.5rem);
     z-index: 3;
     width: clamp(140px, 28vw, 480px);
-    // will-change toggled dynamically by GSAP onToggle
+    // will-change toggled dynamically by GSAP (buildHero)
   }
-
+ 
   &__scroll-block {
     margin-top: 3.5rem;
   }
-
+ 
   &__scroll-divider {
     width: 100%;
     height: 1px;
     background: rgba(255, 255, 255, 0.45);
     margin-bottom: 1rem;
   }
-
+ 
   &__scroll-meta {
     display: flex;
     align-items: center;
@@ -904,26 +912,26 @@
     letter-spacing: 0.12em;
     color: #ffffff;
   }
-
+ 
   &__scroll-action {
     display: flex;
     align-items: center;
     gap: 0.5rem;
   }
-
+ 
   &__scroll-chevrons {
     display: flex;
     align-items: center;
     width: 14px;
     height: 14px;
-
+ 
     svg {
       width: 100%;
       height: 100%;
       transform: rotate(90deg);
     }
   }
-
+ 
   // ── MOBILE LAYOUT (max-width: 767px) ──────────────────────────────────────
   @media (max-width: 767px) {
     &__text-left {
@@ -936,7 +944,7 @@
       padding-inline: 1.25rem;
       transform: translate3d(0, 0, 0);
     }
-
+ 
     &__text-right {
       position: absolute;
       left: 0;
@@ -945,70 +953,70 @@
       bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px) + var(--vh-gap));
       padding-inline: 1.25rem;
     }
-
+ 
     &__narrative {
       display: none;
     }
-
+ 
     &__headline {
       &-sub {
         font-size: clamp(1.3rem, 6vw, 2rem);
       }
-
+ 
       &-main {
         font-size: clamp(1.8rem, 10.5vw, 3.2rem);
       }
     }
-
+ 
     &__window-entity {
       width: clamp(220px, 68vw, 320px);
       height: clamp(280px, 52vh, 460px);
     }
-
+ 
     &__window-pill {
       bottom: 5%;
     }
-
+ 
     &__scroll-block {
       margin-top: 1rem;
     }
-
+ 
     &__scroll-meta {
       font-size: 0.6rem;
       letter-spacing: 0.1em;
     }
-
+ 
     &__scroll-dest {
       display: none;
     }
   }
 }
-
+ 
 .hero--active .hero__window-ring {
   animation-play-state: paused;
 }
-
+ 
 .hero--active .hero__sky-img {
   animation-play-state: paused;
 }
-
+ 
 @media (prefers-reduced-motion: reduce) {
   .hero__sky-img {
     animation: none;
   }
 }
-
-
+ 
+ 
 // ─── VALUE GRID SECTION ──────────────────────────────────────────────────────
 .value {
   padding: 8rem 3rem;
   background: var(--dark-luxury);
-
+ 
   &__header {
     max-width: 700px;
     margin-bottom: 5rem;
   }
-
+ 
   &__eyebrow {
     font-size: 0.68rem;
     letter-spacing: 0.2em;
@@ -1016,20 +1024,20 @@
     color: var(--sand-gold);
     margin-bottom: 1.25rem;
   }
-
+ 
   &__title {
     font-family: 'Playfair Display', serif;
     font-size: clamp(2.2rem, 4vw, 3.5rem);
     font-weight: 900;
     line-height: 1.1;
     color: var(--light-sand);
-
+ 
     em {
       font-style: italic;
       color: var(--sand-gold);
     }
   }
-
+ 
   &__grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -1039,7 +1047,7 @@
     border-radius: 20px;
     overflow: hidden;
   }
-
+ 
   &__cell {
     background: var(--dark-luxury);
     padding: 3rem 2.5rem;
@@ -1047,20 +1055,20 @@
     opacity: 0;
     transform: translate3d(0, 30px, 0);
     transition: background 0.4s ease;
-
+ 
     &:hover {
       background: rgba(200, 157, 102, 0.06);
     }
-
+ 
     &--wide {
       grid-column: span 2;
     }
-
+ 
     &--highlight {
       background: rgba(200, 157, 102, 0.07);
     }
   }
-
+ 
   &__icon {
     width: 44px;
     height: 44px;
@@ -1073,7 +1081,7 @@
     margin-bottom: 1.5rem;
     font-size: 1.2rem;
   }
-
+ 
   &__cell-title {
     font-family: 'Playfair Display', serif;
     font-size: 1.25rem;
@@ -1081,14 +1089,14 @@
     color: var(--light-sand);
     margin-bottom: 0.75rem;
   }
-
+ 
   &__cell-desc {
     font-size: 0.8rem;
     line-height: 1.7;
     color: rgba(250, 247, 242, 0.45);
     max-width: 320px;
   }
-
+ 
   &__stat {
     font-family: 'Playfair Display', serif;
     font-size: 3.5rem;
@@ -1098,12 +1106,13 @@
     margin-top: 1rem;
   }
 }
-
+ 
 // ─── TAKEOFF HERO — ASCENT SECTION ──────────────────────────────────────────
-// Architecture: 8 absolutely-positioned layers inside a 100svh pinned section.
+// Architecture: 8 absolutely-positioned layers inside a 100lvh pinned section.
 // GSAP animates ONLY transform + opacity — no layout reads in scroll callbacks.
-
+ 
 // ─── CSS Variables for the Takeoff palette ───────────────────────────────────
+// Every colour in this section comes from these tokens, so light and dark stay consistent.
 :host {
   --tk-ink: #2b2320; // dark brown text
   --tk-muted: #8d827b; // muted label color
@@ -1111,7 +1120,7 @@
   --tk-taupe: #7f7470; // warm taupe darkest bg
   --tk-grid: rgba(43, 35, 32, 0.09); // blueprint grid lines
   --tk-ring: rgba(43, 35, 32, 0.06); // blueprint radial rings
-
+ 
   @media (prefers-color-scheme: dark) {
     --tk-ink: #f5ede6;
     --tk-muted: #a09490;
@@ -1121,16 +1130,16 @@
     --tk-ring: rgba(245, 237, 230, 0.05);
   }
 }
-
+ 
 .ascent-section {
   position: relative;
   width: 100%;
   height: 100vh;
   height: 100lvh;
   overflow: hidden;
-  contain: layout style;
+  contain: layout style; // also gives this section its own stacking context
 }
-
+ 
 // ── Layer 1: gradient background ─────────────────────────────────────────────
 .ascent__bg {
   position: absolute;
@@ -1138,7 +1147,7 @@
   z-index: 0;
   background: linear-gradient(180deg, var(--tk-taupe) 0%, var(--tk-cream) 100%);
 }
-
+ 
 // ── Layer 2: Blueprint CSS grid — height 200vh so it can slide without gaps ──
 .ascent__blueprint {
   position: absolute;
@@ -1147,15 +1156,15 @@
   top: -100vh; // extends 1 viewport above: room to slide DOWN
   height: 200vh;
   z-index: 1;
-  will-change: transform; // compositor only — GSAP moves yPercent
+  will-change: transform; // compositor only — GSAP moves yPercent (kept static: never torn down)
   pointer-events: none;
-
+ 
   // CSS-only blueprint grid: two repeating linear gradients (64px, 1px lines)
   background-image:
     repeating-linear-gradient(0deg, var(--tk-grid) 0px, var(--tk-grid) 1px, transparent 1px, transparent 64px),
     repeating-linear-gradient(90deg, var(--tk-grid) 0px, var(--tk-grid) 1px, transparent 1px, transparent 64px);
   background-size: 64px 64px;
-
+ 
   // Two thin concentric radial rings in the vertical center
   &::after {
     content: '';
@@ -1166,7 +1175,7 @@
       radial-gradient(ellipse 70% 35% at 50% 50%, transparent 90%, var(--tk-ring) 91%, transparent 92%);
   }
 }
-
+ 
 // ── Layer 3: Giant wordmark ───────────────────────────────────────────────────
 .ascent__wordmark {
   position: absolute;
@@ -1178,38 +1187,39 @@
   margin: auto;
   pointer-events: none;
   will-change: transform;
-
+ 
   font-family: 'Syne', 'Inter Tight', sans-serif;
   font-size: clamp(5rem, 15vw, 15rem);
   font-weight: 600;
   letter-spacing: -0.04em;
   line-height: 0.9;
   color: var(--tk-ink);
-
+ 
   // Starts hidden — GSAP: y:150, opacity:0 → y:-30, opacity:1
   opacity: 0;
-
+ 
   @media (max-width: 799px) {
     font-size: 27vw;
     top: 40vh;
   }
 }
-
+ 
 // ── Layer 4: Phase-1 intro text ───────────────────────────────────────────────
 .ascent__phase1 {
   position: absolute;
   inset: 0;
   z-index: 6;
   pointer-events: none;
+  will-change: transform, opacity; // GSAP fades + moves it; promoted up-front, like the other layers
 }
-
+ 
 // Top-left title block
 .ascent__p1-title-block {
   position: absolute;
   top: clamp(5rem, 8vh, 8rem);
   left: clamp(2rem, 5vw, 5rem);
 }
-
+ 
 .ascent__p1-label {
   font-family: 'Space Grotesk', sans-serif;
   font-size: clamp(0.65rem, 0.8vw, 0.75rem);
@@ -1219,7 +1229,7 @@
   color: var(--tk-muted);
   margin-bottom: 0.3rem;
 }
-
+ 
 .ascent__p1-model {
   font-family: 'Syne', 'Inter Tight', sans-serif;
   font-size: clamp(4rem, 10vw, 10rem);
@@ -1229,19 +1239,19 @@
   color: var(--tk-ink);
   margin: 0;
 }
-
+ 
 // Top-right editorial block
 .ascent__p1-right-block {
   position: absolute;
   top: clamp(5rem, 8vh, 8rem);
   right: clamp(2rem, 5vw, 5rem);
   width: clamp(220px, 24vw, 340px);
-
+ 
   @media (max-width: 799px) {
     display: none;
   }
 }
-
+ 
 .ascent__p1-header {
   font-family: 'Space Grotesk', sans-serif;
   font-size: clamp(1.2rem, 2vw, 1.8rem);
@@ -1251,14 +1261,14 @@
   color: var(--tk-ink);
   margin: 0 0 1.2rem;
 }
-
+ 
 .ascent__p1-divider {
   width: 100%;
   height: 1px;
-  background: rgba(43, 35, 32, 0.15);
+  background: color-mix(in srgb, var(--tk-ink) 15%, transparent);
   margin-bottom: 1rem;
 }
-
+ 
 .ascent__p1-access {
   font-family: 'Space Grotesk', sans-serif;
   font-size: clamp(0.55rem, 0.65vw, 0.62rem);
@@ -1269,15 +1279,16 @@
   line-height: 1.6;
   margin-bottom: 1rem;
 }
-
+ 
 .ascent__p1-desc {
   font-family: 'Space Grotesk', sans-serif;
   font-size: clamp(0.72rem, 0.85vw, 0.8rem);
   line-height: 1.7;
-  color: rgba(43, 35, 32, 0.6);
+  // FIX: was a hardcoded dark rgba -> invisible on the dark theme
+  color: color-mix(in srgb, var(--tk-ink) 70%, transparent);
   max-width: 280px;
 }
-
+ 
 // Bottom center scroll hint — only visible in Phase 1
 .ascent__scroll-hint {
   position: absolute;
@@ -1291,14 +1302,14 @@
   align-items: center;
   gap: 0.4rem;
   pointer-events: none;
-
+ 
   svg {
     width: 20px;
     height: 20px;
     color: var(--tk-muted);
     animation: hint-bounce 2s ease-in-out infinite;
   }
-
+ 
   span {
     font-family: 'Space Grotesk', sans-serif;
     font-size: 0.6rem;
@@ -1308,19 +1319,19 @@
     color: var(--tk-muted);
   }
 }
-
+ 
 @keyframes hint-bounce {
-
+ 
   0%,
   100% {
     transform: translateY(0);
   }
-
+ 
   50% {
     transform: translateY(6px);
   }
 }
-
+ 
 // ── Layer 5: Jet image ────────────────────────────────────────────────────────
 // Centered via left:50% — GSAP handles xPercent:-50 centering (never CSS translateX)
 .ascent__jet-wrapper {
@@ -1335,7 +1346,7 @@
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
-
+ 
 .ascent__jet-photo {
   display: block;
   width: auto;
@@ -1344,13 +1355,13 @@
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   user-select: none;
-
+ 
   @media (max-width: 799px) {
     width: 112vw;
     height: auto;
   }
 }
-
+ 
 // ── Layers 6 & 7: Spec columns ────────────────────────────────────────────────
 // Left column: bottom-left, opacity 0 (GSAP animates in)
 .ascent__specs-left {
@@ -1362,14 +1373,14 @@
   display: flex;
   flex-direction: column;
   gap: 0;
-
+ 
   @media (max-width: 799px) {
     width: 46%;
     left: 3vw;
     bottom: calc(6rem + var(--vh-gap));
   }
 }
-
+ 
 // Right column: bottom-right, opacity 0 (GSAP animates in)
 .ascent__specs-right {
   position: absolute;
@@ -1380,23 +1391,23 @@
   display: flex;
   flex-direction: column;
   gap: 0;
-
+ 
   @media (max-width: 799px) {
     width: 46%;
     right: 3vw;
     bottom: calc(6rem + var(--vh-gap));
   }
 }
-
+ 
 // Individual spec item: 1px top divider, label + value
 .ascent__spec-item {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
   padding: 0.65rem 0;
-  border-top: 1px solid rgba(43, 35, 32, 0.12);
+  border-top: 1px solid color-mix(in srgb, var(--tk-ink) 14%, transparent);
 }
-
+ 
 .ascent__spec-label {
   font-family: 'Space Grotesk', sans-serif;
   font-size: clamp(0.52rem, 0.6vw, 0.6rem);
@@ -1405,12 +1416,12 @@
   text-transform: uppercase;
   color: var(--tk-muted);
   line-height: 1.3;
-
+ 
   @media (max-width: 799px) {
     font-size: 0.55rem;
   }
 }
-
+ 
 .ascent__spec-value {
   font-family: 'Space Grotesk', sans-serif;
   font-size: clamp(0.7rem, 0.9vw, 0.85rem);
@@ -1418,13 +1429,15 @@
   letter-spacing: 0.01em;
   color: var(--tk-ink);
   line-height: 1.3;
-
+ 
   @media (max-width: 799px) {
     font-size: 0.7rem;
   }
 }
-
+ 
 // ── Layer 8: Book CTA pill ────────────────────────────────────────────────────
+// A white pill with dark text in BOTH themes (same look as the hero pill), so its colours are
+// fixed and do not depend on the --tk-ink token (which turns light on the dark theme).
 .ascent__cta-btn {
   position: absolute;
   bottom: calc(clamp(1.5rem, 3vh, 3rem) + var(--vh-gap));
@@ -1433,14 +1446,14 @@
   margin: auto; // center horizontally — never use CSS translateX (conflicts GSAP)
   width: fit-content;
   z-index: 8;
-
+ 
   button {
     display: inline-flex;
     align-items: center;
     gap: 0.6rem;
     padding: 0.85rem 0.85rem 0.85rem 1.8rem;
     background: #fff;
-    color: var(--tk-ink);
+    color: #2b2320;
     border: 1px solid rgba(43, 35, 32, 0.12);
     border-radius: 100px;
     font-family: 'Space Grotesk', sans-serif;
@@ -1453,33 +1466,33 @@
       0 8px 30px rgba(43, 35, 32, 0.12),
       0 2px 8px rgba(43, 35, 32, 0.08);
     transition: transform 0.25s ease, box-shadow 0.25s ease;
-
+ 
     &:hover {
       transform: translateY(-2px);
       box-shadow: 0 14px 40px rgba(43, 35, 32, 0.18), 0 4px 12px rgba(43, 35, 32, 0.12);
     }
-
+ 
     &:focus-visible {
       outline: 2px solid var(--tk-ink);
       outline-offset: 3px;
     }
-
+ 
     &:active {
       transform: translateY(-1px);
     }
   }
 }
-
+ 
 .ascent__cta-icon {
   width: 32px;
   height: 32px;
-  background: var(--tk-ink);
+  background: #2b2320;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-
+ 
   svg {
     width: 14px;
     height: 14px;
@@ -1487,80 +1500,65 @@
     fill: #fff;
   }
 }
-
+ 
 // ── Scroll progress indicator ─────────────────────────────────────────────────
+// FIX: it used to be a small centred bar + label at the very bottom, which collided with the
+// "Scroll to take off" hint (phase 1) and sat under the CTA pill (end of the timeline).
+// It is now a thin full-width line on the bottom edge: it can't overlap anything.
 .ascent__progress {
   position: absolute;
-  bottom: 1.2rem;
   left: 0;
   right: 0;
-  margin: auto;
-  width: fit-content;
-  bottom: calc(1.2rem + var(--vh-gap));
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.4rem;
+  bottom: var(--vh-gap);
   z-index: 9;
   pointer-events: none;
 }
-
+ 
 .ascent__progress-track {
-  width: 100px;
-  height: 1px;
-  background: rgba(43, 35, 32, 0.14);
-  border-radius: 2px;
+  width: 100%;
+  height: 2px;
+  background: color-mix(in srgb, var(--tk-ink) 14%, transparent);
   overflow: hidden;
 }
-
+ 
 .ascent__progress-fill {
   width: 100%;
   height: 100%;
-  background: rgba(43, 35, 32, 0.65);
+  background: color-mix(in srgb, var(--tk-ink) 65%, transparent);
   transform-origin: left center;
   transform: scaleX(0);
-  border-radius: 2px;
 }
-
-.ascent__progress-label {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.5rem;
-  font-weight: 700;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--tk-muted);
-}
-
+ 
 // ── prefers-reduced-motion: show final state statically, no pin/scrub ─────────
 @media (prefers-reduced-motion: reduce) {
   .ascent-section {
     height: auto;
     overflow: visible;
   }
-
+ 
   .ascent__phase1 {
     display: none;
   }
-
+ 
   .ascent__wordmark {
     opacity: 1;
     transform: none;
     top: 8vh;
     font-size: clamp(4rem, 12vw, 12rem);
   }
-
+ 
   .ascent__jet-wrapper {
     top: auto;
     left: auto;
     position: relative;
     margin: 0 auto 2rem;
   }
-
+ 
   .ascent__jet-photo {
     height: auto;
     width: clamp(280px, 60vw, 600px);
   }
-
+ 
   .ascent__specs-left,
   .ascent__specs-right {
     position: static;
@@ -1568,12 +1566,21 @@
     bottom: calc(clamp(4rem, 10vh, 8rem) + var(--vh-gap));
     max-width: 400px;
   }
-
+ 
+  .ascent__cta-btn {
+    position: static;
+    margin: 2rem auto;
+  }
+ 
+  .ascent__progress {
+    display: none;
+  }
+ 
   .ascent__blueprint {
     display: none;
   }
 }
-
+ 
 // ─── FOOTER ──────────────────────────────────────────────────────────────────
 .footer {
   border-top: 1px solid rgba(200, 157, 102, 0.15);
@@ -1581,30 +1588,30 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-
+ 
   &__brand {
     font-family: 'Playfair Display', serif;
     font-size: 1.2rem;
     font-weight: 700;
     letter-spacing: 0.15em;
     color: var(--light-sand);
-
+ 
     span {
       color: var(--sand-gold);
     }
   }
-
+ 
   &__copy {
     font-size: 0.7rem;
     color: rgba(250, 247, 242, 0.3);
     letter-spacing: 0.08em;
   }
-
+ 
   &__links {
     display: flex;
     gap: 2rem;
     list-style: none;
-
+ 
     a {
       font-size: 0.7rem;
       letter-spacing: 0.1em;
@@ -1612,38 +1619,38 @@
       color: rgba(250, 247, 242, 0.35);
       text-decoration: none;
       transition: color 0.3s;
-
+ 
       &:hover {
         color: var(--sand-gold);
       }
     }
   }
 }
-
+ 
 // ─── GLOBAL MOBILE OVERRIDES (max-width: 767px) ──────────────────────────────
 @media (max-width: 767px) {
   .value {
     padding: 4rem 1.25rem;
-
+ 
     &__grid {
       grid-template-columns: 1fr;
     }
-
+ 
     &__cell {
       padding: 2rem 1.5rem;
     }
-
+ 
     &__cell--wide {
       grid-column: auto;
     }
   }
-
+ 
   .footer {
     flex-direction: column;
     gap: 1.25rem;
     padding: 2rem 1.25rem;
     text-align: center;
-
+ 
     &__links {
       flex-wrap: wrap;
       justify-content: center;
@@ -1651,20 +1658,21 @@
     }
   }
 }
-
+ 
 // ─── ROUTE STORY ──────────────────────────────────────────────────────────────
 .route {
   --route-bg: #1a1210;
   position: relative;
   width: 100%;
   height: 100vh;
+  height: 100lvh; // FIX: same unit as the hero + ascent sections, so the pin-spacers line up
   overflow: hidden;
   background-color: var(--route-bg);
   background-image:
-    repeating-linear-gradient(0deg,  rgba(255, 255, 255, 0.05) 0, rgba(255, 255, 255, 0.05) 1px, transparent 1px, transparent 64px),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.05) 0, rgba(255, 255, 255, 0.05) 1px, transparent 1px, transparent 64px),
     repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0, rgba(255, 255, 255, 0.05) 1px, transparent 1px, transparent 64px);
   contain: layout style;
-
+ 
   // soft top + bottom fades — blends into the neighbouring dark sections
   &::before {
     content: '';
@@ -1674,21 +1682,21 @@
     pointer-events: none;
     background: linear-gradient(180deg, var(--route-bg) 0%, transparent 16%, transparent 84%, var(--route-bg) 100%);
   }
-
+ 
   &__words {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    bottom: var(--vh-gap);      // centre inside the visible area on mobile browsers
+    bottom: var(--vh-gap); // centre inside the visible area on mobile browsers
     display: grid;
     place-items: center;
     z-index: 1;
     pointer-events: none;
   }
-
+ 
   &__word {
-    grid-area: 1 / 1;           // all three words stacked in the same cell
+    grid-area: 1 / 1; // all three words stacked in the same cell
     margin: 0;
     font-family: 'Syne', sans-serif;
     font-size: clamp(3rem, 13vw, 14rem);
@@ -1697,10 +1705,23 @@
     line-height: 1;
     color: transparent;
     -webkit-text-stroke: 1px rgba(200, 157, 102, 0.5);
-
-    &:not(:first-child) { opacity: 0; visibility: hidden; }
+ 
+    // All hidden by default. The TS adds .is-active to ONE word, and only when the
+    // active word changes (no per-frame style writes). The fade runs in CSS.
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease, visibility 0s linear 0.4s;
+ 
+    &.is-active {
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 0.4s ease, visibility 0s;
+    }
   }
-
+ 
+  // The trail is the only thing that repaints while scrolling. Giving the SVG its own
+  // compositor layer keeps the grid background, the big outlined words and the fade
+  // overlay from being re-rasterised together with it.
   &__svg {
     position: absolute;
     top: 0;
@@ -1709,9 +1730,54 @@
     height: calc(100% - var(--vh-gap));
     z-index: 2;
     overflow: visible;
+    will-change: transform;
+  }
+ 
+  // Car + light cone. Moved ONLY by transform from the TS (compositor-only).
+  // --car-w / --car-h are set in buildRoute(). Same box as the SVG, same stacking
+  // level, later in the DOM so it paints above the trail (and below ::before).
+  &__car {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: var(--car-w, 40px);
+    height: var(--car-h, 90px);
+    z-index: 2;
+    transform-origin: 50% 50%;
+    will-change: transform;
+    pointer-events: none;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+ 
+  &__car-img {
+    position: relative; // above the cone
+    display: block;
+    width: 100%;
+    height: 100%;
+    user-select: none;
+    pointer-events: none;
+  }
+ 
+  // Headlight cone: a trapezoid that starts at the car's front edge and fades out ahead.
+  // Box = 2.6 × car-w wide, 1.6 × car-h tall, sitting above the car and centred on it.
+  // The clip-path narrows the bottom edge to 0.7 × car-w (36.54% → 63.46%).
+  &__car-cone {
+    position: absolute;
+    left: calc(var(--car-w, 40px) * -0.8);
+    top: calc(var(--car-h, 90px) * -1.6);
+    width: calc(var(--car-w, 40px) * 2.6);
+    height: calc(var(--car-h, 90px) * 1.6);
+    background: linear-gradient(to top, rgba(255, 235, 194, 0.45), rgba(255, 235, 194, 0));
+    clip-path: polygon(0 0, 100% 0, 63.46% 100%, 36.54% 100%);
+    pointer-events: none;
   }
 }
-
+ 
 @media (prefers-reduced-motion: reduce) {
-  .route { display: none; }   // TS returns early for reduced motion
+  .route {
+    display: none;
+  }
+ 
+  // TS returns early for reduced motion
 }

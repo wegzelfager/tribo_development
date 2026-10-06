@@ -4,6 +4,8 @@ import {
   PLATFORM_ID, Inject, NgZone, ChangeDetectionStrategy
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { SmoothScrollService } from '../../core/smooth-scroll.service';
+import { ProcessShowcaseComponent } from '../../process-showcase/process-showcase.component';
  
 type GSAPType = typeof import('gsap').gsap;
 type STType = typeof import('gsap/ScrollTrigger').ScrollTrigger;
@@ -12,15 +14,16 @@ interface LenisInstance {
   on(event: string, cb: (e: { scroll: number }) => void): void;
   destroy(): void;
   raf(time: number): void;
+  resize?(): void;
 }
  
 @Component({
   selector: 'app-landing',
   standalone: true,
-  imports: [],
+  imports: [ProcessShowcaseComponent],
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LandingComponent implements AfterViewInit, OnDestroy {
  
@@ -59,6 +62,7 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
   @ViewChild('ascentJetImg')    ascentJetImg?: ElementRef<HTMLImageElement>;
   @ViewChild('routeSection')    routeSection?: ElementRef<HTMLElement>;
   @ViewChild('routeSvg')        routeSvg?: ElementRef<SVGSVGElement>;
+  @ViewChild('routeCar')        routeCar?: ElementRef<HTMLDivElement>;
  
   mobileMenuOpen = false;
  
@@ -71,17 +75,22 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
   private destroyed = false;
   // Lenis already smooths the scroll, so scrub must NOT add a second long smoothing
   private scrubValue: number | boolean = 0.6;
-  // FIX: anticipatePin is only useful for native (touch) scroll, where the compositor
-  // scrolls a frame ahead of JS. With Lenis (scroll driven from the GSAP ticker) it makes
-  // the pin engage EARLY (position:fixed before the scroll reaches the start), which shows
-  // up as the section jumping up and then settling at every pin hand-off.
-  // Must be decided BEFORE the ScrollTriggers are created (it is read once at creation).
+  // anticipatePin is only useful for native (touch) scroll. With Lenis it makes the pin
+  // engage EARLY. Must be decided BEFORE the ScrollTriggers are created.
   private anticipate = 1;
   private onLoadRefresh?: () => void;
  
+  // FIX: refresh listener that keeps Lenis' measured page height in sync with ScrollTrigger
+  private onSTRefresh?: () => void;
+  // FIX: set by buildHero, released by buildAscent once the hero is completely off-screen
+  private heroWarm?: (on: boolean) => void;
+  private prevScrollBehavior = '';
+  private navDark = false;
+ 
   constructor(
     @Inject(PLATFORM_ID) private platformId: object,
-    private zone: NgZone
+    private zone: NgZone,
+    private smoothScroll: SmoothScrollService,
   ) {}
  
   toggleMobileMenu(): void {
@@ -89,6 +98,20 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     if (isPlatformBrowser(this.platformId)) {
       document.body.style.overflow = this.mobileMenuOpen ? 'hidden' : '';
     }
+  }
+ 
+  // ─── NAV THEME ─────────────────────────────────────────────────────────────
+  // One place decides the nav colour, so the section triggers never fight each other.
+  // nav--dark = dark text (for light backgrounds).
+  private setNavDark(dark: boolean): void {
+    if (dark === this.navDark) return;
+    this.navDark = dark;
+    this.navbar?.nativeElement.classList.toggle('nav--dark', dark);
+  }
+ 
+  // The 650ER section follows the OS colour scheme (see :host tokens in the SCSS).
+  private prefersDark(): boolean {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
   }
  
   ngAfterViewInit(): void {
@@ -103,8 +126,8 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
  
       gsap.registerPlugin(ScrollTrigger);
       ScrollTrigger.config({ limitCallbacks: true, ignoreMobileResize: true });
-      // force3D left at the default "auto": it promotes elements only while animating
-      // (force3D: true would keep every animated element on its own GPU layer permanently).
+      // force3D stays at the default "auto" globally. The few heavy scrubbed tweens that
+      // sit on a pin hand-off opt in with force3D: true individually (see below).
       this.gsap = gsap;
       this.ST = ScrollTrigger;
  
@@ -124,6 +147,9 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
         { isMobile: '(max-width: 767px)', isDesktop: '(min-width: 768px)' },
         (ctx) => {
           const isMobile = !!ctx.conditions?.['isMobile'];
+          // Order matters: hero -> ascent -> route (top to bottom of the page).
+          // Each one also has an explicit refreshPriority so ScrollTrigger measures them in
+          // this order even if another component (ProcessShowcase) created its triggers first.
           this.buildHero(isMobile);
           this.buildAscent(isMobile);
           this.buildRoute(isMobile);
@@ -139,8 +165,10 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
           .forEach(img => img?.decode?.().catch(() => {}));
       });
  
-      // Late layout shifts (fonts, images) move trigger positions -> re-measure once
-      const refresh = () => ScrollTrigger.refresh();
+      // Late layout shifts (fonts, images) move trigger positions -> re-measure once.
+      // sort() puts the triggers in refreshPriority order first, so a pin-spacer always exists
+      // before the triggers that sit below it are measured.
+      const refresh = () => { ScrollTrigger.sort(); ScrollTrigger.refresh(); };
       (document as any).fonts?.ready?.then(refresh);
       if (document.readyState !== 'complete') {
         this.onLoadRefresh = refresh;
@@ -163,12 +191,27 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
       autoRaf: false, // we drive it from the GSAP ticker below
     }) as LenisInstance;
  
+    // FIX: a CSS `scroll-behavior: smooth` on <html> fights Lenis (the browser animates every
+    // scrollTo Lenis performs). Force it off while Lenis is alive; restored in ngOnDestroy.
+    const root = document.documentElement;
+    this.prevScrollBehavior = root.style.scrollBehavior;
+    root.style.scrollBehavior = 'auto';
+ 
     this.scrubValue = true; // 1:1 with Lenis' already-smoothed scroll
-    this.anticipate = 0;    // FIX: Lenis drives scroll from the same ticker, nothing to anticipate
+    this.anticipate = 0;    // Lenis drives scroll from the same ticker, nothing to anticipate
     this.tickerCb = (time: number) => this.lenis!.raf(time * 1000);
     this.gsap.ticker.add(this.tickerCb);
     this.gsap.ticker.lagSmoothing(0);
-    this.lenis.on('scroll', this.ST.update);
+    this.lenis.on('scroll', () => this.ST.update());
+ 
+    // FIX: pin-spacers change the page height. Lenis re-measures lazily (ResizeObserver +
+    // debounce), so for a moment its scroll limit / position is stale. Re-measure right
+    // after every ScrollTrigger refresh.
+    this.onSTRefresh = () => this.lenis?.resize?.();
+    this.ST.addEventListener('refresh', this.onSTRefresh);
+ 
+    // Register with SmoothScrollService so ProcessShowcase can use it
+    this.smoothScroll.register(this.lenis as any);
   }
  
   private initCursor(): void {
@@ -223,7 +266,6 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     const jetWrap   = this.jetImg?.nativeElement.parentElement as HTMLElement | null;
     const cards     = [this.card1?.nativeElement, this.card2?.nativeElement, this.card3?.nativeElement]
                         .filter(Boolean) as HTMLElement[];
-    const nav       = this.navbar?.nativeElement;
  
     const jetStartY = isMobile ? 40 : 100;  // desktop: fully below the bottom edge
     const jetEndY   = isMobile ? -50 : 50;  // desktop: half of the car below the bottom edge
@@ -231,19 +273,26 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     gsap.set(wrap, { x: 0, y: 0, transformOrigin: 'center center' });
  
     // The zoom is computed from the real aperture size instead of a fixed 9.
-    // Fixed 9 shows the edges on wide screens (>~1700px) and over-scales on phones
-    // (a bigger scale = a bigger GPU surface for nothing).
     // offsetWidth/Height ignore transforms, so this is safe even mid-entrance.
     const zoomTarget = (): number => {
       if (!sky || !sky.offsetWidth || !sky.offsetHeight) return isMobile ? 6 : 9;
       const cover = Math.max(window.innerWidth / sky.offsetWidth, window.innerHeight / sky.offsetHeight);
-      return cover * 1.6; // the aperture is an ellipse: x1.6 so the screen corners are covered too (enlarged sky layer)
+      return cover * 1.6; // the aperture is an ellipse: x1.6 so the screen corners are covered too
     };
  
+    // FIX (pin hand-off hitch): will-change is switched ON when the hero becomes active, but it is
+    // NOT switched off when the hero's pin ends. At that moment the hero is still fully visible
+    // (it scrolls away while the next section comes in), and dropping ~8 compositor layers in
+    // that frame forces a re-layerize + re-raster = the stutter you feel at the hand-off.
+    // buildAscent() releases it only once the hero is completely off-screen.
     const heavy = [wrap, pill, cloudText, ascent, left, right, jetWrap, ...cards]
       .filter(Boolean) as HTMLElement[];
-    let navDark = false;
+    const warm = (on: boolean) =>
+      heavy.forEach(el => (el.style.willChange = on ? 'transform, opacity' : 'auto'));
+    this.heroWarm = warm;
+ 
     let threshold = 0.53;
+    const HIDE_WRAP_AT = 0.66; // the ascent layer is fully opaque from here (0.48 + 0.18)
  
     const tl = gsap.timeline({
       scrollTrigger: {
@@ -252,34 +301,32 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
         end: isMobile ? '+=250%' : '+=350%',
         pin: true,
         scrub: this.scrubValue,
-        anticipatePin: this.anticipate, // FIX: 0 with Lenis, 1 for native (touch) scroll
+        anticipatePin: this.anticipate,
         invalidateOnRefresh: true,
+        refreshPriority: 3, // measured first: it is the top-most pinned section
         onToggle: (self) => {
-          heavy.forEach(el => el.style.willChange = self.isActive ? 'transform, opacity' : 'auto');
-          hero.classList.toggle('hero--active', self.isActive); // SCSS pauses the ring pulse with this
+          if (self.isActive) warm(true);
+          hero.classList.toggle('hero--active', self.isActive); // SCSS pauses the CSS animations with this
         },
-        onUpdate: (self) => {
-          if (!nav) return;
-          const dark = self.progress >= threshold;
-          if (dark !== navDark) { navDark = dark; nav.classList.toggle('nav--dark', dark); }
-        },
+        onUpdate: (self) => this.setNavDark(self.progress >= threshold),
       }
     });
  
     // STAGE 1 → 2
-    tl
-      .to(wrap, { scale: zoomTarget, ease: 'power2.in', duration: 0.65 }, 0)
-      .to(watermark, { opacity: 0, duration: 0.05 }, 0)
-      .to([tLeft, tRight], { opacity: 0, y: -35, ease: 'power1.out', duration: 0.2 }, 0);
+    // force3D: true on the big zoom, so GSAP never swaps matrix3d <-> matrix at progress 0 / 1.
+    tl.to(wrap, { scale: zoomTarget, ease: 'power2.in', duration: 0.65, force3D: true }, 0);
+    if (watermark) tl.to(watermark, { opacity: 0, duration: 0.05 }, 0);
+    // autoAlpha (opacity + visibility): hidden layers are skipped by the compositor completely.
+    tl.to([tLeft, tRight], { autoAlpha: 0, y: -35, ease: 'power1.out', duration: 0.2 }, 0);
  
-    if (pill) tl.to(pill, { opacity: 0, scale: 0.8, ease: 'power1.out', duration: 0.15 }, 0);
-    // The ring sits inside `wrap`, which is already scaled, so scaling it x10 on top
-    // only made a huge box-shadow surface. Fade it out instead.
-    if (ring) tl.to(ring, { opacity: 0, ease: 'power1.out', duration: 0.2 }, 0);
-    tl.to(bg, { opacity: 0, ease: 'power1.in', duration: 0.35 }, 0.15);
+    if (pill) tl.to(pill, { autoAlpha: 0, scale: 0.8, ease: 'power1.out', duration: 0.15 }, 0);
+    // The ring sits inside `wrap`, which is already scaled. Fade it out instead of scaling it.
+    // autoAlpha on purpose: the ring has a CSS keyframe animation on `opacity`, and a running
+    // CSS animation overrides GSAP's inline opacity. `visibility` is not animated by the keyframes.
+    if (ring) tl.to(ring, { autoAlpha: 0, ease: 'power1.out', duration: 0.2 }, 0);
+    tl.to(bg, { autoAlpha: 0, ease: 'power1.in', duration: 0.35 }, 0.15);
  
-    // STAGE 2: cloud text. autoAlpha (opacity + visibility) so that hidden
-    // full-screen layers are skipped by the compositor completely.
+    // STAGE 2: cloud text.
     if (cloudText) {
       tl.fromTo(cloudText, { autoAlpha: 0, y: 30 },
           { autoAlpha: 1, y: 0, ease: 'power2.out', duration: 0.14 }, 0.28)
@@ -299,24 +346,30 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     if (jetWrap) {
       tl.fromTo(jetWrap,
         { xPercent: -50, yPercent: jetStartY, scale: 0.8 },
-        { xPercent: -50, yPercent: jetEndY, scale: 1, ease: 'power2.out', duration: 0.38 }, 0.52);
+        { xPercent: -50, yPercent: jetEndY, scale: 1, ease: 'power2.out', duration: 0.38, force3D: true }, 0.52);
     }
     if (cards.length) {
       tl.fromTo(cards, { y: 35, opacity: 0 },
         { y: 0, opacity: 1, stagger: 0.06, ease: 'back.out(1.4)', duration: 0.18 }, 0.68);
     }
  
+    // FIX: once the ascent layer is opaque, `wrap` (still ~9x scaled underneath) is invisible work.
+    // Hide it so the compositor drops that giant layer for the rest of the hero + the hand-off.
+    // It also covers the infinite CSS animations (sky-drift / ring-pulse) that restart when
+    // the pin ends: they now run on a `visibility:hidden` layer, so they cost nothing.
+    tl.to(wrap, { autoAlpha: 0, duration: 0.01, ease: 'none' }, HIDE_WRAP_AT);
+ 
     threshold = 0.52 / tl.duration();
  
-    // refreshPriority -1: this trigger measures the value section, which sits AFTER
-    // the pinned sections. If it refreshes before their pin-spacers exist, its start
-    // position is wrong (nav stays dark/light at the wrong time, especially after resize).
-    if (nav && this.valueSection) {
+    // refreshPriority -1: this trigger measures the value section, which sits AFTER the pinned
+    // sections. Nav goes light on the dark value section, and dark again when scrolling back up.
+    if (this.valueSection) {
       this.ST.create({
         trigger: this.valueSection.nativeElement,
         start: 'top 64px',
         refreshPriority: -1,
-        onEnter: () => nav.classList.remove('nav--dark'),
+        onEnter: () => this.setNavDark(false),
+        onLeaveBack: () => this.setNavDark(true),
       });
     }
   }
@@ -349,15 +402,16 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
       ...(sRight ? Array.from(sRight.querySelectorAll('.ascent__spec-item')) : []),
     ] as HTMLElement[];
  
-    gsap.set(jetWrap, { xPercent: -50, yPercent: 0, scale: 1 });
-    if (blueprint) gsap.set(blueprint, { yPercent: 0 });
-    if (wordmark)  gsap.set(wordmark, { y: CFG.WORD_FROM_Y, opacity: 0 });
+    gsap.set(jetWrap, { xPercent: -50, yPercent: 0, scale: 1, force3D: true });
+    if (blueprint) gsap.set(blueprint, { yPercent: 0, force3D: true });
+    if (wordmark)  gsap.set(wordmark, { y: CFG.WORD_FROM_Y, opacity: 0, force3D: true });
     if (p1)        gsap.set(p1, { y: 0, opacity: 1 });
     if (specItems.length) gsap.set(specItems, { opacity: 0, y: 30 });
     if (cta)       gsap.set(cta, { opacity: 0, y: 30 });
  
-    const heavy = [jetWrap, blueprint, wordmark, p1].filter(Boolean) as HTMLElement[];
- 
+    // FIX: no JS will-change toggling here anymore. The SCSS already promotes jet / blueprint /
+    // wordmark / phase1 statically, so their layers exist BEFORE the section scrolls in and are
+    // never torn down / rebuilt at the pin boundaries.
     const tl = gsap.timeline({
       defaults: { ease: 'none' },
       scrollTrigger: {
@@ -366,41 +420,59 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
         end: CFG.SCROLL_LENGTH,
         pin: true,
         scrub: this.scrubValue,
-        anticipatePin: this.anticipate, // FIX: 0 with Lenis, 1 for native (touch) scroll
+        anticipatePin: this.anticipate,
         invalidateOnRefresh: true,
-        onToggle: (self) => heavy.forEach(el => el.style.willChange = self.isActive ? 'transform, opacity' : 'auto'),
+        refreshPriority: 2,
+        onEnter: () => {
+          // The hero is completely off-screen now -> safe to drop its compositor layers.
+          this.heroWarm?.(false);
+          this.setNavDark(!this.prefersDark());
+        },
+        onLeaveBack: () => {
+          // Going back up: re-promote the hero layers before it scrolls into view.
+          this.heroWarm?.(true);
+          this.setNavDark(true);
+        },
         onUpdate: (self) => { if (progress) progress.style.transform = `scaleX(${self.progress})`; },
       },
     });
  
-    tl.to(jetWrap, { xPercent: -50, yPercent: CFG.JET_END_Y, scale: CFG.JET_END_SCALE, ease: 'power1.in', duration: 0.75 }, 0);
-    if (blueprint) tl.to(blueprint, { yPercent: CFG.BLUEPRINT_END_Y, ease: 'power1.in', duration: 0.75 }, 0);
+    tl.to(jetWrap, { xPercent: -50, yPercent: CFG.JET_END_Y, scale: CFG.JET_END_SCALE, ease: 'power1.in', duration: 0.75, force3D: true }, 0);
+    if (blueprint) tl.to(blueprint, { yPercent: CFG.BLUEPRINT_END_Y, ease: 'power1.in', duration: 0.75, force3D: true }, 0);
     if (p1)        tl.to(p1, { opacity: 0, y: 40, ease: 'power1.out', duration: 0.30 }, 0);
-    if (wordmark)  tl.to(wordmark, { y: CFG.WORD_TO_Y, opacity: 1, ease: 'power2.out', duration: 0.50 }, 0.35);
+    if (wordmark)  tl.to(wordmark, { y: CFG.WORD_TO_Y, opacity: 1, ease: 'power2.out', duration: 0.50, force3D: true }, 0.35);
     if (specItems.length) tl.to(specItems, { opacity: 1, y: 0, ease: 'power2.out', duration: 0.12, stagger: 0.02 }, 0.70);
     if (cta)       tl.to(cta, { opacity: 1, y: 0, ease: 'power2.out', duration: 0.12 }, 0.85);
   }
  
   // ─── ROUTE STORY ──────────────────────────────────────────────────────────
+  // Perf design:
+  //  - NO SVG filter. The glow is a second, wider, translucent stroke.
+  //  - The car + light cone are a plain HTML element moved with transform only.
+  //  - The path is sampled ONCE into a lookup table. Scrolling only interpolates numbers.
+  //  - Per-frame work = 3 style writes. Node markers and ghost words are touched only when
+  //    their state really changes.
+  //  - A plain ScrollTrigger (no timeline / proxy tween). Progress is 1:1 with the scroll.
   private buildRoute(isMobile: boolean): void {
-    const gsap    = this.gsap;
     const section = this.routeSection?.nativeElement;
     const svg     = this.routeSvg?.nativeElement as SVGSVGElement | undefined;
-    if (!section || !svg) return;
+    const car     = this.routeCar?.nativeElement;
+    if (!section || !svg || !car) return;
  
-    // ── Real viewport dimensions — viewBox always matches the CSS box ──────────
-    // clientWidth/Height are set after layout; fall back to window if 0 (e.g. SSR).
-    const W = section.clientWidth  || window.innerWidth;
-    const H = section.clientHeight || window.innerHeight;
+    // ── Coordinate space = the SVG's real CSS box (viewBox always matches it) ──────────
+    const box0 = svg.getBoundingClientRect();
+    const W = box0.width  || window.innerWidth;
+    const H = box0.height || window.innerHeight;
  
     // ── Layout flags ───────────────────────────────────────────────────────────
     const vertical = isMobile || window.matchMedia('(orientation: portrait)').matches;
  
     // ── Car size proportional to viewport width ────────────────────────────────
-    const carW    = W * (vertical ? 0.088 : 0.032);
-    const carH    = carW * (1030 / 472);   // suv-cutout.webp native ratio
-    const coneEnd = carH * 2.1;
-    const cone    = `${-carW * 0.35},${-carH / 2} ${carW * 0.35},${-carH / 2} ${carW * 1.3},${-coneEnd} ${-carW * 1.3},${-coneEnd}`;
+    const carW = W * (vertical ? 0.088 : 0.032);
+    const carH = carW * (1030 / 472);   // suv-cutout.webp native ratio
+    // The SCSS sizes the car + light cone from these two custom properties
+    car.style.setProperty('--car-w', `${carW.toFixed(1)}px`);
+    car.style.setProperty('--car-h', `${carH.toFixed(1)}px`);
  
     // ── Path: all coordinates are fractions of W × H ──────────────────────────
     // Vertical S (mobile/portrait): enters top-right → curves left → exits bottom-left
@@ -429,47 +501,34 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
       { f: 0.86, title: 'Trip delivered',       sub: 'Funds released on arrival' },
     ];
  
-    // ── Build SVG ─────────────────────────────────────────────────────────────
+    // ── Build SVG (static road + dashed line + glow/core trail). No <filter>. ──────────
     svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
     svg.innerHTML = `
-      <defs>
-        <linearGradient id="routeCone" gradientUnits="userSpaceOnUse"
-            x1="0" y1="${-carH / 2}" x2="0" y2="${-coneEnd}">
-          <stop offset="0" stop-color="#FFEBC2" stop-opacity="0.45"/>
-          <stop offset="1" stop-color="#FFEBC2" stop-opacity="0"/>
-        </linearGradient>
-        <filter id="routeGlow" x="-60%" y="-60%" width="220%" height="220%">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
-          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-      </defs>
       <path d="${d}" fill="none"
             stroke="rgba(255,255,255,0.045)" stroke-width="${(carW * 0.9).toFixed(1)}"
             stroke-linecap="round"/>
       <path d="${d}" fill="none"
             stroke="rgba(200,157,102,0.35)" stroke-width="2"
             stroke-dasharray="3 10" stroke-linecap="round"/>
+      <path id="routeGlow" d="${d}" fill="none"
+            stroke="#D9B97F" stroke-opacity="0.22" stroke-width="9"
+            stroke-linecap="round"/>
       <path id="routeTrail" d="${d}" fill="none"
             stroke="#D9B97F" stroke-width="2.5"
-            stroke-linecap="round" filter="url(#routeGlow)"/>
-      <g id="routeNodes"></g>
-      <g id="routeCar">
-        <polygon points="${cone}" fill="url(#routeCone)"/>
-        <image href="assets/images/suv-cutout.webp"
-               x="${(-carW / 2).toFixed(1)}" y="${(-carH / 2).toFixed(1)}"
-               width="${carW.toFixed(1)}" height="${carH.toFixed(1)}"/>
-      </g>`;
+            stroke-linecap="round"/>
+      <g id="routeNodes"></g>`;
  
     const NS     = 'http://www.w3.org/2000/svg';
     const trail  = svg.querySelector('#routeTrail') as SVGPathElement;
-    const carEl  = svg.querySelector('#routeCar')   as SVGGElement;
+    const glow   = svg.querySelector('#routeGlow')  as SVGPathElement;
     const nodesG = svg.querySelector('#routeNodes') as SVGGElement;
     const len    = trail.getTotalLength();
  
-    trail.style.strokeDasharray  = `${len}`;
-    trail.style.strokeDashoffset = `${len}`;
+    const dash = String(len);
+    trail.style.strokeDasharray = dash;  trail.style.strokeDashoffset = dash;
+    glow.style.strokeDasharray  = dash;  glow.style.strokeDashoffset  = dash;
  
-    // ── Milestone markers ──────────────────────────────────────────────────────
+    // ── Milestone markers (created once, toggled only when their state changes) ────────
     const nodeEls: { ring: SVGCircleElement; dot: SVGCircleElement; label: SVGGElement }[] = [];
     NODES.forEach(n => {
       const pt  = trail.getPointAtLength(len * n.f);
@@ -515,55 +574,103 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     // ── Ghost words ───────────────────────────────────────────────────────────
     const words = Array.from(section.querySelectorAll('.route__word')) as HTMLElement[];
  
-    // ── Scrub proxy ───────────────────────────────────────────────────────────
-    const proxy = { p: 0 };
+    // ── Path lookup table: sampled ONCE, interpolated per frame ───────────────────────
+    // Layout: [x, y, angleDeg] per sample. Angles are unwrapped so linear interpolation
+    // never spins the car the long way round at the ±180° seam.
+    const N   = 600;
+    const lut = new Float32Array((N + 1) * 3);
+    const px: number[] = [];
+    const py: number[] = [];
+    for (let i = 0; i <= N; i++) {
+      const pt = trail.getPointAtLength((len * i) / N);
+      px.push(pt.x); py.push(pt.y);
+    }
+    let prevAng = 0;
+    for (let i = 0; i <= N; i++) {
+      const a = Math.max(0, i - 1), b = Math.min(N, i + 1);
+      let ang = Math.atan2(py[b] - py[a], px[b] - px[a]) * (180 / Math.PI) + 90;
+      if (i > 0) {
+        while (ang - prevAng > 180)  ang -= 360;
+        while (ang - prevAng < -180) ang += 360;
+      }
+      prevAng = ang;
+      lut[i * 3] = px[i]; lut[i * 3 + 1] = py[i]; lut[i * 3 + 2] = ang;
+    }
  
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: section,
-        start: 'top top',
-        end: isMobile ? '+=200%' : '+=250%',
-        pin: true,
-        scrub: this.scrubValue,
-        anticipatePin: this.anticipate, // FIX: 0 with Lenis, 1 for native (touch) scroll
-        invalidateOnRefresh: true,
-      },
-      onUpdate: () => {
-        const p = proxy.p;
+    // The car is positioned in px, the SVG scales with its box. Keep them in sync after a
+    // resize/refresh (measured on refresh only, never per frame).
+    let sx = 1, sy = 1;
+    const measure = () => {
+      const r = svg.getBoundingClientRect();
+      sx = r.width  / W || 1;
+      sy = r.height / H || 1;
+    };
  
-        // Trail draw
-        trail.style.strokeDashoffset = String(len * (1 - p));
+    // ── Render: runs on scroll. 3 style writes; everything else only on state change ───
+    const shown = [false, false, false];
+    let lastWord = -1;
+    let lastP = -1;
  
-        // Car position + tangent rotation
-        const a0 = Math.max(0, Math.min(len - 0.01, len * p));
-        const a1 = Math.max(0, Math.min(len,         len * p + 0.5));
-        const pos  = trail.getPointAtLength(a0);
-        const pos2 = trail.getPointAtLength(a1);
-        const angle = Math.atan2(pos2.y - pos.y, pos2.x - pos.x) * (180 / Math.PI) + 90;
-        carEl.setAttribute('transform', `translate(${pos.x},${pos.y}) rotate(${angle})`);
+    const render = (progress: number, force = false) => {
+      const p = progress < 0 ? 0 : progress > 1 ? 1 : progress;
+      if (!force && p === lastP) return;
+      lastP = p;
  
-        // Milestone reveals
-        NODES.forEach((n, i) => {
-          const op = p >= n.f - 0.03 ? '1' : '0';
-          nodeEls[i].ring.setAttribute('opacity',  op);
-          nodeEls[i].dot.setAttribute('opacity',   op);
-          nodeEls[i].label.setAttribute('opacity', op);
-        });
+      // Car: interpolate the LUT, move by transform only (compositor layer)
+      const f = p * N;
+      const i = f >= N ? N - 1 : f | 0;
+      const t = f - i;
+      const o = i * 3;
+      const cx  = (lut[o]     + (lut[o + 3] - lut[o])     * t) * sx;
+      const cy  = (lut[o + 1] + (lut[o + 4] - lut[o + 1]) * t) * sy;
+      const ang =  lut[o + 2] + (lut[o + 5] - lut[o + 2]) * t;
+      car.style.transform =
+        `translate3d(${(cx - carW / 2).toFixed(1)}px, ${(cy - carH / 2).toFixed(1)}px, 0) rotate(${ang.toFixed(2)}deg)`;
  
-        // Ghost word crossfade
-        const idx = p < 0.33 ? 0 : p < 0.66 ? 1 : 2;
-        words.forEach((w, i) => gsap.set(w, {
-          opacity: i === idx ? 1 : 0,
-          visibility: i === idx ? 'visible' : 'hidden',
-        }));
-      },
+      // Trail draw (core + glow share the same offset)
+      const off = String(len * (1 - p));
+      trail.style.strokeDashoffset = off;
+      glow.style.strokeDashoffset  = off;
+ 
+      // Milestones: only touch the DOM when one flips
+      for (let k = 0; k < NODES.length; k++) {
+        const on = p >= NODES[k].f - 0.03;
+        if (on === shown[k]) continue;
+        shown[k] = on;
+        const op = on ? '1' : '0';
+        nodeEls[k].ring.setAttribute('opacity',  op);
+        nodeEls[k].dot.setAttribute('opacity',   op);
+        nodeEls[k].label.setAttribute('opacity', op);
+      }
+ 
+      // Ghost words: class toggle (CSS handles the fade) only when the active word changes
+      const idx = p < 0.33 ? 0 : p < 0.66 ? 1 : 2;
+      if (idx !== lastWord) {
+        lastWord = idx;
+        for (let k = 0; k < words.length; k++) words[k].classList.toggle('is-active', k === idx);
+      }
+    };
+ 
+    this.ST.create({
+      trigger: section,
+      start: 'top top',
+      end: isMobile ? '+=200%' : '+=250%',
+      pin: true,
+      anticipatePin: this.anticipate,
+      refreshPriority: 1, // after hero (3) and ascent (2), before everything else
+      onUpdate:  (self) => render(self.progress),
+      onRefresh: (self) => { measure(); render(self.progress, true); },
+      // The route background is dark, so the nav must be light here. When leaving it forward,
+      // restore the previous behaviour (dark) for the sections below, until the value section.
+      onEnter:     () => this.setNavDark(false),
+      onLeave:     () => this.setNavDark(true),
+      onEnterBack: () => this.setNavDark(false),
+      onLeaveBack: () => this.setNavDark(!this.prefersDark()),
     });
  
-    tl.to(proxy, { p: 1, duration: 1, ease: 'none' });
- 
-    // Set initial car at path start
-    const p0 = trail.getPointAtLength(0);
-    carEl.setAttribute('transform', `translate(${p0.x},${p0.y}) rotate(0)`);
+    // Initial state: car at the path start, first word visible
+    measure();
+    render(0, true);
   }
  
   private initValueAnim(): void {
@@ -587,10 +694,14 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroyed = true;
     document.body.style.overflow = '';
+    this.smoothScroll.unregister();
     this.mm?.revert();
+    if (this.onSTRefresh) this.ST?.removeEventListener('refresh', this.onSTRefresh);
     this.ST?.getAll().forEach(t => t.kill());
     if (this.tickerCb && this.gsap) this.gsap.ticker.remove(this.tickerCb);
     this.lenis?.destroy();
+    if (this.lenis) document.documentElement.style.scrollBehavior = this.prevScrollBehavior;
+    this.heroWarm = undefined;
     if (this.onLoadRefresh) window.removeEventListener('load', this.onLoadRefresh);
     if (this.mouseMoveHandler) document.removeEventListener('mousemove', this.mouseMoveHandler);
   }

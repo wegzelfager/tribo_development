@@ -1,0 +1,505 @@
+// ─── ProcessShowcaseComponent styles ────────────────────────────────────────
+// Fonts: Syne (display/headers), Space Grotesk (body/labels) — imported globally
+// Palette: espresso #1A1210, sand-gold #C89D66, warm white rgba(250,247,242,.9)
+
+:host,
+:host *,
+:host *::before,
+:host *::after {
+  box-sizing: border-box;
+}
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+// ─── WRAPPER: tall scroll container, stage sticks inside it ──────────────────
+.ps-wrapper {
+  position: relative;
+  // N+1 viewport heights of scroll travel (4 steps + 1 exit range)
+  height: calc(100svh * 5);
+  height: calc(100vh * 5); // fallback
+  background: var(--dark-luxury, #1a1210);
+  background-color: #1a1210;
+}
+
+// ─── STAGE: CSS Grid auto 1fr auto (structurally prevents overlap) ───────────
+.ps-stage {
+  --side-pad: clamp(1.25rem, 4.5vw, 4.5rem);
+  --nav-safe-top: clamp(4.75rem, 10svh, 7rem);
+  --bottom-pad: max(24px, clamp(1.5rem, 4vh, 3rem));
+  --giant: clamp(2.5rem, 7vw, 7.5rem);
+  --giant-weight: 800;
+
+  position: sticky;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100svh;
+  height: 100vh; // fallback
+  overflow: hidden;
+
+  // CSS Grid rows: header (auto) / middle content (1fr) / footer (auto)
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  align-content: stretch;
+  // no overflow-x: hidden — that blocks sticky; browser clips via overflow:hidden
+}
+
+// ─── BACKGROUNDS ─────────────────────────────────────────────────────────────
+.ps-bg-container {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  background: #0a0604;
+  pointer-events: none;
+}
+
+// Single smooth multi-stop gradient overlay — light enough that photos show fully
+.ps-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(10, 6, 4, 0.55) 0%,
+    rgba(10, 6, 4, 0.22) 20%,
+    rgba(10, 6, 4, 0.06) 42%,
+    rgba(10, 6, 4, 0.06) 58%,
+    rgba(10, 6, 4, 0.25) 80%,
+    rgba(10, 6, 4, 0.60) 100%
+  );
+}
+
+// Background layers: at rest no leftover clip-path or transform
+.ps-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  // background fills the entire container
+  background: #0a0604;
+
+  &--active {
+    z-index: 2;
+  }
+}
+
+.ps-bg__img {
+  // cover the full layer — inset-0 + extra 2px bleed hides sub-pixel gaps
+  position: absolute;
+  inset: -1px;
+  width: calc(100% + 2px);
+  height: calc(100% + 2px);
+  object-fit: cover;
+  object-position: center 40%; // keep subject in upper-mid zone
+  display: block;
+}
+
+// picture must fill parent so the img inside covers correctly
+.ps-bg picture {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+// ─── ROW 1: HEADER ────────────────────────────────────────────────────────────
+.ps-header {
+  position: relative;
+  z-index: 10;
+  padding-top: var(--nav-safe-top);
+  padding-inline: var(--side-pad);
+  text-align: center;
+  font-family: 'Syne', sans-serif;
+  font-size: var(--giant);
+  font-weight: var(--giant-weight);
+  line-height: 0.88;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+  color: var(--light-sand, rgba(250, 247, 242, 0.9));
+  user-select: none;
+  pointer-events: none;
+
+  &__row {
+    display: block;
+    white-space: nowrap;
+    margin: 0;
+    padding: 0;
+  }
+
+  &__word {
+    display: inline;
+    white-space: nowrap;
+  }
+}
+
+// ─── ROW 2: MIDDLE CONTENT (left list, featured phrase, right list) ───────────
+.ps-content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-inline: var(--side-pad);
+  gap: 1.5rem;
+  width: 100%;
+  min-height: 0; // prevent grid overflow
+  // GSAP owns yPercent on exit; no CSS translateY transforms here
+}
+
+// ─── LISTS (left and right) ───────────────────────────────────────────────────
+.ps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  width: 26%;
+  flex-shrink: 0;
+
+  &--left  { text-align: left; }
+  &--right { text-align: right; }
+
+  &__btn {
+    all: unset;
+    display: block;
+    width: 100%;
+    cursor: pointer;
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(0.85rem, 1.35vw, 1.5rem);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--light-sand, rgba(250, 247, 242, 0.9));
+    opacity: 0.3; // inactive by default
+    position: relative;
+    padding-block: 0.25em;
+    transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                padding   0.35s cubic-bezier(0.16, 1, 0.3, 1);
+
+    &:hover {
+      opacity: 0.7;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--sand-gold, #c89d66);
+      outline-offset: 4px;
+      border-radius: 2px;
+    }
+
+    // Active item: opacity 1 + dot indicator
+    &--active {
+      opacity: 1 !important;
+    }
+
+    &--left.ps-list__btn--active {
+      transform: translateX(12px);
+      padding-left: 16px;
+
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: var(--sand-gold, #c89d66);
+      }
+    }
+
+    &--right.ps-list__btn--active {
+      transform: translateX(-12px);
+      padding-right: 16px;
+
+      &::after {
+        content: '';
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: var(--sand-gold, #c89d66);
+      }
+    }
+  }
+}
+
+// ─── FEATURED PHRASE (centre) ─────────────────────────────────────────────────
+.ps-featured {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  min-height: 80px;
+  overflow: hidden;
+
+  &__item {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__phrase {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.1rem, 2.1vw, 2.4rem);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--light-sand, rgba(250, 247, 242, 0.9));
+    white-space: nowrap;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.3em;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+// Word-mask: clips the sliding words
+.ps-word-mask {
+  display: inline-block;
+  overflow: hidden;
+  line-height: 1.15;
+  vertical-align: top;
+}
+
+.ps-word {
+  display: inline-block;
+  vertical-align: top;
+}
+
+// ─── ROW 3: FOOTER ────────────────────────────────────────────────────────────
+.ps-footer {
+  position: relative;
+  z-index: 10;
+  padding-bottom: var(--bottom-pad);
+  padding-inline: var(--side-pad);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0.75rem, 1.8vh, 1.8rem);
+  user-select: none;
+
+  &__text {
+    text-align: center;
+    font-family: 'Syne', sans-serif;
+    font-size: var(--giant);
+    font-weight: var(--giant-weight);
+    line-height: 0.88;
+    letter-spacing: -0.035em;
+    text-transform: uppercase;
+    color: var(--light-sand, rgba(250, 247, 242, 0.9));
+    pointer-events: none;
+  }
+
+  &__row {
+    display: block;
+    white-space: nowrap;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+// ─── PROGRESS ────────────────────────────────────────────────────────────────
+.ps-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  width: 160px;
+
+  &__numbers {
+    display: flex;
+    align-items: baseline;
+    gap: 0.25rem;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(0.65rem, 0.78vw, 0.85rem);
+    letter-spacing: 0.08em;
+    color: rgba(250, 247, 242, 0.6);
+  }
+
+  &__current {
+    color: var(--sand-gold, #c89d66);
+    font-weight: 700;
+  }
+
+  &__total {
+    color: rgba(250, 247, 242, 0.45);
+  }
+
+  &__track {
+    width: 100%;
+    height: 2px;
+    background: rgba(250, 247, 242, 0.2);
+    position: relative;
+    overflow: hidden;
+    border-radius: 1px;
+  }
+
+  &__fill {
+    position: absolute;
+    inset: 0;
+    transform-origin: left center;
+    transform: scaleX(0.25);
+    background: var(--sand-gold, #c89d66);
+    border-radius: 1px;
+  }
+}
+
+// ─── SOUND TOGGLE (position: absolute inside stage) ───────────────────────────
+.ps-sound-toggle {
+  position: absolute;
+  bottom: var(--bottom-pad);
+  right: var(--side-pad);
+  z-index: 20;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(200, 157, 102, 0.35);
+  border-radius: 50%;
+  background: rgba(10, 6, 4, 0.55);
+  backdrop-filter: blur(12px);
+  color: var(--sand-gold, #c89d66);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.25s, border-color 0.25s, transform 0.2s;
+
+  &:hover {
+    background: rgba(200, 157, 102, 0.18);
+    border-color: rgba(200, 157, 102, 0.7);
+    transform: scale(1.08);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--sand-gold, #c89d66);
+    outline-offset: 3px;
+  }
+
+  &--muted {
+    color: rgba(250, 247, 242, 0.35);
+    border-color: rgba(250, 247, 242, 0.18);
+  }
+}
+
+// ─── EXIT STATE: blur + dim ──────────────────────────────────────────────────
+.ps-wrapper.ps--exiting {
+  .ps-list,
+  .ps-featured,
+  .ps-footer__text,
+  .ps-progress {
+    filter: blur(6px);
+    opacity: 0.25;
+    transition: filter 0.7s ease, opacity 0.7s ease;
+  }
+}
+
+// ─── REDUCED MOTION ──────────────────────────────────────────────────────────
+@media (prefers-reduced-motion: reduce) {
+  .ps-bg {
+    transition: opacity 0.4s ease !important;
+  }
+  .ps-bg__img,
+  .ps-word,
+  .ps-list__btn {
+    transition: none !important;
+  }
+}
+
+// ─── TABLET (769px – 1024px) ───────────────────────────────────────────────
+@media (min-width: 769px) and (max-width: 1024px) {
+  .ps-stage {
+    --side-pad: clamp(1.25rem, 3.5vw, 3rem);
+    --nav-safe-top: clamp(4rem, 9svh, 6rem);
+    --giant: clamp(2.2rem, 6vw, 5.5rem);
+  }
+
+  .ps-list {
+    width: 28%;
+
+    &__btn {
+      font-size: clamp(0.78rem, 1.15vw, 1.1rem);
+    }
+  }
+
+  .ps-featured__phrase {
+    font-size: clamp(1rem, 1.8vw, 2rem);
+  }
+}
+
+// ─── MOBILE LAYOUT (≤768px) ─────────────────────────────────────────────────
+@media (max-width: 768px) {
+  .ps-stage {
+    --side-pad: 1.25rem;
+    --nav-safe-top: clamp(4.5rem, 9svh, 6rem);
+    --bottom-pad: 24px;
+  }
+
+  .ps-header__row {
+    white-space: normal;
+  }
+
+  .ps-header__word {
+    display: block;
+    white-space: nowrap;
+  }
+
+  .ps-content {
+    flex-direction: column;
+    justify-content: center;
+    gap: 1.25rem;
+    padding-inline: var(--side-pad);
+  }
+
+  .ps-featured {
+    order: -1;
+    width: 100%;
+    min-height: 50px;
+
+    &__phrase {
+      font-size: clamp(0.95rem, 4.2vw, 1.35rem);
+      white-space: normal;
+      text-align: center;
+    }
+  }
+
+  .ps-list {
+    width: 100%;
+    text-align: center !important;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.4rem 1.2rem;
+
+    &__btn {
+      font-size: clamp(0.75rem, 3.4vw, 0.95rem);
+
+      &--left.ps-list__btn--active,
+      &--right.ps-list__btn--active {
+        transform: none;
+        padding-left: 0;
+        padding-right: 0;
+
+        &::before, &::after {
+          display: none;
+        }
+      }
+    }
+  }
+
+  .ps-progress {
+    width: 130px;
+  }
+}
