@@ -1,0 +1,41 @@
+﻿<section class="hz" id="journeys" aria-label="Every journey, protected">
+  <div class="hz__stage">
+
+    <div class="hz__row">
+      @for (s of slides; track s.id) {
+        <article class="hz__panel"
+                 [style.--img]="'url(' + s.image + ')'"
+                 [style.--pos]="s.pos"
+                 [style.--grad]="s.fallback">
+          <div class="hz__word" aria-hidden="true">{{ s.word }}</div>
+          <div class="hz__label" aria-hidden="true">{{ s.word }}</div>
+          <div class="hz__info">
+            <h3 class="hz__info-title">{{ s.title }}</h3>
+            <p class="hz__info-copy">{{ s.copy }}</p>
+          </div>
+        </article>
+      }
+    </div>
+
+    <h2 class="hz__heading">Every journey, protected.</h2>
+    <p class="hz__count" aria-hidden="true"><span class="hz__count-now">01</span> / 04</p>
+
+    <p class="hz__big">Paid only on<br />arrival</p>
+
+    <!-- The one horizon: shared by every scene, doubles as progress, ends in the escrow seal -->
+    <div class="hz__line" aria-hidden="true"></div>
+    <div class="hz__fill" aria-hidden="true"></div>
+    <div class="hz__seal" aria-hidden="true">
+      <i class="hz__seal-dot"></i>
+      <b class="hz__seal-label">Escrow</b>
+    </div>
+    <p class="hz__seal-copy">Your payment stays in escrow until you land, dock or arrive.</p>
+
+    <nav class="hz__beats" aria-label="Journey steps">
+      @for (b of beats; track b; let i = $index) {
+        <button type="button" class="hz__beat" [attr.aria-current]="i === 0 ? 'true' : 'false'" (click)="goTo(i)">{{ b }}</button>
+      }
+    </nav>
+
+  </div>
+</section>

@@ -5,7 +5,7 @@ import {
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { SmoothScrollService } from '../../core/smooth-scroll.service';
-import { ProcessShowcaseComponent } from '../../process-showcase/process-showcase.component';
+import { HorizonShowcaseComponent } from '../../horizon-showcase/horizon-showcase.component';
  
 type GSAPType = typeof import('gsap').gsap;
 type STType = typeof import('gsap/ScrollTrigger').ScrollTrigger;
@@ -20,7 +20,7 @@ interface LenisInstance {
 @Component({
   selector: 'app-landing',
   standalone: true,
-  imports: [ProcessShowcaseComponent],
+  imports: [HorizonShowcaseComponent],
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -47,6 +47,7 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
   @ViewChild('card1')           card1!: ElementRef<HTMLDivElement>;
   @ViewChild('card2')           card2!: ElementRef<HTMLDivElement>;
   @ViewChild('card3')           card3!: ElementRef<HTMLDivElement>;
+  @ViewChild('seamFade')        seamFade?: ElementRef<HTMLDivElement>;
   @ViewChild('valueSection')    valueSection!: ElementRef<HTMLElement>;
   @ViewChildren('valueCell')    valueCells!: QueryList<ElementRef<HTMLDivElement>>;
  
@@ -57,7 +58,8 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
   @ViewChild('jetWrapper')      jetWrapper?: ElementRef<HTMLDivElement>;
   @ViewChild('ascentCta')       ascentCta?: ElementRef<HTMLDivElement>;
   @ViewChild('ascentProgress')  ascentProgress?: ElementRef<HTMLDivElement>;
-  @ViewChild('blueprintLayer')  blueprintLayer?: ElementRef<HTMLDivElement>;
+  @ViewChild('duskLayer')       duskLayer?: ElementRef<HTMLDivElement>;
+
   @ViewChild('wordmarkEl')      wordmarkEl?: ElementRef<HTMLDivElement>;
   @ViewChild('ascentJetImg')    ascentJetImg?: ElementRef<HTMLImageElement>;
   @ViewChild('routeSection')    routeSection?: ElementRef<HTMLElement>;
@@ -107,11 +109,6 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     if (dark === this.navDark) return;
     this.navDark = dark;
     this.navbar?.nativeElement.classList.toggle('nav--dark', dark);
-  }
- 
-  // The 650ER section follows the OS colour scheme (see :host tokens in the SCSS).
-  private prefersDark(): boolean {
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
   }
  
   ngAfterViewInit(): void {
@@ -352,6 +349,8 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
       tl.fromTo(cards, { y: 35, opacity: 0 },
         { y: 0, opacity: 1, stagger: 0.06, ease: 'back.out(1.4)', duration: 0.18 }, 0.68);
     }
+    const seam = this.seamFade?.nativeElement;
+    if (seam) tl.fromTo(seam, { autoAlpha: 0 }, { autoAlpha: 1, ease: 'none', duration: 0.08 }, 0.9);
  
     // FIX: once the ascent layer is opaque, `wrap` (still ~9x scaled underneath) is invisible work.
     // Hide it so the compositor drops that giant layer for the rest of the hero + the hand-off.
@@ -369,7 +368,6 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
         start: 'top 64px',
         refreshPriority: -1,
         onEnter: () => this.setNavDark(false),
-        onLeaveBack: () => this.setNavDark(true),
       });
     }
   }
@@ -380,14 +378,12 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     const CFG = {
       JET_END_Y:       isMobile ? -70 : -140,
       JET_END_SCALE:   isMobile ? 0.5 : 0.3,
-      BLUEPRINT_END_Y: isMobile ? 20 : 40,
       WORD_FROM_Y:     isMobile ? 75 : 150,
       WORD_TO_Y:       isMobile ? -15 : -30,
-      SCROLL_LENGTH:   isMobile ? '+=150%' : '+=250%',
+      SCROLL_LENGTH:   isMobile ? '+=180%' : '+=300%',
     };
  
     const section   = this.ascentSection?.nativeElement;
-    const blueprint = this.blueprintLayer?.nativeElement;
     const wordmark  = this.wordmarkEl?.nativeElement;
     const p1        = this.phase1Layer?.nativeElement;
     const jetWrap   = this.jetWrapper?.nativeElement;
@@ -395,6 +391,7 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     const sRight    = this.specsRight?.nativeElement;
     const cta       = this.ascentCta?.nativeElement;
     const progress  = this.ascentProgress?.nativeElement;
+    const dusk      = this.duskLayer?.nativeElement;
     if (!section || !jetWrap) return;
  
     const specItems = [
@@ -403,13 +400,13 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     ] as HTMLElement[];
  
     gsap.set(jetWrap, { xPercent: -50, yPercent: 0, scale: 1, force3D: true });
-    if (blueprint) gsap.set(blueprint, { yPercent: 0, force3D: true });
     if (wordmark)  gsap.set(wordmark, { y: CFG.WORD_FROM_Y, opacity: 0, force3D: true });
     if (p1)        gsap.set(p1, { y: 0, opacity: 1 });
     if (specItems.length) gsap.set(specItems, { opacity: 0, y: 30 });
     if (cta)       gsap.set(cta, { opacity: 0, y: 30 });
+    if (dusk)      gsap.set(dusk, { autoAlpha: 0 });
  
-    // FIX: no JS will-change toggling here anymore. The SCSS already promotes jet / blueprint /
+    // FIX: no JS will-change toggling here anymore. The SCSS already promotes jet /
     // wordmark / phase1 statically, so their layers exist BEFORE the section scrolls in and are
     // never torn down / rebuilt at the pin boundaries.
     const tl = gsap.timeline({
@@ -426,23 +423,26 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
         onEnter: () => {
           // The hero is completely off-screen now -> safe to drop its compositor layers.
           this.heroWarm?.(false);
-          this.setNavDark(!this.prefersDark());
+          this.setNavDark(true);
         },
         onLeaveBack: () => {
           // Going back up: re-promote the hero layers before it scrolls into view.
           this.heroWarm?.(true);
           this.setNavDark(true);
         },
-        onUpdate: (self) => { if (progress) progress.style.transform = `scaleX(${self.progress})`; },
+        onUpdate: (self) => {
+          if (progress) progress.style.transform = `scaleX(${self.progress})`;
+          this.setNavDark(self.progress < 0.95);
+        },
       },
     });
  
     tl.to(jetWrap, { xPercent: -50, yPercent: CFG.JET_END_Y, scale: CFG.JET_END_SCALE, ease: 'power1.in', duration: 0.75, force3D: true }, 0);
-    if (blueprint) tl.to(blueprint, { yPercent: CFG.BLUEPRINT_END_Y, ease: 'power1.in', duration: 0.75, force3D: true }, 0);
     if (p1)        tl.to(p1, { opacity: 0, y: 40, ease: 'power1.out', duration: 0.30 }, 0);
     if (wordmark)  tl.to(wordmark, { y: CFG.WORD_TO_Y, opacity: 1, ease: 'power2.out', duration: 0.50, force3D: true }, 0.35);
     if (specItems.length) tl.to(specItems, { opacity: 1, y: 0, ease: 'power2.out', duration: 0.12, stagger: 0.02 }, 0.70);
     if (cta)       tl.to(cta, { opacity: 1, y: 0, ease: 'power2.out', duration: 0.12 }, 0.85);
+    if (dusk)      tl.to(dusk, { autoAlpha: 1, ease: 'power1.in', duration: 0.15 }, 1.0);
   }
  
   // ─── ROUTE STORY ──────────────────────────────────────────────────────────
@@ -660,12 +660,12 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
       refreshPriority: 1, // after hero (3) and ascent (2), before everything else
       onUpdate:  (self) => render(self.progress),
       onRefresh: (self) => { measure(); render(self.progress, true); },
-      // The route background is dark, so the nav must be light here. When leaving it forward,
-      // restore the previous behaviour (dark) for the sections below, until the value section.
+      // The route background is dark, so the nav must be light here. When leaving forward,
+      // the nav stays light: HorizonShowcase below is also dark.
       onEnter:     () => this.setNavDark(false),
-      onLeave:     () => this.setNavDark(true),
+      onLeave:     () => this.setNavDark(false),
       onEnterBack: () => this.setNavDark(false),
-      onLeaveBack: () => this.setNavDark(!this.prefersDark()),
+      onLeaveBack: () => this.setNavDark(false),
     });
  
     // Initial state: car at the path start, first word visible

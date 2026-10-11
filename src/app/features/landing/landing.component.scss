@@ -1,5 +1,6 @@
 .landing-wrap {
   --vh-gap: 0px;
+  --seam-dark: var(--dark-luxury, #1a1210);
  
   @supports (height: 100lvh) {
     --vh-gap: calc(100lvh - 100svh);
@@ -460,6 +461,16 @@
       user-select: none;
     }
  
+    .ascent__seam {
+      position: absolute; left: 0; right: 0; bottom: 0;
+      height: 30vh;
+      z-index: 3;            // above the SUV (2), below the cards (4)
+      pointer-events: none;
+      opacity: 0; visibility: hidden;
+      background: linear-gradient(to top,
+        #E3D4C5 0%, rgba(227,212,197,.9) 22%, rgba(227,212,197,.5) 55%, rgba(227,212,197,0) 100%);
+    }
+
     .ascent__cards {
       position: absolute;
       bottom: calc(2.2rem + var(--vh-gap));
@@ -1112,23 +1123,9 @@
 // GSAP animates ONLY transform + opacity — no layout reads in scroll callbacks.
  
 // ─── CSS Variables for the Takeoff palette ───────────────────────────────────
-// Every colour in this section comes from these tokens, so light and dark stay consistent.
 :host {
-  --tk-ink: #2b2320; // dark brown text
-  --tk-muted: #8d827b; // muted label color
-  --tk-cream: #fbf5ec; // cream lightest bg
-  --tk-taupe: #7f7470; // warm taupe darkest bg
-  --tk-grid: rgba(43, 35, 32, 0.09); // blueprint grid lines
-  --tk-ring: rgba(43, 35, 32, 0.06); // blueprint radial rings
- 
-  @media (prefers-color-scheme: dark) {
-    --tk-ink: #f5ede6;
-    --tk-muted: #a09490;
-    --tk-cream: #1a1210;
-    --tk-taupe: #3a2e2b;
-    --tk-grid: rgba(245, 237, 230, 0.07);
-    --tk-ring: rgba(245, 237, 230, 0.05);
-  }
+  --tk-ink: #1a1615;   // same ink as the hero's ascent layer text
+  --tk-muted: #5f544e;
 }
  
 .ascent-section {
@@ -1138,6 +1135,7 @@
   height: 100lvh;
   overflow: hidden;
   contain: layout style; // also gives this section its own stacking context
+  box-shadow: 0 -2px 0 #E3D4C5;
 }
  
 // ── Layer 1: gradient background ─────────────────────────────────────────────
@@ -1145,36 +1143,12 @@
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: linear-gradient(180deg, var(--tk-taupe) 0%, var(--tk-cream) 100%);
+  // Starts with the colour the hero's ascent layer ENDS with (#E3D4C5) so there is no seam
+  // while the hero scrolls out, then turns light blue so the jet stands out.
+  background: linear-gradient(180deg, #E3D4C5 0%, #D8E7F0 45%, #C2DCED 100%);
 }
  
-// ── Layer 2: Blueprint CSS grid — height 200vh so it can slide without gaps ──
-.ascent__blueprint {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: -100vh; // extends 1 viewport above: room to slide DOWN
-  height: 200vh;
-  z-index: 1;
-  will-change: transform; // compositor only — GSAP moves yPercent (kept static: never torn down)
-  pointer-events: none;
- 
-  // CSS-only blueprint grid: two repeating linear gradients (64px, 1px lines)
-  background-image:
-    repeating-linear-gradient(0deg, var(--tk-grid) 0px, var(--tk-grid) 1px, transparent 1px, transparent 64px),
-    repeating-linear-gradient(90deg, var(--tk-grid) 0px, var(--tk-grid) 1px, transparent 1px, transparent 64px);
-  background-size: 64px 64px;
- 
-  // Two thin concentric radial rings in the vertical center
-  &::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background:
-      radial-gradient(ellipse 48% 24% at 50% 50%, transparent 90%, var(--tk-ring) 91%, transparent 92%),
-      radial-gradient(ellipse 70% 35% at 50% 50%, transparent 90%, var(--tk-ring) 91%, transparent 92%);
-  }
-}
+
  
 // ── Layer 3: Giant wordmark ───────────────────────────────────────────────────
 .ascent__wordmark {
@@ -1528,6 +1502,14 @@
   transform-origin: left center;
   transform: scaleX(0);
 }
+
+.ascent__dusk {
+  position: absolute; inset: 0;
+  z-index: 10;              // above everything in the section, progress line included
+  background: var(--seam-dark, #1a1210);
+  opacity: 0; visibility: hidden;
+  pointer-events: none;
+}
  
 // ── prefers-reduced-motion: show final state statically, no pin/scrub ─────────
 @media (prefers-reduced-motion: reduce) {
@@ -1575,10 +1557,12 @@
   .ascent__progress {
     display: none;
   }
- 
-  .ascent__blueprint {
+
+  .ascent__dusk {
     display: none;
   }
+ 
+
 }
  
 // ─── FOOTER ──────────────────────────────────────────────────────────────────
@@ -1661,16 +1645,13 @@
  
 // ─── ROUTE STORY ──────────────────────────────────────────────────────────────
 .route {
-  --route-bg: #1a1210;
+  --route-bg: var(--seam-dark);
   position: relative;
   width: 100%;
   height: 100vh;
   height: 100lvh; // FIX: same unit as the hero + ascent sections, so the pin-spacers line up
   overflow: hidden;
   background-color: var(--route-bg);
-  background-image:
-    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.05) 0, rgba(255, 255, 255, 0.05) 1px, transparent 1px, transparent 64px),
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0, rgba(255, 255, 255, 0.05) 1px, transparent 1px, transparent 64px);
   contain: layout style;
  
   // soft top + bottom fades — blends into the neighbouring dark sections
