@@ -1,0 +1,123 @@
+// Journey Teaser — "Are you ready to be surprised?"
+// Dark #0B0B0E bg, gold radial glow, seam → navy at the bottom
+
+.teaser {
+  position: relative;
+  height: 100vh; height: 100svh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  overflow: hidden;
+  background: #0B0B0E;
+
+  // ── radial gold glow ────────────────────────────────────────────────────
+  &__glow {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      ellipse 70% 55% at 50% 48%,
+      rgba(201, 162, 74, 0.14) 0%,
+      rgba(201, 162, 74, 0.04) 55%,
+      transparent 80%
+    );
+    pointer-events: none;
+    animation: teaser-pulse 6s ease-in-out infinite alternate;
+  }
+
+  // ── headline content ────────────────────────────────────────────────────
+  &__content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 0 clamp(20px, 6vw, 80px);
+    opacity: 0;
+    transform: translateY(28px);
+    transition:
+      opacity   0.9s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+
+    &--visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  &__eyebrow {
+    font: 500 12px/1 'Space Grotesk', sans-serif;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #C9A24A;
+    margin: 0 0 32px;
+    opacity: 0.85;
+  }
+
+  &__headline {
+    font: 800 clamp(40px, 8vw, 108px)/0.95 'Syne', sans-serif;
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+    color: #FAF7F2;
+    margin: 0 0 36px;
+  }
+
+  &__sub {
+    font: 400 clamp(15px, 1.3vw, 18px)/1.7 'Space Grotesk', sans-serif;
+    color: rgba(250, 247, 242, 0.55);
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  // ── scroll hint ──────────────────────────────────────────────────────────
+  &__scroll {
+    position: absolute;
+    bottom: clamp(32px, 5vh, 52px);
+    left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column;
+    align-items: center; gap: 10px;
+    opacity: 0.45;
+    z-index: 2;
+    animation: teaser-scroll-bob 2.4s ease-in-out infinite;
+  }
+
+  &__scroll-line {
+    display: block;
+    width: 1px; height: 40px;
+    background: linear-gradient(to bottom, transparent, #C9A24A 60%, transparent);
+  }
+
+  &__scroll-label {
+    font: 500 11px/1 'Space Grotesk', sans-serif;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #FAF7F2;
+  }
+
+  // ── bottom seam → navy of beat 01 ───────────────────────────────────────
+  &__seam {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 180px;
+    background: linear-gradient(to bottom, transparent 0%, #0D1B4B 100%);
+    pointer-events: none;
+    z-index: 3;
+  }
+}
+
+@keyframes teaser-pulse {
+  from { opacity: 0.75; transform: scale(1); }
+  to   { opacity: 1;    transform: scale(1.06); }
+}
+
+@keyframes teaser-scroll-bob {
+  0%, 100% { transform: translateX(-50%) translateY(0);  }
+  50%       { transform: translateX(-50%) translateY(6px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .teaser__glow   { animation: none; }
+  .teaser__scroll { animation: none; }
+  .teaser__content { transition: none; }
+}
+
+@media (max-width: 599px) {
+  .teaser__headline { letter-spacing: -0.03em; }
+  .teaser__sub { font-size: 15px; }
+}

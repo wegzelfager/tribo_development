@@ -1,0 +1,392 @@
+// Tribo 3D Section — fully scoped styles (.t3d- prefix, no html/body overrides)
+// All IDs from the original standalone page are converted to classes.
+
+:host {
+  display: block;
+  // CSS custom props scoped to host — won't leak to sibling components
+  --t3d-gold:   #C9A24A;
+  --t3d-gold-b: #F6E2A8;
+  --t3d-ink:    #FAF7F2;
+  --t3d-dark:   #0B0B0E;
+}
+
+.t3d-root {
+  display: block;
+  background: var(--t3d-dark);
+  // No overflow:hidden here — would break position:sticky
+}
+
+/* ─── Loading overlay (absolute, local) ──────────────────────────────────── */
+.t3d-loader {
+  position: absolute;
+  inset: 0;
+  z-index: 9999;
+  background: var(--t3d-dark);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  transition: opacity 0.7s ease, visibility 0.7s ease;
+
+  &--hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  &__logo {
+    font: 800 32px/1 'Syne', sans-serif;
+    letter-spacing: -0.02em;
+    color: var(--t3d-gold-b);
+  }
+
+  &__bar-wrap {
+    width: min(300px, 70vw);
+    height: 2px;
+    background: rgba(250, 247, 242, 0.12);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  &__bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--t3d-gold), var(--t3d-gold-b));
+    border-radius: 2px;
+    transition: width 0.2s linear;
+  }
+
+  &__pct {
+    font: 500 13px/1 'Space Grotesk', sans-serif;
+    letter-spacing: 0.08em;
+    opacity: 0.55;
+    color: var(--t3d-ink);
+  }
+
+  &__err {
+    display: none;
+    color: #f87171;
+    font-size: 14px;
+    text-align: center;
+    max-width: 380px;
+    line-height: 1.65;
+    padding: 0 24px;
+    color: #f87171;
+  }
+}
+
+/* ─── Scroll wrapper + sticky stage ──────────────────────────────────────── */
+.t3d-wrap {
+  height: 700vh;
+  position: relative;
+}
+
+.t3d-stage {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100svh;
+  box-sizing: border-box;
+  overflow: hidden;
+  // Background color interpolated by JS between beats
+  background: #0D1B4B;
+  will-change: background-color;
+  padding-top:    env(safe-area-inset-top,    0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ─── Canvas container ────────────────────────────────────────────────────── */
+.t3d-canvas-wrap {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+
+  canvas {
+    display: block;
+    width:  100% !important;
+    height: 100% !important;
+  }
+}
+
+/* ─── Ghost word ──────────────────────────────────────────────────────────── */
+.t3d-ghost {
+  position: absolute;
+  left: 0; right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  text-align: center;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: currentColor;
+  opacity: 0.09;
+  pointer-events: none;
+  white-space: nowrap;
+  user-select: none;
+  z-index: 1;
+  overflow: hidden;
+  will-change: opacity;
+  // Font size set dynamically by fitGhost()
+}
+
+/* ─── Eyebrow ─────────────────────────────────────────────────────────────── */
+.t3d-eyebrow {
+  position: absolute;
+  left: clamp(20px, 4vw, 52px);
+  // Offset fixed site header (~72 px) so eyebrow doesn't hide under it
+  top: calc(env(safe-area-inset-top, 0px) + clamp(82px, 10vh, 104px));
+  font-size: 12px;
+  font-weight: 500;
+  font-family: 'Space Grotesk', sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.50;
+  z-index: 20;
+  pointer-events: none;
+}
+
+/* ─── Beat title (left) ───────────────────────────────────────────────────── */
+.t3d-ttl {
+  position: absolute;
+  left:  clamp(20px, 4vw, 52px);
+  top:   50%;
+  transform: translateY(-50%);
+  max-width: clamp(180px, 26vw, 380px);
+  z-index: 20;
+}
+
+.t3d-beat-k {
+  display: block;
+  font: 500 12px/1 'Space Grotesk', sans-serif;
+  letter-spacing: 0.10em;
+  opacity: 0.55;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+}
+
+.t3d-beat-h {
+  font: 800 clamp(26px, 3.4vw, 56px)/1.02 'Syne', sans-serif;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  margin: 0;
+
+  &::after {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--t3d-gold), transparent);
+    margin-top: 18px;
+    border-radius: 1px;
+  }
+}
+
+/* ─── Beat description (right) ───────────────────────────────────────────── */
+.t3d-beat-d {
+  position: absolute;
+  right: clamp(20px, 4vw, 52px);
+  top:   50%;
+  transform: translateY(-50%);
+  max-width: min(320px, 24vw);
+  font-size: clamp(14px, 1.15vw, 17px);
+  font-family: 'Space Grotesk', sans-serif;
+  line-height: 1.72;
+  opacity: 0.8;
+  z-index: 20;
+}
+
+/* ─── Dot navigation ──────────────────────────────────────────────────────── */
+.t3d-dots {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: max(18px, env(safe-area-inset-bottom, 18px));
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  z-index: 30;
+}
+
+:host ::ng-deep .t3d-dot-btn,
+.t3d-dot-btn {
+  width: 44px; height: 44px;
+  padding: 0;
+  background: none; border: 0;
+  cursor: pointer;
+  display: grid; place-items: center;
+  color: inherit;
+  transition: opacity 0.2s;
+
+  &:hover { opacity: 0.7; }
+
+  i {
+    display: block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    border: 1.5px solid currentColor;
+    background: transparent;
+    transition: background 0.3s, transform 0.3s;
+  }
+
+  &[aria-current="true"] i {
+    background: currentColor;
+    transform: scale(1.2);
+  }
+
+  &:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: -4px;
+    border-radius: 50%;
+  }
+}
+
+/* ─── Itinerary label pills (injected by JS) ──────────────────────────────── */
+:host ::ng-deep .t3d-lab {
+  position: absolute;
+  left: 0; top: 0;
+  z-index: 15;
+  padding: 7px 14px;
+  border: 1px solid rgba(246, 226, 168, 0.55);
+  border-radius: 99px;
+  background: rgba(11, 11, 14, 0.35);
+  backdrop-filter: blur(6px);
+  font: 500 12px/1 'Space Grotesk', sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--t3d-gold-b);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ─── Beat-in animations (explicit final opacities so missing base rules can never break it) ── */
+@keyframes t3d-ttl-in {
+  from { opacity: 0; translate: 0 16px; }
+  to   { opacity: 1; translate: 0 0; }
+}
+
+@keyframes t3d-desc-in {
+  from { opacity: 0; translate: 0 16px; }
+  to   { opacity: 0.8; translate: 0 0; }
+}
+
+@keyframes t3d-ghost-in {
+  from { opacity: 0; translate: 0 16px; }
+  to   { opacity: 0.09; translate: 0 0; }
+}
+
+.t3d-anim-in {
+  animation: t3d-ttl-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.t3d-ghost.t3d-anim-in {
+  animation: t3d-ghost-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.t3d-beat-d.t3d-anim-in {
+  animation: t3d-desc-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.t3d-ttl.t3d-anim-in {
+  animation: t3d-ttl-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ─── Closing CTA section ─────────────────────────────────────────────────── */
+.t3d-cta {
+  position: relative;
+  height: 100vh; height: 100svh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center;
+  padding: 0 20px;
+  background: #0B0B0E;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 50%; top: -10%;
+    width: 90vmin; height: 90vmin;
+    transform: translateX(-50%);
+    background: radial-gradient(circle,
+      rgba(201, 162, 74, 0.22) 0%,
+      rgba(201, 162, 74, 0.05) 50%,
+      transparent 70%);
+    pointer-events: none;
+    animation: t3d-cta-glow 5s ease-in-out infinite alternate;
+  }
+
+  &__headline {
+    position: relative;
+    font: 800 clamp(40px, 7.5vw, 112px)/0.96 'Syne', sans-serif;
+    letter-spacing: -0.035em;
+    color: var(--t3d-ink);
+    margin-bottom: 48px;
+    text-transform: uppercase;
+  }
+
+  &__btn {
+    position: relative;
+    display: inline-flex; align-items: center; gap: 10px;
+    min-height: 56px; padding: 0 40px;
+    border-radius: 99px;
+    background: #fff; color: #14110D;
+    font: 700 15px/1 'Space Grotesk', sans-serif;
+    text-decoration: none; letter-spacing: 0.025em;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.25);
+    transition:
+      transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+
+    &::after { content: '→'; font-size: 17px; transition: transform 0.25s; }
+
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+      &::after { transform: translateX(5px); }
+    }
+
+    &:focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
+  }
+}
+
+@keyframes t3d-cta-glow {
+  from { transform: translateX(-50%) scale(1);   opacity: 0.7; }
+  to   { transform: translateX(-50%) scale(1.1); opacity: 1;   }
+}
+
+/* ─── Mobile layout (<900px) ──────────────────────────────────────────────── */
+@media (max-width: 899px) {
+  .t3d-eyebrow {
+    left: 0; right: 0;
+    text-align: center;
+  }
+
+  .t3d-ttl {
+    left: 0; right: 0; max-width: none;
+    top: calc(env(safe-area-inset-top, 0px) + 120px);
+    transform: none; text-align: center;
+    padding: 0 20px;
+  }
+
+  .t3d-beat-h::after { margin: 18px auto 0; }
+
+  .t3d-beat-d {
+    left: 20px; right: 20px;
+    top: auto; bottom: 72px;
+    transform: none; max-width: none;
+    text-align: center; font-size: 14px;
+  }
+}
+
+/* ─── Reduced motion ──────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .t3d-anim-in,
+  .t3d-ghost.t3d-anim-in,
+  .t3d-beat-d.t3d-anim-in,
+  .t3d-ttl.t3d-anim-in { animation: none; }
+  .t3d-cta::before { animation: none; }
+}

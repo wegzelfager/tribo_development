@@ -1,0 +1,107 @@
+<section class="accord" aria-label="Our services — Sky, Sea, Land, Seal">
+
+  <!-- Top bar -->
+  <header class="accord__top-bar">
+    <h2 class="accord__top-headline">Every journey, protected.</h2>
+    <span class="accord__counter" aria-live="polite" aria-atomic="true">
+      {{ activeIndex + 1 | number:'2.0' }} / 04
+    </span>
+  </header>
+
+  <!-- Accordion panels -->
+  <div
+    class="accord__panels"
+    role="tablist"
+    aria-label="Journey categories"
+    (keydown)="onKeydown($event)">
+
+    @for (panel of panels; track panel.id; let i = $index) {
+      <div
+        class="accord__panel"
+        [class.accord__panel--active]="activeIndex === i"
+        role="tab"
+        [id]="'tab-' + panel.id"
+        [attr.aria-selected]="activeIndex === i"
+        [attr.aria-controls]="'panel-' + panel.id"
+        tabindex="{{ activeIndex === i ? 0 : -1 }}"
+        (click)="setActive(i)"
+        (mouseenter)="!isMobile && setActive(i)">
+
+        <!-- Vertical label (inactive) -->
+        <span class="accord__vert-label" aria-hidden="true">{{ panel.word }}</span>
+
+        <!-- Panel interior (visible when active) -->
+        <div
+          class="accord__panel-body"
+          role="tabpanel"
+          [id]="'panel-' + panel.id"
+          [attr.aria-labelledby]="'tab-' + panel.id"
+          [attr.aria-hidden]="activeIndex !== i">
+
+          <!-- Ghost word behind vehicle -->
+          <span class="accord__ghost" aria-hidden="true">{{ panel.word }}</span>
+
+          <!-- Vehicle image -->
+          <div class="accord__vehicle-wrap">
+            <img
+              class="accord__vehicle"
+              [src]="panel.img"
+              [alt]="panel.imgAlt"
+              [loading]="activeIndex === i ? 'eager' : 'lazy'"
+              decoding="async" />
+          </div>
+
+          <!-- Background image (sky / ocean / savanna) -->
+          <div class="accord__bg-layer">
+            <img
+              class="accord__bg-img"
+              [src]="panel.bg"
+              [alt]="''"
+              loading="lazy"
+              decoding="async"
+              aria-hidden="true" />
+          </div>
+
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Bottom bar -->
+  <footer class="accord__bottom-bar">
+
+    <!-- Caption (bottom-left) -->
+    <div class="accord__caption">
+      <p class="accord__caption-title">{{ activePanel.label }}</p>
+      <p class="accord__caption-desc">{{ activePanel.desc }}</p>
+    </div>
+
+    <!-- Tab nav + progress line (bottom-center) -->
+    <nav class="accord__tab-nav" aria-label="Category tabs">
+      <div class="accord__progress-track">
+        <div
+          class="accord__progress-knob"
+          [style.left.%]="knobPosition">
+        </div>
+      </div>
+      <ul class="accord__tab-list">
+        @for (panel of panels; track panel.id; let i = $index) {
+          <li>
+            <button
+              class="accord__tab-btn"
+              [class.accord__tab-btn--active]="activeIndex === i"
+              type="button"
+              [attr.aria-current]="activeIndex === i ? 'true' : null"
+              (click)="setActive(i)">
+              {{ panel.word }}
+            </button>
+          </li>
+        }
+      </ul>
+    </nav>
+
+    <!-- Empty right placeholder keeps headline/counter balanced -->
+    <div class="accord__bottom-right" aria-hidden="true"></div>
+
+  </footer>
+</section>

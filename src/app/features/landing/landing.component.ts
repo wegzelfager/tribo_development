@@ -6,21 +6,27 @@ import {
 import { isPlatformBrowser } from '@angular/common';
 import { SmoothScrollService } from '../../core/smooth-scroll.service';
 import { HorizonShowcaseComponent } from '../../horizon-showcase/horizon-showcase.component';
- 
+import { JourneyTeaserComponent } from './components/journey-teaser/journey-teaser.component';
+import { Tribo3dSectionComponent } from './components/tribo-3d-section/tribo-3d-section.component';
+
 type GSAPType = typeof import('gsap').gsap;
 type STType = typeof import('gsap/ScrollTrigger').ScrollTrigger;
- 
+
 interface LenisInstance {
   on(event: string, cb: (e: { scroll: number }) => void): void;
   destroy(): void;
   raf(time: number): void;
   resize?(): void;
 }
- 
+
 @Component({
   selector: 'app-landing',
   standalone: true,
-  imports: [HorizonShowcaseComponent],
+  imports: [
+    HorizonShowcaseComponent,
+    JourneyTeaserComponent,
+    Tribo3dSectionComponent,
+  ],
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

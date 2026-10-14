@@ -1,0 +1,245 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tribo — Where trust meets extraordinary journeys</title>
+<meta name="description" content="Tribo is the luxury travel marketplace where trust meets extraordinary journeys. Private jets, superyachts, safari operators, AI itineraries, and full escrow protection.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{box-sizing:border-box;color-scheme:dark;--ink:#FAF7F2;--gold:#D9B97F;--gold-bright:#F6E2A8}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:#0e0e0f;color:var(--ink);font-family:'Space Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased;overscroll-behavior:none}
+.wrap{height:800vh;position:relative}
+.stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:rgb(27,42,107);color:var(--ink);will-change:background-color;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.bg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.ghost{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;font:800 38vh/1 'Syne',sans-serif;letter-spacing:-0.04em;color:currentColor;opacity:0.13;pointer-events:none;white-space:nowrap;user-select:none;z-index:1}
+.veh{position:absolute;left:50%;top:50%;will-change:transform,opacity;pointer-events:none;z-index:10}
+#jet{filter:drop-shadow(0px 40px 40px rgba(0,0,0,.45)) drop-shadow(0px 8px 12px rgba(0,0,0,.3))}
+#yacht,#suv{filter:drop-shadow(0px 20px 30px rgba(0,0,0,.4)) drop-shadow(0px 4px 8px rgba(0,0,0,.25))}
+.eyebrow{position:absolute;left:clamp(20px,4vw,48px);top:clamp(72px,10vh,96px);font-size:13px;font-weight:500;opacity:0.72;letter-spacing:0.02em;z-index:20;pointer-events:none}
+.ttl{position:absolute;left:clamp(20px,4vw,48px);top:50%;transform:translateY(-50%);max-width:28vw;z-index:20}
+.beat-counter{display:block;font-size:13px;font-weight:500;opacity:.7;margin-bottom:14px;letter-spacing:.05em}
+.ttl h2{font:800 clamp(28px,3.8vw,58px)/1.02 'Syne',sans-serif;letter-spacing:-0.03em;text-transform:uppercase}
+.desc{position:absolute;right:clamp(20px,4vw,48px);top:50%;transform:translateY(-50%);max-width:min(320px,24vw);font-size:clamp(14px,1.2vw,17px);line-height:1.65;opacity:.88;z-index:20}
+@keyframes beatIn{from{opacity:0;translate:0 14px}to{opacity:1;translate:0 0}}
+.anim-in{animation:beatIn .55s cubic-bezier(.22,1,.36,1) both}
+.dots{position:absolute;left:0;right:0;bottom:max(14px,env(safe-area-inset-bottom,14px));display:flex;justify-content:center;gap:4px;z-index:30}
+.dots button{width:44px;height:44px;padding:0;background:none;border:0;cursor:pointer;display:grid;place-items:center;color:inherit;transition:opacity .2s}
+.dots button:hover{opacity:.75}
+.dots i{display:block;width:9px;height:9px;border-radius:50%;border:1.5px solid currentColor;background:transparent;transition:background .3s,transform .3s}
+.dots button[aria-current="true"] i{background:currentColor;transform:scale(1.15)}
+.dots button:focus-visible{outline:2px solid currentColor;outline-offset:-4px;border-radius:50%}
+.cta{position:relative;height:100vh;height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 20px;background:#0e0e0f;overflow:hidden}
+.cta::before{content:"";position:absolute;left:50%;top:-20%;width:85vmin;height:85vmin;transform:translateX(-50%);background:radial-gradient(circle,rgba(217,185,127,.28) 0%,rgba(217,185,127,.06) 50%,transparent 70%);pointer-events:none;animation:ctaGlow 4s ease-in-out infinite alternate}
+@keyframes ctaGlow{from{opacity:.7;transform:translateX(-50%) scale(1)}to{opacity:1;transform:translateX(-50%) scale(1.08)}}
+.cta h2{position:relative;margin:0 0 40px;font:800 clamp(38px,7vw,108px)/.97 'Syne',sans-serif;letter-spacing:-0.035em;color:var(--ink)}
+.cta a{position:relative;display:inline-flex;align-items:center;gap:10px;min-height:54px;padding:0 36px;border-radius:99px;background:#fff;color:#14110d;font:700 15px/1 'Space Grotesk',sans-serif;text-decoration:none;letter-spacing:.02em;transition:transform .25s cubic-bezier(.22,1,.36,1),box-shadow .25s cubic-bezier(.22,1,.36,1);box-shadow:0 2px 12px rgba(0,0,0,.2)}
+.cta a::after{content:"→";font-size:16px;transition:transform .25s}
+.cta a:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.3)}
+.cta a:hover::after{transform:translateX(4px)}
+.cta a:focus-visible{outline:2px solid #fff;outline-offset:4px}
+@media(max-width:899px){
+.eyebrow{top:calc(env(safe-area-inset-top,0px) + 80px);left:0;right:0;text-align:center}
+.ttl{left:0;right:0;max-width:none;top:calc(env(safe-area-inset-top,0px) + 140px);transform:none;text-align:center;padding:0 20px}
+.ttl h2{font-size:clamp(24px,8vw,38px)}
+.beat-counter{margin-bottom:8px}
+.desc{left:20px;right:20px;top:auto;bottom:68px;transform:none;max-width:none;text-align:center;font-size:14px;line-height:1.6}
+.ghost{font-size:26vh}
+}
+@media(prefers-reduced-motion:reduce){.cta::before{animation:none}@keyframes beatIn{from{}to{}}@keyframes ctaGlow{}}
+</style>
+</head>
+<body>
+<div class="wrap" id="wrap">
+<section class="stage" id="stage" aria-label="Why Tribo — 5 reasons to trust us">
+<svg class="bg" id="bg" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<radialGradient id="cg" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#fff" stop-opacity=".52"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+<radialGradient id="dg" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#fff0cd" stop-opacity=".48"/><stop offset="1" stop-color="#fff0cd" stop-opacity="0"/></radialGradient>
+<mask id="rm" maskUnits="userSpaceOnUse" x="0" y="0" width="4000" height="4000"><path id="rmp" fill="none" stroke="#fff" stroke-width="36" stroke-linecap="round"/></mask>
+</defs>
+<g id="sky" opacity="0"></g>
+<g id="sea" opacity="0"></g>
+<g id="land" opacity="0"></g>
+<g id="route" opacity="0"><path id="rp" fill="none" stroke="#FAF7F2" stroke-width="2.5" stroke-dasharray="4 13" stroke-linecap="round" mask="url(#rm)"/></g>
+<g id="seal" opacity="0">
+<circle id="sr1" fill="none" stroke="#D9B97F" stroke-width="2.5" stroke-linecap="round"/>
+<circle id="sr2" fill="none" stroke="#D9B97F" stroke-width="1" opacity=".55"/>
+<path id="sp" fill="none"/>
+<text id="stx" fill="#F6E2A8" font-family="'Space Grotesk',sans-serif" font-weight="700" letter-spacing="1.2"><textPath id="stp" href="#sp" startOffset="0%">PAID ONLY ON ARRIVAL · PAID ONLY ON ARRIVAL · </textPath></text>
+<text id="stt" text-anchor="middle" dominant-baseline="middle" fill="#F6E2A8" font-family="'Syne',sans-serif" font-weight="800">TRIBO</text>
+<text id="sts" text-anchor="middle" fill="rgba(250,247,242,.75)" font-family="'Space Grotesk',sans-serif" font-weight="500" letter-spacing="3">ESCROW</text>
+<g id="ticks" fill="none" stroke="#D9B97F" stroke-width="1" opacity=".4"></g>
+</g>
+</svg>
+<div class="ghost" id="ghost" aria-hidden="true"></div>
+<img class="veh" id="jet" src="./jet.png" alt="" role="presentation" draggable="false">
+<svg class="veh" id="yacht" viewBox="0 0 160 440" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<defs>
+<linearGradient id="yh" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#C8D8E2"/><stop offset=".45" stop-color="#FFFFFF"/><stop offset="1" stop-color="#C8D8E2"/></linearGradient>
+<linearGradient id="yd" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#E4D8B8"/><stop offset="1" stop-color="#C8B98A"/></linearGradient>
+</defs>
+<path fill="url(#yh)" d="M80 5C113 62 132 155 133 252L131 404C131 426 117 437 80 437C43 437 29 426 29 404L27 252C28 155 47 62 80 5Z"/>
+<path fill="url(#yd)" d="M80 42C103 95 117 164 119 252L117 398C115 412 101 420 80 420C59 420 45 412 43 398L41 252C43 164 57 95 80 42Z"/>
+<line x1="55" y1="80" x2="55" y2="400" stroke="#b8a068" stroke-width=".8" opacity=".4"/><line x1="62" y1="70" x2="62" y2="410" stroke="#b8a068" stroke-width=".8" opacity=".4"/><line x1="69" y1="64" x2="69" y2="415" stroke="#b8a068" stroke-width=".8" opacity=".4"/><line x1="80" y1="60" x2="80" y2="418" stroke="#b8a068" stroke-width=".8" opacity=".25"/><line x1="91" y1="64" x2="91" y2="415" stroke="#b8a068" stroke-width=".8" opacity=".4"/><line x1="98" y1="70" x2="98" y2="410" stroke="#b8a068" stroke-width=".8" opacity=".4"/><line x1="105" y1="80" x2="105" y2="400" stroke="#b8a068" stroke-width=".8" opacity=".4"/>
+<rect x="50" y="148" width="60" height="130" rx="17" fill="#fff"/>
+<rect x="58" y="162" width="44" height="74" rx="12" fill="#EDE5CE"/>
+<rect x="63" y="172" width="34" height="20" rx="8" fill="#1a2b45" opacity=".9"/>
+<rect x="56" y="316" width="48" height="56" rx="13" fill="#30A2C8" opacity=".8"/>
+<rect x="64" y="326" width="32" height="36" rx="8" fill="#1a7ea0"/>
+<circle cx="80" cy="88" r="24" fill="none" stroke="rgba(200,160,50,.7)" stroke-width="2.5"/>
+<text x="80" y="93" text-anchor="middle" font-size="14" fill="rgba(200,160,50,.7)" font-family="sans-serif" font-weight="700">H</text>
+<line x1="80" y1="5" x2="80" y2="-18" stroke="#ccc" stroke-width="1.4"/>
+<line x1="70" y1="-10" x2="90" y2="-10" stroke="#ccc" stroke-width="1"/>
+</svg>
+<img class="veh" id="suv" src="./suv.png" alt="" role="presentation" draggable="false">
+<p class="eyebrow" aria-hidden="true">Why Tribo &middot; Where trust meets extraordinary journeys</p>
+<div class="ttl" id="ttl"><span class="beat-counter" id="beatK"></span><h2 id="beatH"></h2></div>
+<p class="desc" id="beatD" aria-live="polite" aria-atomic="true"></p>
+<nav class="dots" id="dots" aria-label="Story beat navigation"></nav>
+</section>
+</div>
+<section class="cta" aria-label="Call to action — book your journey">
+<h2>Your journey.<br>Protected.</h2>
+<a href="#" id="ctaBtn" aria-label="Book your flight with Tribo">Book the flight</a>
+</section>
+<script>
+(function(){'use strict';
+var NS='http://www.w3.org/2000/svg';
+function $(id){return document.getElementById(id)}
+function mk(tag,attrs,parent){var el=document.createElementNS(NS,tag);for(var k in attrs)el.setAttribute(k,attrs[k]);parent.appendChild(el);return el}
+var wrap=$('wrap'),stage=$('stage'),bg=$('bg'),jet=$('jet'),yacht=$('yacht'),suv=$('suv'),ghost=$('ghost'),beatK=$('beatK'),beatH=$('beatH'),beatD=$('beatD'),ttl=$('ttl'),dots=$('dots'),gSky=$('sky'),gSea=$('sea'),gLand=$('land'),route=$('route'),rp=$('rp'),rmp=$('rmp'),seal=$('seal'),sr1=$('sr1'),sr2=$('sr2'),sp=$('sp'),stp=$('stp'),stt=$('stt'),sts=$('sts'),ticks=$('ticks'),stx=$('stx');
+var mq=window.matchMedia('(prefers-reduced-motion: reduce)'),reduced=mq.matches;
+mq.addEventListener('change',function(e){reduced=e.matches});
+var BEATS=[
+{k:'01 / 05',t:'Private Fleet',g:'LIVE',bg:[27,42,107],ink:[250,247,242],d:'Instant booking of private jets, helicopters, and superyachts with real-time availability.'},
+{k:'02 / 05',t:'Global Network',g:'120+',bg:[14,124,134],ink:[250,247,242],d:'Access exclusive B2B operator partners and C2C luxury travel experiences across 120+ countries.'},
+{k:'03 / 05',t:'Safari Operators',g:'500+',bg:[226,118,48],ink:[27,15,6],d:'Verified operators with real reviews, insurance certification, and Tribo quality seals on every listing.'},
+{k:'04 / 05',t:'Itinerary Engine',g:'AI',bg:[84,52,150],ink:[250,247,242],d:'Our proprietary AI orchestrates every touchpoint of your journey, with hyper-personalized experiences at scale.'},
+{k:'05 / 05',t:'Secure Escrow',g:'100%',bg:[14,14,15],ink:[250,247,242],d:'Every transaction is held in full escrow until service delivery is confirmed. Zero financial risk.'}
+];
+var N=BEATS.length;
+var vw=0,vh=0,mob=false,cx=0,cy=0,H=0,nodes=[],routeLen=1,RS=0,sealCirc=1;
+var env=[],envOff=0;
+var cur=0,tgt=0,lastNow=performance.now(),T0=lastNow,activeIdx=-1;
+var mx=0.5,pmx=0.5,lastScrollY=window.scrollY,rafRunning=true;
+var btns=[];
+BEATS.forEach(function(b,i){
+var bt=document.createElement('button');bt.type='button';bt.setAttribute('aria-label','Go to '+b.t);bt.setAttribute('aria-current','false');bt.innerHTML='<i></i>';
+bt.addEventListener('click',function(){var ms=wrap.scrollHeight-window.innerHeight,top=wrap.getBoundingClientRect().top+window.scrollY+((i+.5)/N)*ms;window.scrollTo({top:top,behavior:reduced?'auto':'smooth'})});
+dots.appendChild(bt);btns.push(bt)});
+var seed=31337;
+function rnd(){seed=(seed*16807+0)%2147483647;return seed/2147483647}
+function cl(v,a,b){return v<a?a:v>b?b:v}
+function ez(x){return x*x*(3-2*x)}
+function tri(x,c,w){return ez(cl(1-Math.abs(x-c)/w,0,1))}
+function lerp(a,b,t){return a+(b-a)*t}
+function mixColor(a,b,g){return[0,1,2].map(function(i){return Math.round(lerp(a[i],b[i],g))})}
+function heading(P,Q){return Math.atan2(Q[1]-P[1],Q[0]-P[0])*(180/Math.PI)+90}
+function sizeVeh(el,w,h){el.style.width=w+'px';el.style.height=h+'px';el.style.marginLeft=(-w/2)+'px';el.style.marginTop=(-h/2)+'px'}
+function buildEnv(){
+[gSky,gSea,gLand].forEach(function(g){while(g.firstChild)g.removeChild(g.firstChild)});
+env=[];seed=31337;
+for(var i=0;i<11;i++){var w=vw*(.08+rnd()*.13),h=w*(.28+rnd()*.18),el=mk('ellipse',{rx:w,ry:h,fill:'url(#cg)'},gSky);env.push({el:el,x:rnd()*vw,y:rnd()*(vh+280),sp:.4+rnd()*.7})}
+for(i=0;i<40;i++){var len=vw*(.025+rnd()*.065);el=mk('rect',{width:len,height:2.4,rx:1.2,fill:'#fff',opacity:(.15+rnd()*.18).toFixed(2)},gSea);env.push({el:el,x:rnd()*vw,y:rnd()*(vh+280),sp:.8+rnd()*.6})}
+for(i=0;i<20;i++){var a=vw*(.04+rnd()*.09);el=mk('path',{d:'M0 0 Q'+(a/2)+' -'+(a*.22)+' '+a+' 0',fill:'none',stroke:'rgba(80,30,0,.25)','stroke-width':(2.8+rnd()*2).toFixed(1),'stroke-linecap':'round'},gLand);env.push({el:el,x:rnd()*vw,y:rnd()*(vh+280),sp:.7+rnd()*.5})}
+for(i=0;i<8;i++){w=vw*(.06+rnd()*.09);el=mk('ellipse',{rx:w,ry:w*.45,fill:'url(#dg)'},gLand);env.push({el:el,x:rnd()*vw,y:rnd()*(vh+280),sp:.35+rnd()*.5})}}
+function buildSealTicks(){
+while(ticks.firstChild)ticks.removeChild(ticks.firstChild);
+var count=36;for(var i=0;i<count;i++){var angle=(i/count)*Math.PI*2,r1=RS*.84,r2=RS*(i%3===0?.78:.81);
+mk('line',{x1:(Math.cos(angle)*r1).toFixed(2),y1:(Math.sin(angle)*r1).toFixed(2),x2:(Math.cos(angle)*r2).toFixed(2),y2:(Math.sin(angle)*r2).toFixed(2)},ticks)}}
+function layout(){
+vw=window.innerWidth;vh=window.innerHeight;mob=vw<900;cx=vw/2;cy=vh/2;
+bg.setAttribute('viewBox','0 0 '+vw+' '+vh);
+H=Math.min(vh*(mob?.38:.58),580);
+sizeVeh(jet,H*400/440,H);
+var yH=H*.96;sizeVeh(yacht,yH*160/440,yH);
+var sH=H*.76;sizeVeh(suv,sH*160/340,sH);
+var A,B,C;
+if(mob){A=[vw*.28,vh*.36];B=[vw*.72,vh*.50];C=[vw*.28,vh*.64]}
+else{A=[vw*.22,vh*.66];B=[vw*.5,vh*.34];C=[vw*.78,vh*.66]}
+nodes=[A,B,C];
+var d='M'+A[0]+' '+A[1]+' C'+(A[0]+(B[0]-A[0])*.5)+' '+A[1]+' '+(B[0]-(B[0]-A[0])*.5)+' '+B[1]+' '+B[0]+' '+B[1]+' S'+(C[0]-(C[0]-B[0])*.5)+' '+C[1]+' '+C[0]+' '+C[1];
+rp.setAttribute('d',d);rmp.setAttribute('d',d);
+routeLen=(rmp.getTotalLength&&rmp.getTotalLength())||600;rmp.style.strokeDasharray=routeLen;
+RS=Math.min(vw,vh)*(mob?.19:.16);
+sr1.setAttribute('r',RS);sr2.setAttribute('r',RS*.78);
+var textR=RS*.89;
+sp.setAttribute('d','M'+(-textR)+' 0 a'+textR+' '+textR+' 0 1 1 '+(2*textR)+' 0 a'+textR+' '+textR+' 0 1 1 '+(-2*textR)+' 0');
+stp.setAttribute('textLength',(2*Math.PI*textR).toFixed(1));
+stx.setAttribute('font-size',(RS*.12).toFixed(1));
+stt.setAttribute('font-size',(RS*.28).toFixed(1));
+sts.setAttribute('font-size',(RS*.09).toFixed(1));
+sts.setAttribute('y',(RS*.32).toFixed(1));
+sealCirc=2*Math.PI*RS;sr1.style.strokeDasharray=sealCirc;
+buildEnv();buildSealTicks()}
+function kfs(now){
+var ns=mob?.28:.40,sw=mob?.36:.50,mini=ns*.80;
+var speed=now/7000,Ro=RS*(mob?2.3:2.1);
+var oa=[speed,speed+2.094,speed+4.189];
+function orb(j,sc){var th=oa[j];return{x:(cx+Ro*Math.cos(th))/vw,y:(cy+Ro*Math.sin(th))/vh,s:sc,r:(th*180/Math.PI)+180,o:1}}
+function nd(P,sc,rot){return{x:P[0]/vw,y:P[1]/vh,s:sc,r:rot,o:1}}
+var hAB=heading(nodes[0],nodes[1]),hBC=heading(nodes[1],nodes[2]);
+return{
+jet:[{x:.5,y:.5,s:ns,r:0,o:1},{x:.5,y:-.9,s:ns,r:0,o:0},{x:.5,y:-.9,s:ns,r:0,o:0},nd(nodes[0],ns,hAB),orb(0,mini)],
+yacht:[{x:.5,y:1.9,s:ns,r:0,o:0},{x:.5,y:.5,s:ns,r:0,o:1},{x:.5,y:-.9,s:ns,r:0,o:0},nd(nodes[1],ns,(hAB+hBC)/2),orb(1,mini)],
+suv:[{x:.5,y:1.9,s:sw,r:0,o:0},{x:.5,y:1.9,s:sw,r:0,o:0},{x:.5,y:.5,s:sw,r:0,o:1},nd(nodes[2],sw,hBC),orb(2,sw*.8)]}}
+function place(el,K,kk,g,bob,px){
+var a=K[kk],b=K[kk+1];
+var x=lerp(a.x,b.x,g),y=lerp(a.y,b.y,g)+bob,s=a.s*Math.pow(b.s/a.s,g),r=lerp(a.r,b.r,g),o=lerp(a.o,b.o,g);
+el.style.transform='translate3d('+((x-.5)*vw+px).toFixed(1)+'px,'+((y-.5)*vh).toFixed(1)+'px,0) rotate('+(r+px*.10).toFixed(2)+'deg) scale('+s.toFixed(4)+')';
+el.style.opacity=cl(o,0,1).toFixed(3)}
+function setIdx(i){
+if(i===activeIdx)return;activeIdx=i;var b=BEATS[i];
+beatK.textContent=b.k;beatH.textContent=b.t;beatD.textContent=b.d;ghost.textContent=b.g;
+btns.forEach(function(btn,j){btn.setAttribute('aria-current',j===i?'true':'false')});
+[ttl,beatD,ghost].forEach(function(el){el.classList.remove('anim-in');void el.offsetWidth;el.classList.add('anim-in')})}
+function prog(){var ms=wrap.scrollHeight-window.innerHeight,sc=-wrap.getBoundingClientRect().top;return cl(sc/Math.max(1,ms),0,1)}
+function render(p,now,dt,sd){
+var u=cl(p*N-.5,0,N-1),kk=Math.min(N-2,Math.floor(u)),f=u-kk,g=ez(cl((f-.25)/.5,0,1)),pos=kk+g;
+var A=BEATS[kk],B=BEATS[kk+1],bgc=mixColor(A.bg,B.bg,g),ink=mixColor(A.ink,B.ink,g);
+stage.style.backgroundColor='rgb('+bgc+')';stage.style.color='rgb('+ink+')';
+setIdx(Math.round(pos));
+pmx+=(mx-pmx)*(1-Math.exp(-dt*5));
+var pm=reduced?0:(pmx-.5)*24;
+var ep=reduced?1:cl((now-T0)/2200,0,1),ee=1-Math.pow(1-ep,4);
+var bob=reduced?0:Math.sin(now/1200)*.0055;
+var K=kfs(now);
+place(jet,K.jet,kk,g,(1-ee)*.92+bob,pm);
+place(yacht,K.yacht,kk,g,bob,pm*.55);
+place(suv,K.suv,kk,g,bob*.45,pm*.45);
+envOff+=reduced?0:(50*dt+Math.abs(sd)*.8);
+gSky.setAttribute('opacity',tri(pos,0,.9).toFixed(3));
+gSea.setAttribute('opacity',tri(pos,1,.9).toFixed(3));
+gLand.setAttribute('opacity',tri(pos,2,.9).toFixed(3));
+env.forEach(function(e){var y=((e.y+envOff*e.sp)%(vh+300))-120;e.el.setAttribute('transform','translate('+e.x.toFixed(1)+','+y.toFixed(1)+')')});
+var rd=ez(cl((pos-2.35)/.65,0,1)),ro=1-ez(cl((pos-3.5)/.5,0,1));
+rmp.style.strokeDashoffset=(routeLen*(1-rd)).toFixed(1);route.setAttribute('opacity',(ro*(rd>0?1:0)).toFixed(3));
+var si=ez(cl((pos-3.35)/.65,0,1)),sr=reduced?0:(now/95)%360;
+seal.setAttribute('transform','translate('+cx+','+cy+') rotate('+sr.toFixed(1)+') scale('+(0.80+0.20*si).toFixed(3)+')');
+seal.setAttribute('opacity',si.toFixed(3));sr1.style.strokeDashoffset=(sealCirc*(1-si)).toFixed(1);
+ghost.style.opacity=(.13*(1-ez(cl((pos-3.65)/.35,0,1)))).toFixed(3)}
+function loop(now){
+if(!rafRunning)return;
+requestAnimationFrame(loop);
+var dt=Math.min(.05,(now-lastNow)/1000);lastNow=now;
+var cy2=window.scrollY,sd=cy2-lastScrollY;lastScrollY=cy2;
+cur+=(tgt-cur)*(reduced?1:1-Math.exp(-dt*6));
+render(cur,now,dt,sd)}
+stage.addEventListener('pointermove',function(e){if(e.pointerType==='mouse')mx=e.clientX/window.innerWidth});
+window.addEventListener('scroll',function(){tgt=prog()},{passive:true});
+window.addEventListener('resize',layout);
+if('IntersectionObserver' in window)new IntersectionObserver(function(entries){
+var visible=entries[0].isIntersecting;
+if(visible&&!rafRunning){rafRunning=true;lastNow=performance.now();lastScrollY=window.scrollY;requestAnimationFrame(loop)}
+else if(!visible)rafRunning=false},{threshold:0}).observe(wrap);
+function init(){layout();tgt=prog();cur=tgt;T0=performance.now();lastNow=T0;lastScrollY=window.scrollY;requestAnimationFrame(loop)}
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(init);else init();
+})();
+</script>
+</body>
+</html>

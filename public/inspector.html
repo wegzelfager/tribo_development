@@ -1,0 +1,36 @@
+﻿<!doctype html><html><head><meta charset="utf-8"><title>GLB Inspector</title></head>
+<body style="background:#111;color:#eee;font-family:monospace;padding:20px">
+<pre id="log">Loading...</pre>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+const log = s => { document.getElementById('log').textContent += s + '\n'; console.log(s); };
+log('Loading plane.glb...');
+const loader = new GLTFLoader();
+loader.load('/assets/plane.glb', (gltf) => {
+  const scene = gltf.scene;
+  log('=== SCENE GRAPH ===');
+  let meshCount=0, matCount=0, mats=new Set();
+  scene.traverse(o => {
+    const pad = '  '.repeat(getDepth(o,scene));
+    log(pad + o.type + ' "' + o.name + '"' + (o.isMesh?' [MESH geo:verts='+o.geometry.attributes.position.count+']':''));
+    if(o.isMesh){meshCount++;if(o.material){[].concat(o.material).forEach(m=>{mats.add(m.name+'['+m.type+']')})}}
+  });
+  log('\n=== MATERIALS ('+mats.size+') ===');
+  mats.forEach(m=>log('  '+m));
+  log('\n=== ANIMATIONS ('+gltf.animations.length+') ===');
+  gltf.animations.forEach(a=>log('  "'+a.name+'" dur='+a.duration.toFixed(2)+'s'));
+  const box = new THREE.Box3().setFromObject(scene);
+  const size = box.getSize(new THREE.Vector3());
+  const center = box.getCenter(new THREE.Vector3());
+  log('\n=== BOUNDING BOX ===');
+  log('  Size X='+size.x.toFixed(3)+' Y='+size.y.toFixed(3)+' Z='+size.z.toFixed(3));
+  log('  Center X='+center.x.toFixed(3)+' Y='+center.y.toFixed(3)+' Z='+center.z.toFixed(3));
+  log('  Mesh count: '+meshCount);
+  log('\n=== CHILDREN OF ROOT ===');
+  scene.children.forEach(c=>log('  '+c.type+' "'+c.name+'" pos=('+c.position.x.toFixed(2)+','+c.position.y.toFixed(2)+','+c.position.z.toFixed(2)+') rot=('+c.rotation.x.toFixed(2)+','+c.rotation.y.toFixed(2)+','+c.rotation.z.toFixed(2)+')'));
+  log('\nDONE');
+}, xhr=>log('Loading '+Math.round(xhr.loaded/xhr.total*100)+'%'), err=>log('ERROR: '+err));
+function getDepth(o,root){let d=0,c=o;while(c!==root&&c.parent){d++;c=c.parent}return d}
+</script></body></html>

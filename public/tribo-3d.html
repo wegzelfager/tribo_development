@@ -1,0 +1,623 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tribo — Where Trust Meets Extraordinary Journeys</title>
+<meta name="description" content="Tribo is the luxury travel marketplace for private jets, superyachts, and safari experiences.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.167.1/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.167.1/examples/jsm/"
+} }
+</script>
+<style>
+:root{--navy:#0D1B4B;--dark:#0B0B0E;--ink:#FAF7F2;--gold:#C9A24A;--gold-b:#F6E2A8;color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--dark);color:var(--ink);font-family:'Space Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased;overscroll-behavior:none}
+ 
+#loader{position:fixed;inset:0;z-index:9999;background:var(--dark);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;transition:opacity .7s ease,visibility .7s ease}
+#loader.hidden{opacity:0;visibility:hidden;pointer-events:none}
+#loader-logo{font:800 32px/1 'Syne',sans-serif;letter-spacing:-.02em;color:var(--gold-b)}
+#loader-bar-wrap{width:min(300px,70vw);height:2px;background:rgba(250,247,242,.12);border-radius:2px;overflow:hidden}
+#loader-bar{height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--gold-b));transition:width .2s linear}
+#loader-pct{font:500 13px/1 'Space Grotesk',sans-serif;letter-spacing:.08em;opacity:.55}
+#loader-err{display:none;color:#f87171;font-size:14px;text-align:center;max-width:380px;line-height:1.65;padding:0 24px}
+ 
+#wrap{height:700vh;position:relative}
+#stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);background:#0D1B4B;will-change:background-color}
+#canvas-wrap{position:absolute;inset:0;pointer-events:none;z-index:2}
+canvas{display:block;width:100%!important;height:100%!important}
+#ghost{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;font:800 14vw/1 'Syne',sans-serif;letter-spacing:-.04em;color:currentColor;opacity:.09;pointer-events:none;white-space:nowrap;user-select:none;z-index:1}
+#eyebrow{position:absolute;left:clamp(20px,4vw,52px);top:clamp(72px,9vh,96px);font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;opacity:.5;z-index:20;pointer-events:none}
+#ttl{position:absolute;left:clamp(20px,4vw,52px);top:50%;transform:translateY(-50%);max-width:clamp(180px,26vw,380px);z-index:20}
+#beat-k{display:block;font:500 12px/1 'Space Grotesk',sans-serif;letter-spacing:.1em;opacity:.55;margin-bottom:16px;text-transform:uppercase}
+#beat-h{font:800 clamp(28px,3.8vw,62px)/1.01 'Syne',sans-serif;letter-spacing:-.03em;text-transform:uppercase}
+#beat-h::after{content:'';display:block;width:48px;height:2px;background:linear-gradient(90deg,var(--gold),transparent);margin-top:20px;border-radius:1px}
+#beat-d{position:absolute;right:clamp(20px,4vw,52px);top:50%;transform:translateY(-50%);max-width:min(320px,24vw);font-size:clamp(14px,1.15vw,17px);line-height:1.72;opacity:.8;z-index:20}
+#dots{position:absolute;left:0;right:0;bottom:max(18px,env(safe-area-inset-bottom,18px));display:flex;justify-content:center;gap:6px;z-index:30}
+#dots button{width:44px;height:44px;padding:0;background:none;border:0;cursor:pointer;display:grid;place-items:center;color:inherit;transition:opacity .2s}
+#dots button:hover{opacity:.7}
+#dots i{display:block;width:8px;height:8px;border-radius:50%;border:1.5px solid currentColor;transition:background .3s,transform .3s}
+#dots button[aria-current="true"] i{background:currentColor;transform:scale(1.2)}
+#dots button:focus-visible{outline:2px solid currentColor;outline-offset:-4px;border-radius:50%}
+ 
+/* No `to` keyframe on purpose: elements animate to their own computed opacity (ghost .09, desc .80) */
+@keyframes beatIn{from{opacity:0;translate:0 16px}}
+.anim-in{animation:beatIn .6s cubic-bezier(.22,1,.36,1) both}
+ 
+/* Itinerary touchpoint labels (beat 04) — positioned from 3D by JS */
+.lab{position:absolute;left:0;top:0;z-index:15;padding:7px 14px;border:1px solid rgba(246,226,168,.55);border-radius:99px;background:rgba(11,11,14,.35);backdrop-filter:blur(6px);font:500 12px/1 'Space Grotesk',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-b);white-space:nowrap;opacity:0;pointer-events:none}
+ 
+#cta{position:relative;height:100vh;height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 20px;background:#0B0B0E;overflow:hidden}
+#cta::before{content:'';position:absolute;left:50%;top:-10%;width:90vmin;height:90vmin;transform:translateX(-50%);background:radial-gradient(circle,rgba(201,162,74,.22) 0%,rgba(201,162,74,.05) 50%,transparent 70%);pointer-events:none;animation:ctaGlow 5s ease-in-out infinite alternate}
+@keyframes ctaGlow{from{transform:translateX(-50%) scale(1);opacity:.7}to{transform:translateX(-50%) scale(1.1);opacity:1}}
+#cta h2{position:relative;font:800 clamp(40px,7.5vw,112px)/.96 'Syne',sans-serif;letter-spacing:-.035em;color:#FAF7F2;margin-bottom:48px}
+#cta a{position:relative;display:inline-flex;align-items:center;gap:10px;min-height:56px;padding:0 40px;border-radius:99px;background:#fff;color:#14110D;font:700 15px/1 'Space Grotesk',sans-serif;text-decoration:none;letter-spacing:.025em;box-shadow:0 2px 16px rgba(0,0,0,.25);transition:transform .28s cubic-bezier(.22,1,.36,1),box-shadow .28s cubic-bezier(.22,1,.36,1)}
+#cta a::after{content:'→';font-size:17px;transition:transform .25s}
+#cta a:hover{transform:translateY(-3px);box-shadow:0 10px 40px rgba(0,0,0,.35)}
+#cta a:hover::after{transform:translateX(5px)}
+#cta a:focus-visible{outline:2px solid #fff;outline-offset:4px}
+ 
+@media (max-width:899px){
+  #eyebrow{left:0;right:0;text-align:center}
+  #ttl{left:0;right:0;max-width:none;top:calc(env(safe-area-inset-top,0px) + 110px);transform:none;text-align:center;padding:0 24px}
+  #beat-h::after{margin:20px auto 0}
+  #beat-d{left:20px;right:20px;top:auto;bottom:72px;transform:none;max-width:none;text-align:center;font-size:14px}
+}
+@media (prefers-reduced-motion:reduce){.anim-in{animation:none}#cta::before{animation:none}}
+</style>
+</head>
+<body>
+ 
+<div id="loader" role="status" aria-live="polite">
+  <div id="loader-logo">TRIBO</div>
+  <div id="loader-bar-wrap"><div id="loader-bar"></div></div>
+  <div id="loader-pct">Loading model…</div>
+  <div id="loader-err"></div>
+</div>
+ 
+<div id="wrap">
+  <section id="stage" aria-label="Tribo — 5 reasons to trust us">
+    <div id="canvas-wrap" aria-hidden="true"></div>
+    <div id="ghost" aria-hidden="true"><span id="ghost-t"></span></div>
+    <p id="eyebrow" aria-hidden="true">Where trust meets extraordinary journeys</p>
+    <div id="ttl"><span id="beat-k"></span><h2 id="beat-h"></h2></div>
+    <p id="beat-d" aria-live="polite" aria-atomic="true"></p>
+    <nav id="dots" aria-label="Story navigation"></nav>
+  </section>
+</div>
+ 
+<section id="cta" aria-label="Call to action — book your journey">
+  <h2>Your journey.<br>Protected.</h2>
+  <a href="#" id="cta-btn" aria-label="Book your private flight with Tribo">Book the flight</a>
+</section>
+ 
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader }      from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader }     from 'three/addons/loaders/DRACOLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+ 
+/* ─── Utils ─────────────────────────────────────────────────────────────────── */
+const $  = id => document.getElementById(id);
+const cl = (v,a,b) => v < a ? a : v > b ? b : v;
+const lr = (a,b,t) => a + (b-a)*t;
+const ez = x => x*x*(3-2*x);
+const mx = (a,b,g) => a.map((v,i) => lr(v,b[i],g));
+const rad = d => d * Math.PI / 180;
+const win = (s,a,b) => ez(cl((s-a)/(b-a),0,1));          // smooth 0→1 ramp between a and b
+const kf = (t,k) => {                                      // eased keyframes [[t,v],…]
+  if (t <= k[0][0]) return k[0][1];
+  for (let i = 1; i < k.length; i++) if (t <= k[i][0]) {
+    const a = k[i-1], b = k[i];
+    return lr(a[1], b[1], ez((t-a[0])/(b[0]-a[0])));
+  }
+  return k[k.length-1][1];
+};
+ 
+/* ─── DOM ───────────────────────────────────────────────────────────────────── */
+const wrap = $('wrap'), stage = $('stage'), canvasWrap = $('canvas-wrap');
+const loaderEl = $('loader'), loaderBar = $('loader-bar'), loaderPct = $('loader-pct'), loaderErr = $('loader-err');
+const ghostEl = $('ghost'), ghostT = $('ghost-t'), beatK = $('beat-k'), beatH = $('beat-h'), beatD = $('beat-d');
+const ttl = $('ttl'), dotsNav = $('dots');
+ 
+const reduMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
+let reduced = reduMQ.matches;
+reduMQ.addEventListener('change', e => { reduced = e.matches; });
+ 
+/* ─── Story beats ───────────────────────────────────────────────────────────────
+   Each beat = a headline + a real ACTION the plane performs to prove it:
+   01 take-off roll & lift-off      02 orbit a globe while route arcs light up
+   03 climb through clouds → calm   04 fly through glowing itinerary gates
+   05 land → gold shield dome + lock closes around the plane
+   cam = camera angle relative to what it's following (orbit°, elev°, distance)
+──────────────────────────────────────────────────────────────────────────────── */
+const BEATS = [
+  { k:'01 / 05', t:'Private Fleet',  g:'SOVEREIGN', bg:[13,27,75],  ink:[250,247,242],
+    d:'On-demand access to a curated fleet of private jets and helicopters — ready to lift off within hours.',
+    cam:{ orbit:60,  elev:7,  dist:9 } },
+  { k:'02 / 05', t:'Global Network', g:'INFINITE',  bg:[9,110,125], ink:[250,247,242],
+    d:'B2B partners and C2C experiences across 120+ countries. Every operator is verified, rated, and insured.',
+    cam:{ orbit:78,  elev:12, dist:15.5 } },
+  { k:'03 / 05', t:'Above The World', g:'ALTITUDE', bg:[17,10,45],  ink:[250,247,242],
+    d:'At 51,000 ft, above turbulence and crowds — a cabin calibrated for absolute calm.',
+    cam:{ orbit:0,   elev:80, dist:11 } },
+  { k:'04 / 05', t:'AI Itinerary',   g:'PRECISION', bg:[168,72,15], ink:[250,247,242],
+    d:'Our proprietary AI orchestrates every touchpoint — transfers, concierge, climate. Nothing left to chance.',
+    cam:{ orbit:168, elev:13, dist:9.5 } },
+  { k:'05 / 05', t:'Secure Escrow',  g:'PROTECTED', bg:[10,10,14],  ink:[250,247,242],
+    d:'Every transaction held in full escrow until service delivery is confirmed. Zero financial risk.',
+    cam:{ orbit:322, elev:14, dist:10 } }
+];
+const N = BEATS.length;
+ 
+const scrollSpan = () => Math.max(1, wrap.offsetHeight - stage.offsetHeight);
+ 
+const btns = [];
+BEATS.forEach((b, i) => {
+  const bt = document.createElement('button');
+  bt.type = 'button';
+  bt.setAttribute('aria-label', `Go to ${b.t}`);
+  bt.setAttribute('aria-current', 'false');
+  bt.innerHTML = '<i></i>';
+  bt.addEventListener('click', () => {
+    const top = wrap.getBoundingClientRect().top + window.scrollY + ((i + 0.5) / N) * scrollSpan();
+    window.scrollTo({ top, behavior: reduced ? 'auto' : 'smooth' });
+  });
+  dotsNav.appendChild(bt);
+  btns.push(bt);
+});
+ 
+/* ─── Three.js setup ────────────────────────────────────────────────────────── */
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setClearColor(0x000000, 0);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+canvasWrap.appendChild(renderer.domElement);
+ 
+const scene  = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 500);
+camera.position.set(0, 2, 10);
+ 
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment()).texture;
+pmrem.dispose();
+ 
+scene.add(new THREE.AmbientLight(0xffffff, 0.35));
+ 
+const keyLight = new THREE.DirectionalLight(0xfaf0e0, 2.6);
+const KEY_OFF = new THREE.Vector3(-6, 10, 8);
+keyLight.castShadow = true;
+keyLight.shadow.mapSize.set(1024, 1024);
+keyLight.shadow.camera.near = 0.5; keyLight.shadow.camera.far = 60;
+keyLight.shadow.camera.left = keyLight.shadow.camera.bottom = -8;
+keyLight.shadow.camera.right = keyLight.shadow.camera.top = 8;
+keyLight.shadow.bias = -0.001;
+scene.add(keyLight, keyLight.target);          // light + target follow the plane (see updateWorld)
+ 
+const rimLight = new THREE.DirectionalLight(0xC9A24A, 0);   // gold rim, animated by scroll
+rimLight.position.set(8, 3, -10);
+scene.add(rimLight);
+ 
+const fillLight = new THREE.DirectionalLight(0x8ab4c8, 0.5);
+fillLight.position.set(4, -4, 6);
+scene.add(fillLight);
+ 
+const shadowMat  = new THREE.ShadowMaterial({ opacity: 0.30, transparent: true });
+const shadowMesh = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), shadowMat);
+shadowMesh.rotation.x = -Math.PI / 2;
+shadowMesh.position.y = 0.01;
+shadowMesh.receiveShadow = true;
+scene.add(shadowMesh);
+ 
+/* ─── Ghost word: fit to viewport width ─────────────────────────────────────── */
+function fitGhost() {
+  const vw = stage.clientWidth || window.innerWidth;
+  const vh = stage.clientHeight || window.innerHeight;
+  ghostEl.style.fontSize = '100px';
+  const w100 = ghostT.getBoundingClientRect().width;
+  if (!w100) return;
+  ghostEl.style.fontSize = Math.min((vw * 0.94 / w100) * 100, vh * (vw < 900 ? 0.26 : 0.30)).toFixed(1) + 'px';
+}
+ 
+function resize() {
+  const w = canvasWrap.clientWidth || window.innerWidth;
+  const h = canvasWrap.clientHeight || window.innerHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  fitGhost();
+}
+resize();
+if ('ResizeObserver' in window) new ResizeObserver(resize).observe(stage);
+else window.addEventListener('resize', resize);
+ 
+/* ─── State ─────────────────────────────────────────────────────────────────── */
+let modelGroup = null, mixer = null, hasAnims = false, modelBytes = 0;
+let restY = 0.5;          // height of the model's centre when its wheels touch the ground
+let world = null;         // props + anchor points, built after the model loads
+let camOrbit = 60, camElev = 7, camDist = 9;
+let tgt = 0, cur = 0, lastNow = performance.now(), rafId = 0, activeIdx = -1;
+ 
+function setIdx(i) {
+  if (i === activeIdx) return;
+  activeIdx = i;
+  const b = BEATS[i];
+  beatK.textContent = b.k; beatH.textContent = b.t; beatD.textContent = b.d; ghostT.textContent = b.g;
+  fitGhost();
+  btns.forEach((btn, j) => btn.setAttribute('aria-current', j === i ? 'true' : 'false'));
+  [ttl, beatD, ghostEl].forEach(el => { el.classList.remove('anim-in'); void el.offsetWidth; el.classList.add('anim-in'); });
+}
+ 
+function getScrollProgress() {
+  return cl(-wrap.getBoundingClientRect().top / scrollSpan(), 0, 1);
+}
+ 
+/* ═══ FLIGHT RIG + CHOREOGRAPHY ═══════════════════════════════════════════════
+   Which model axis is the nose? Default +Z. If the plane flies sideways or
+   backwards, open the page with ?nose=-z  or  ?nose=+x  or  ?nose=-x
+═══════════════════════════════════════════════════════════════════════════════ */
+const NOSE = new URLSearchParams(location.search).get('nose') || '+z';
+const NOSE_YAW = { '+z':0, '-z':Math.PI, '+x':-Math.PI/2, '-x':Math.PI/2 }[NOSE] ?? 0;
+ 
+const rig = new THREE.Group();                       // moved/rotated by the choreography
+const P = new THREE.Vector3(), F = new THREE.Vector3(0,0,1), UP = new THREE.Vector3(0,1,0);
+const T2 = new THREE.Vector3(), TMP = new THREE.Vector3(), ZERO = new THREE.Vector3(), Z_AXIS = new THREE.Vector3(0,0,1);
+const M4 = new THREE.Matrix4(), QR = new THREE.Quaternion();
+const focus = new THREE.Vector3(), tgtFocus = new THREE.Vector3();
+const GOLD = new THREE.Color(0xF6E2A8);
+let focusInit = false;
+ 
+function fade(o, a) {                                // fade a whole prop group in/out
+  o.visible = a > 0.01;
+  if (!o.visible) return;
+  o.traverse(n => {
+    const m = n.material; if (!m) return;
+    if (m.uniforms) { m.uniforms.uA.value = a; return; }
+    m.transparent = true;
+    m.userData.b ??= m.opacity;
+    m.opacity = m.userData.b * a;
+  });
+}
+ 
+function setupWorld() {
+  console.info(`[Tribo 3D] nose axis = ${NOSE}. If the plane looks sideways/backwards, try ?nose=-z, +x or -x`);
+  const W = { R: 2.9 };
+  const RG = 2.15;                                   // globe radius
+  const E0 = new THREE.Vector3(0, restY + 3, 16);    // end of take-off
+  W.E0 = E0;
+  W.C1 = E0.clone().setY(E0.y - W.R);                // globe centre (plane starts the orbit on top of it)
+  W.E2 = new THREE.Vector3(0, restY + 6.5, E0.z + 30);
+  const pp = [[0,0,0],[0,0,6],[4,.8,14],[-3.5,-.6,23],[3.5,.8,32],[0,0,39],[0,0,44]]
+    .map(([x,y,z]) => new THREE.Vector3(W.E2.x + x, W.E2.y + y, W.E2.z + z));
+  W.path = new THREE.CatmullRomCurve3(pp, false, 'centripetal');
+  W.E3 = pp[6];
+  W.E4 = new THREE.Vector3(0, restY, W.E3.z + 40);   // parked position
+ 
+  /* Runway */
+  const L = W.E4.z + 100, z0 = -40, n = Math.floor(L / 6);
+  const run = new THREE.Group();
+  const strip = new THREE.Mesh(new THREE.PlaneGeometry(8, L), new THREE.MeshStandardMaterial({ color: 0x15161c, roughness: .85, metalness: .1 }));
+  strip.rotation.x = -Math.PI / 2; strip.position.set(0, 0, z0 + L / 2);
+  const dash = new THREE.InstancedMesh(new THREE.BoxGeometry(.25, .02, 2.2), new THREE.MeshBasicMaterial({ color: 0xFAF7F2 }), n);
+  const lamp = new THREE.InstancedMesh(new THREE.SphereGeometry(.09, 8, 6), new THREE.MeshBasicMaterial({ color: 0xF6E2A8 }), n * 2);
+  const m = new THREE.Matrix4();
+  for (let i = 0; i < n; i++) {
+    const z = z0 + i * 6;
+    dash.setMatrixAt(i, m.makeTranslation(0, .02, z));
+    lamp.setMatrixAt(i * 2,     m.makeTranslation(-4.1, .09, z));
+    lamp.setMatrixAt(i * 2 + 1, m.makeTranslation( 4.1, .09, z));
+  }
+  run.add(strip, dash, lamp); scene.add(run); W.run = run;
+ 
+  /* Globe: dotted sphere + glowing cities + animated route arcs */
+  const ll = (lat, lon, r) => { const a = rad(lat), o = rad(lon); return new THREE.Vector3(Math.cos(a)*Math.sin(o)*r, Math.sin(a)*r, Math.cos(a)*Math.cos(o)*r); };
+  const CITY = { cai:[30,31], lon:[51.5,0], nyc:[40.7,-74], dxb:[25.2,55.3], sin:[1.3,103.8], tok:[35.7,139.7], syd:[-33.9,151.2], cpt:[-33.9,18.4], sao:[-23.5,-46.6], lax:[34,-118] };
+  const globe = new THREE.Group();
+  const core = new THREE.Mesh(new THREE.SphereGeometry(RG - .03, 48, 32), new THREE.MeshBasicMaterial({ color: 0x053a44, transparent: true, opacity: .92 }));
+  const dots = new Float32Array(2400 * 3);
+  for (let i = 0; i < 2400; i++) {
+    const y = 1 - 2 * (i + .5) / 2400, r = Math.sqrt(1 - y * y), a = i * 2.39996323;
+    dots.set([Math.cos(a) * r * RG, y * RG, Math.sin(a) * r * RG], i * 3);
+  }
+  const pg = new THREE.BufferGeometry(); pg.setAttribute('position', new THREE.BufferAttribute(dots, 3));
+  const dotPts = new THREE.Points(pg, new THREE.PointsMaterial({ color: 0x8fe3ee, size: .045, transparent: true, depthWrite: false }));
+  const cityPts = new THREE.Points(new THREE.BufferGeometry().setFromPoints(Object.values(CITY).map(c => ll(...c, RG + .01))),
+    new THREE.PointsMaterial({ color: 0xFFE9A8, size: .13, transparent: true, depthWrite: false }));
+  core.renderOrder = 0; dotPts.renderOrder = 1; cityPts.renderOrder = 3;
+  const arcs = new THREE.Group(); W.arcLines = [];
+  [['cai','lon'],['cai','dxb'],['lon','nyc'],['dxb','sin'],['sin','tok'],['nyc','lax'],['cai','cpt'],['sin','syd'],['nyc','sao']].forEach(([a, b]) => {
+    const A = ll(...CITY[a], RG), B = ll(...CITY[b], RG);
+    const mid = A.clone().add(B).multiplyScalar(.5).normalize().multiplyScalar(RG + A.distanceTo(B) * .28);
+    const ln = new THREE.Line(new THREE.BufferGeometry().setFromPoints(new THREE.QuadraticBezierCurve3(A, mid, B).getPoints(48)),
+      new THREE.LineBasicMaterial({ color: 0xF6E2A8, transparent: true }));
+    ln.renderOrder = 2; arcs.add(ln); W.arcLines.push(ln);
+  });
+  globe.add(core, dotPts, cityPts, arcs); globe.position.copy(W.C1); scene.add(globe); W.globe = globe;
+ 
+  /* Clouds (soft sprites in a layer the plane climbs through) */
+  const cv = document.createElement('canvas'); cv.width = cv.height = 128;
+  const cx = cv.getContext('2d'), gr = cx.createRadialGradient(64, 64, 0, 64, 64, 64);
+  gr.addColorStop(0, 'rgba(255,255,255,.9)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+  cx.fillStyle = gr; cx.fillRect(0, 0, 128, 128);
+  const cTex = new THREE.CanvasTexture(cv); cTex.colorSpace = THREE.SRGBColorSpace;
+  const clouds = new THREE.Group();
+  for (let i = 0; i < 48; i++) {
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: cTex, transparent: true, depthWrite: false, color: 0xcfd8ff, opacity: .25 + Math.random() * .3 }));
+    const sc = 5 + Math.random() * 6; sp.scale.set(sc, sc * .6, 1);
+    sp.position.set((Math.random() - .5) * 34, restY + 3.2 + Math.random() * 1.4, E0.z - 6 + Math.random() * (W.E3.z - E0.z + 10));
+    clouds.add(sp);
+  }
+  scene.add(clouds); W.clouds = clouds;
+ 
+  /* Itinerary gates + path (touchpoints) */
+  W.ru = [.2, .4, .6, .8];
+  const gates = new THREE.Group(); W.rings = [];
+  W.ru.forEach(u => {
+    const r = new THREE.Mesh(new THREE.TorusGeometry(2.6, .05, 10, 72), new THREE.MeshBasicMaterial({ color: 0xFAF7F2, transparent: true }));
+    const c = W.path.getPointAt(u);
+    r.position.copy(c); r.lookAt(c.clone().add(W.path.getTangentAt(u))); r.userData.c = c;
+    gates.add(r); W.rings.push(r);
+  });
+  const full = W.path.getSpacedPoints(160);
+  W.pathDim = new THREE.Line(new THREE.BufferGeometry().setFromPoints(full), new THREE.LineBasicMaterial({ color: 0xFAF7F2, transparent: true }));
+  W.pathLit = new THREE.Line(new THREE.BufferGeometry().setFromPoints(full), new THREE.LineBasicMaterial({ color: 0xF6E2A8, transparent: true }));
+  gates.add(W.pathDim, W.pathLit); scene.add(gates); W.gates = gates;
+  W.labs = ['Transfer', 'Concierge', 'Climate', 'Arrival'].map(t => {
+    const d = document.createElement('div'); d.className = 'lab'; d.textContent = t; d.setAttribute('aria-hidden', 'true');
+    stage.appendChild(d); return d;
+  });
+ 
+  /* Escrow: fresnel shield dome + ground ring + gold padlock */
+  const shield = new THREE.Group();
+  W.dome = new THREE.Mesh(new THREE.SphereGeometry(3.6, 56, 28, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.ShaderMaterial({
+    uniforms: { uA: { value: 0 } }, transparent: true, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending,
+    vertexShader: 'varying vec3 vN;varying vec3 vV;void main(){vec4 mv=modelViewMatrix*vec4(position,1.);vN=normalize(normalMatrix*normal);vV=normalize(-mv.xyz);gl_Position=projectionMatrix*mv;}',
+    fragmentShader: 'varying vec3 vN;varying vec3 vV;uniform float uA;void main(){float f=pow(1.-abs(dot(normalize(vN),normalize(vV))),2.5);gl_FragColor=vec4(vec3(.79,.64,.29)*(f*1.6+.06),(f+.05)*uA);}'
+  }));
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(3.6, .04, 8, 96), new THREE.MeshBasicMaterial({ color: 0xF6E2A8, transparent: true }));
+  ring.rotation.x = Math.PI / 2; ring.position.y = .03;
+  const goldMat = new THREE.MeshStandardMaterial({ color: 0xC9A24A, metalness: 1, roughness: .28, transparent: true });
+  W.lock = new THREE.Group();
+  const shackle = new THREE.Mesh(new THREE.TorusGeometry(.3, .08, 12, 24, Math.PI), goldMat); shackle.position.y = .39;
+  W.lock.add(new THREE.Mesh(new THREE.BoxGeometry(1, .78, .42), goldMat), shackle);
+  shield.add(W.dome, ring, W.lock); shield.position.set(W.E4.x, 0, W.E4.z);
+  scene.add(shield); W.shield = shield;
+  return W;
+}
+ 
+/* Where is the plane, and how is it oriented, at scroll position s (0…5)?
+   Beat i occupies s ∈ [i, i+1]; each beat ends exactly where the next begins. */
+function pose(s, now) {
+  const i = Math.min(N - 1, Math.floor(s)), t = s - i;
+  const { E0, E2, E3, E4, C1, R, path } = world;
+  let pitch = 0, roll = 0, byPitch = true;
+  UP.set(0, 1, 0);
+ 
+  if (i === 0) {                                      // 01 — take-off roll, rotate, lift off, level out
+    P.set(0, restY + 3 * win(t, .48, 1), -10 + 26 * t * t);
+    pitch = kf(t, [[0,0],[.5,0],[.66,13],[1,0]]);
+    if (t < .5 && !reduced) P.y += Math.sin(now / 38) * .012 * t;   // runway rumble
+  } else if (i === 1) {                               // 02 — one full orbit around the globe
+    const a = t * Math.PI * 2, c = Math.cos(a), sn = Math.sin(a);
+    P.set(C1.x, C1.y + R * c, C1.z + R * sn);
+    F.set(0, -sn, c); UP.set(0, c, sn); byPitch = false;
+  } else if (i === 2) {                               // 03 — climb through the clouds, turbulence fades, calm
+    P.set(0, E0.y + (E2.y - E0.y) * kf(t, [[0,0],[.55,1],[1,1]]), E0.z + (E2.z - E0.z) * t);
+    pitch = kf(t, [[0,0],[.15,16],[.5,12],[.62,0],[1,0]]);
+    const sh = reduced ? 0 : Math.sin(Math.PI * cl(t / .5, 0, 1));
+    roll = sh * .1 * Math.sin(now / 90); P.y += sh * .05 * Math.sin(now / 47);
+  } else if (i === 3) {                               // 04 — follow the itinerary path through the gates, banking
+    path.getPointAt(t, P); path.getTangentAt(t, F); path.getTangentAt(Math.min(1, t + .02), T2);
+    roll = cl(-(F.z * T2.x - F.x * T2.z) * 5, -.6, .6); byPitch = false;
+  } else {                                            // 05 — approach, flare, touch down, roll out, stop
+    const q = cl((t - .5) / .35, 0, 1);
+    P.set(0, restY + (E3.y - restY) * Math.pow(1 - cl(t / .5, 0, 1), 2), E3.z + 56 * Math.min(t, .5) + 12 * (1 - (1 - q) * (1 - q)));
+    pitch = kf(t, [[0,0],[.14,-4],[.42,4],[.54,0],[1,0]]);
+  }
+ 
+  if (byPitch) F.set(0, Math.sin(rad(pitch)), Math.cos(rad(pitch)));
+  rig.position.copy(P);
+  M4.lookAt(F, ZERO, UP);
+  rig.quaternion.setFromRotationMatrix(M4).multiply(QR.setFromAxisAngle(Z_AXIS, roll));
+ 
+  if (modelGroup) {                                   // gentle float, only while airborne
+    const air = cl((P.y - restY) / 2, 0, 1);
+    modelGroup.position.y = reduced ? 0 : Math.sin(now / 1100) * .05 * air;
+  }
+}
+ 
+/* Cross-fade the props, drive globe/gates/shield, move lights + labels */
+function updateWorld(s, now) {
+  const W = world;
+  const runW    = (1 - win(s, .55, .9)) + win(s, 3.6, 4);
+  const globeW  = win(s, .7, 1) * (1 - win(s, 1.9, 2.15));
+  const cloudW  = win(s, 2, 2.25) * (1 - win(s, 3.2, 3.8));
+  const gateW   = win(s, 2.8, 3) * (1 - win(s, 3.85, 4));
+  const shieldW = win(s, 4.55, 4.95);
+  fade(W.run, runW); fade(W.globe, globeW); fade(W.clouds, cloudW); fade(W.shield, shieldW);
+  shadowMat.opacity = .3 * Math.max(runW, cloudW * .5);
+ 
+  if (W.globe.visible) {                              // globe spins, route arcs draw themselves
+    W.globe.rotation.y = s * .9 + (reduced ? 0 : now / 30000);
+    const prog = cl((s - 1.05) / .8, 0, 1);
+    W.arcLines.forEach((l, k) => l.geometry.setDrawRange(0, Math.floor(49 * cl(prog * 1.6 - k * .07, 0, 1))));
+  }
+ 
+  const u = cl(s - 3, 0, 1);                          // plane progress along the itinerary path
+  W.gates.visible = gateW > .01;
+  const w = stage.clientWidth, h = stage.clientHeight;
+  W.rings.forEach((r, k) => {
+    const d = (u - W.ru[k] + .03) / .08, lit = ez(cl(d, 0, 1));
+    r.scale.setScalar(1 + .3 * Math.sin(Math.PI * cl(d / 2.5, 0, 1)));
+    r.material.color.set(0xFAF7F2).lerp(GOLD, lit);
+    r.material.opacity = gateW * (.4 + .6 * lit);
+    TMP.copy(r.userData.c); TMP.y += 3.4; TMP.project(camera);
+    const o = W.gates.visible && TMP.z < 1 ? gateW * cl(1.4 - Math.abs(u - W.ru[k]) / .1, 0, 1) : 0;
+    W.labs[k].style.opacity = o.toFixed(2);
+    W.labs[k].style.transform = `translate(${(TMP.x * .5 + .5) * w}px,${(-TMP.y * .5 + .5) * h}px) translate(-50%,-50%)`;
+  });
+  W.pathDim.material.opacity = gateW * .22;
+  W.pathLit.material.opacity = gateW;
+  W.pathLit.geometry.setDrawRange(0, Math.floor(161 * u) + 1);
+ 
+  if (W.shield.visible) {
+    W.dome.scale.setScalar(.75 + .25 * shieldW);
+    W.lock.rotation.y = reduced ? 0 : now / 1400;
+    W.lock.position.y = 4.6 - (1 - shieldW) * 1.5 + (reduced ? 0 : .15 * Math.sin(now / 700));
+  }
+ 
+  keyLight.position.copy(P).add(KEY_OFF);             // shadows + lighting follow the plane
+  keyLight.target.position.copy(P);
+  shadowMesh.position.set(P.x, .01, P.z);
+}
+ 
+/* ─── Apply beat state from scroll progress p ───────────────────────────────── */
+function applyBeat(p, now, dt) {
+  const u  = cl(p * N - 0.5, 0, N - 1);
+  const kk = Math.min(N - 2, Math.floor(u));
+  const g  = ez(cl((u - kk - 0.20) / 0.60, 0, 1));
+  const pos = kk + g;
+  const A = BEATS[kk], B = BEATS[kk + 1];
+ 
+  stage.style.backgroundColor = `rgb(${mx(A.bg, B.bg, g).map(Math.round)})`;
+  stage.style.color           = `rgb(${mx(A.ink, B.ink, g).map(Math.round)})`;
+  setIdx(Math.round(pos));
+ 
+  const s = cl(p, 0, 0.9999) * N;
+  pose(s, now);
+ 
+  // Camera follows the plane — except in beat 02, where it frames the whole globe
+  const k = reduced ? 1 : (1 - Math.exp(-dt * 5));
+  tgtFocus.lerpVectors(kk === 1 ? world.C1 : P, kk + 1 === 1 ? world.C1 : P, g);
+  if (!focusInit) { focus.copy(tgtFocus); focusInit = true; }
+  focus.lerp(tgtFocus, k);
+  camOrbit += (lr(A.cam.orbit, B.cam.orbit, g) - camOrbit) * k;
+  camElev  += (lr(A.cam.elev,  B.cam.elev,  g) - camElev)  * k;
+  camDist  += (lr(A.cam.dist,  B.cam.dist,  g) - camDist)  * k;
+ 
+  rimLight.intensity = lr(0, 4.8, cl((pos - 2.5) / 1.5, 0, 1));
+  if (mixer && hasAnims) mixer.setTime(pos * 2.0);
+ 
+  const oR = rad(camOrbit), eR = rad(camElev);
+  camera.position.set(
+    focus.x + camDist * Math.cos(eR) * Math.sin(oR),
+    focus.y + camDist * Math.sin(eR),
+    focus.z + camDist * Math.cos(eR) * Math.cos(oR)
+  );
+  camera.lookAt(focus);
+  camera.updateMatrixWorld();
+  updateWorld(s, now);
+}
+ 
+/* ─── Render loop ───────────────────────────────────────────────────────────── */
+function loop(now) {
+  rafId = requestAnimationFrame(loop);
+  const dt = Math.max(0, Math.min(0.05, (now - lastNow) / 1000));
+  lastNow = now;
+  cur += (tgt - cur) * (reduced ? 1 : (1 - Math.exp(-dt * 6)));
+  applyBeat(cur, now, dt);
+  renderer.render(scene, camera);
+}
+function startLoop() { if (rafId) return; lastNow = performance.now(); rafId = requestAnimationFrame(loop); }
+function stopLoop()  { if (rafId) cancelAnimationFrame(rafId); rafId = 0; }
+ 
+/* ─── Model inspection + normalization ──────────────────────────────────────── */
+function inspectAndNormalize(gltf) {
+  const obj = gltf.scene;
+  const meshNames = [], matSet = new Set();
+  obj.traverse(n => {
+    if (n.isMesh) {
+      meshNames.push(n.name || '(unnamed)');
+      if (n.material) matSet.add((n.material.name || n.material.type) + (n.material.map ? '[tex]' : ''));
+      n.castShadow = n.receiveShadow = true;
+    }
+  });
+  const bbox = new THREE.Box3().setFromObject(obj);
+  const rawSize = bbox.getSize(new THREE.Vector3()), rawCenter = bbox.getCenter(new THREE.Vector3());
+  const normScale = 4.0 / Math.max(rawSize.x, rawSize.y, rawSize.z);          // longest axis → 4 units
+  obj.position.copy(rawCenter).multiplyScalar(-normScale);
+  obj.scale.setScalar(normScale);
+ 
+  const grp = new THREE.Group(); grp.add(obj);
+  restY = -new THREE.Box3().setFromObject(grp).min.y;                          // wheels-on-ground height
+ 
+  hasAnims = gltf.animations.length > 0;
+  if (hasAnims) { mixer = new THREE.AnimationMixer(grp); gltf.animations.forEach(c => mixer.clipAction(c).play()); }
+ 
+  console.group('%c[Tribo 3D] ✓ Model Inspection', 'color:#C9A24A;font-weight:700;font-size:14px');
+  console.log(`Meshes: ${meshNames.length} · Materials: ${matSet.size} · Animations: ${hasAnims ? gltf.animations.map(a => a.name).join(', ') : 'none'}`);
+  console.log(`Raw size (X×Y×Z): ${rawSize.x.toFixed(3)} × ${rawSize.y.toFixed(3)} × ${rawSize.z.toFixed(3)} · norm scale ${normScale.toFixed(4)} · restY ${restY.toFixed(3)}`);
+  console.groupEnd();
+  return grp;
+}
+ 
+function reportModelSize() {
+  const mb = modelBytes / 1048576;
+  if (mb > 15) console.warn(`[Tribo 3D] plane.glb is ${mb.toFixed(1)} MB (over 15 MB). Optimize: npx gltf-pipeline -i plane.glb -o plane-opt.glb --draco.compressionLevel=7`);
+}
+ 
+/* ─── Load the GLB ──────────────────────────────────────────────────────────── */
+function loadModel() {
+  const loader = new GLTFLoader();                   // NOTE: serve via HTTP — file:// will fail
+  const draco = new DRACOLoader();
+  draco.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/');
+  loader.setDRACOLoader(draco);
+ 
+  loader.load('/assets/plane.glb',
+    (gltf) => {
+      draco.dispose();
+      modelGroup = inspectAndNormalize(gltf);
+      modelGroup.rotation.y = NOSE_YAW;              // make the model's nose point along the rig's +Z
+      rig.add(modelGroup); scene.add(rig);
+      world = setupWorld();
+      loaderEl.classList.add('hidden');
+      reportModelSize();
+      tgt = cur = getScrollProgress();
+      resize(); setIdx(0); startLoop();
+    },
+    (xhr) => {
+      modelBytes = Math.max(modelBytes, xhr.total || 0, xhr.loaded || 0);
+      if (xhr.lengthComputable) {
+        const pct = Math.round((xhr.loaded / xhr.total) * 100);
+        loaderBar.style.width = pct + '%';
+        loaderPct.textContent = `Loading model… ${pct}%`;
+      }
+    },
+    (err) => {
+      console.error('[Tribo 3D] GLTFLoader failed:', err);
+      loaderBar.style.background = '#f87171';
+      loaderPct.textContent = 'Failed to load model.';
+      loaderErr.style.display = 'block';
+      loaderErr.innerHTML = `<strong>Cannot load <code>plane.glb</code></strong><br><br>` +
+        `<strong>Most likely cause:</strong> the page was opened via <code>file://</code>. Run <code>ng serve</code> and open ` +
+        `<code>http://localhost:4200/tribo-3d.html</code>.<br><br>Raw error: <em>${err.message || err}</em>`;
+    }
+  );
+}
+ 
+window.addEventListener('scroll', () => { tgt = getScrollProgress(); }, { passive: true });
+ 
+if ('IntersectionObserver' in window) {
+  new IntersectionObserver(entries => {
+    if (!modelGroup) return;
+    if (entries[0].isIntersecting) startLoop(); else stopLoop();
+  }, { threshold: 0 }).observe(wrap);
+}
+ 
+const fontsReady = document.fonts?.load
+  ? Promise.all([document.fonts.load('800 100px "Syne"'), document.fonts.load('500 14px "Space Grotesk"')]).catch(() => {})
+  : Promise.resolve();
+fontsReady.then(loadModel);
+</script>
+</body>
+</html>

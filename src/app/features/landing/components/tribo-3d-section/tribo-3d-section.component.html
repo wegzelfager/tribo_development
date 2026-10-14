@@ -1,0 +1,53 @@
+<!-- Tribo 3D Scroll Story Section — markup only, logic lives in .ts -->
+<div class="t3d-root">
+
+  <!-- 700 vh scroll wrapper -->
+  <div class="t3d-wrap" #wrapEl>
+    <section class="t3d-stage" #stageEl aria-label="Tribo — 5 reasons to trust us">
+
+      <!-- Loading overlay (absolute, local to stage) -->
+      <div class="t3d-loader" #loaderEl role="status" aria-live="polite">
+        <div class="t3d-loader__logo">TRIBO</div>
+        <div class="t3d-loader__bar-wrap"><div class="t3d-loader__bar" #loaderBar></div></div>
+        <div class="t3d-loader__pct" #loaderPct>Loading model…</div>
+        <div class="t3d-loader__err" #loaderErr></div>
+      </div>
+
+      <!-- Three.js canvas injected here by the component -->
+      <div class="t3d-canvas-wrap" #canvasWrap aria-hidden="true"></div>
+
+      <!-- Ghost word (huge faint typemark behind the model) -->
+      <div class="t3d-ghost" #ghostEl aria-hidden="true">
+        <span #ghostT></span>
+      </div>
+
+      <!-- Eyebrow -->
+      <p class="t3d-eyebrow" aria-hidden="true">Where trust meets extraordinary journeys</p>
+
+      <!-- Beat title (left) -->
+      <div class="t3d-ttl" #ttlEl>
+        <span class="t3d-beat-k" #beatK></span>
+        <h2 class="t3d-beat-h" #beatH></h2>
+      </div>
+
+      <!-- Beat description (right) -->
+      <p class="t3d-beat-d" #beatD aria-live="polite" aria-atomic="true"></p>
+
+      <!-- Dot nav -->
+      <nav class="t3d-dots" #dotsNav aria-label="Story navigation"></nav>
+
+    </section>
+  </div>
+
+  <!-- Closing CTA — "Your journey. Protected." -->
+  <section class="t3d-cta" aria-label="Call to action — book your journey">
+    <h2 class="t3d-cta__headline">Your journey.<br>Protected.</h2>
+    <a href="#hero-cta-book"
+       class="t3d-cta__btn"
+       id="t3d-book-btn"
+       aria-label="Book your private flight with Tribo">
+      Book the flight
+    </a>
+  </section>
+
+</div>

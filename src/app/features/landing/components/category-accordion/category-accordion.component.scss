@@ -1,0 +1,301 @@
+// Sky / Sea / Land / Seal — horizontal accordion (desktop), vertical stack (mobile)
+
+$gold:    #C9A24A;
+$gold-b:  #F6E2A8;
+$ink:     #FAF7F2;
+$dark:    #0B0B0E;
+
+// Panel widths
+$active-w:   58%;
+$inactive-w: calc((100% - 58%) / 3);
+
+.accord {
+  position: relative;
+  height: 100vh; height: 100svh;
+  background: $dark;
+  display: flex; flex-direction: column;
+  color: $ink;
+  font-family: 'Space Grotesk', sans-serif;
+  overflow: hidden;
+
+  // ── top bar ─────────────────────────────────────────────────────────────
+  &__top-bar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    display: flex; align-items: flex-start; justify-content: space-between;
+    padding: clamp(20px, 3.5vw, 44px) clamp(20px, 4vw, 52px);
+    z-index: 30;
+    pointer-events: none;
+  }
+
+  &__top-headline {
+    font: 700 clamp(13px, 1.1vw, 16px)/1 'Space Grotesk', sans-serif;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.70;
+    margin: 0;
+  }
+
+  &__counter {
+    font: 800 clamp(13px, 1.05vw, 15px)/1 'Syne', sans-serif;
+    letter-spacing: 0.12em;
+    color: $gold;
+  }
+
+  // ── panels row ──────────────────────────────────────────────────────────
+  &__panels {
+    flex: 1;
+    display: flex;
+    // panels fill the entire section height between top/bottom bars
+    min-height: 0;
+    cursor: pointer;
+  }
+
+  &__panel {
+    position: relative;
+    width: $inactive-w;
+    transition: width 0.72s cubic-bezier(0.77, 0, 0.175, 1);
+    overflow: hidden;
+    outline: none;
+    // thin separator
+    &:not(:last-child) { border-right: 1px solid rgba(250, 247, 242, 0.06); }
+
+    &--active {
+      width: $active-w;
+      cursor: default;
+    }
+
+    &:focus-visible {
+      box-shadow: inset 0 0 0 2px rgba($gold, 0.8);
+    }
+  }
+
+  // ── vertical label on inactive panels ───────────────────────────────────
+  &__vert-label {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) rotate(-90deg);
+    font: 800 clamp(11px, 1vw, 14px)/1 'Syne', sans-serif;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    opacity: 0.4;
+    white-space: nowrap;
+    transition: opacity 0.4s;
+    z-index: 5;
+    pointer-events: none;
+
+    .accord__panel--active & { opacity: 0; }
+    .accord__panel:hover:not(.accord__panel--active) & { opacity: 0.7; }
+  }
+
+  // ── panel body ───────────────────────────────────────────────────────────
+  &__panel-body {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.55s ease 0.12s;
+    pointer-events: none;
+
+    .accord__panel--active & {
+      opacity: 1;
+      pointer-events: auto;
+    }
+  }
+
+  // ── background image ─────────────────────────────────────────────────────
+  &__bg-layer {
+    position: absolute; inset: 0;
+    z-index: 0;
+
+    &::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba($dark, 0.25) 0%,
+        rgba($dark, 0.55) 100%
+      );
+    }
+  }
+
+  &__bg-img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    display: block;
+  }
+
+  // ── ghost word ────────────────────────────────────────────────────────────
+  &__ghost {
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -48%);
+    font: 800 clamp(80px, 18vw, 220px)/1 'Syne', sans-serif;
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+    color: $ink;
+    opacity: 0.09;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 2;
+    user-select: none;
+  }
+
+  // ── vehicle image ─────────────────────────────────────────────────────────
+  &__vehicle-wrap {
+    position: absolute;
+    left: 50%; bottom: 14%;
+    transform: translateX(-50%);
+    z-index: 4;
+    width: clamp(160px, 45%, 460px);
+    transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+
+    .accord__panel--active & {
+      transform: translateX(-50%) translateY(-6px);
+    }
+  }
+
+  &__vehicle {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.6));
+  }
+
+  // ── bottom bar ────────────────────────────────────────────────────────────
+  &__bottom-bar {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: end;
+    padding: clamp(20px, 3.5vw, 44px) clamp(20px, 4vw, 52px);
+    z-index: 30;
+    background: linear-gradient(to top, rgba($dark, 0.6) 0%, transparent 100%);
+    pointer-events: none;
+  }
+
+  &__caption {
+    pointer-events: none;
+  }
+
+  &__caption-title {
+    font: 700 clamp(14px, 1.2vw, 18px)/1.2 'Syne', sans-serif;
+    color: $gold-b;
+    margin: 0 0 8px;
+    letter-spacing: -0.01em;
+  }
+
+  &__caption-desc {
+    font: 400 clamp(12px, 0.95vw, 14px)/1.6 'Space Grotesk', sans-serif;
+    color: rgba($ink, 0.65);
+    margin: 0;
+    max-width: 300px;
+  }
+
+  // ── tab nav + progress ───────────────────────────────────────────────────
+  &__tab-nav {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    pointer-events: auto;
+  }
+
+  &__progress-track {
+    position: relative;
+    width: 120px; height: 2px;
+    background: rgba($ink, 0.18);
+    border-radius: 1px;
+  }
+
+  &__progress-knob {
+    position: absolute;
+    top: 50%; transform: translate(-50%, -50%);
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: $gold;
+    transition: left 0.55s cubic-bezier(0.77, 0, 0.175, 1);
+    box-shadow: 0 0 8px rgba($gold, 0.6);
+
+    &::before {
+      content: '';
+      position: absolute; inset: -3px;
+      border-radius: 50%;
+      border: 1px solid rgba($gold, 0.4);
+    }
+  }
+
+  &__tab-list {
+    display: flex; gap: clamp(12px, 2vw, 28px);
+    list-style: none; margin: 0; padding: 0;
+  }
+
+  &__tab-btn {
+    background: none; border: 0; padding: 4px 0;
+    font: 500 clamp(11px, 0.9vw, 13px)/1 'Space Grotesk', sans-serif;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: rgba($ink, 0.40);
+    cursor: pointer;
+    transition: color 0.3s;
+
+    &--active { color: $gold; }
+    &:hover:not(&--active) { color: rgba($ink, 0.75); }
+    &:focus-visible { outline: 1px solid $gold; outline-offset: 4px; border-radius: 2px; }
+  }
+
+  &__bottom-right {
+    display: flex; justify-content: flex-end;
+  }
+}
+
+// ── Mobile: vertical stack ────────────────────────────────────────────────────
+@media (max-width: 767px) {
+  .accord {
+    height: auto;
+    min-height: 100svh;
+
+    &__top-bar   { position: relative; }
+    &__bottom-bar {
+      position: relative;
+      grid-template-columns: 1fr;
+      gap: 20px;
+      background: none;
+    }
+    &__bottom-right { display: none; }
+
+    &__panels {
+      flex-direction: column;
+    }
+
+    &__panel {
+      width: 100% !important;
+      height: 260px;
+      border-right: none !important;
+      border-bottom: 1px solid rgba(250, 247, 242, 0.06);
+
+      &--active { height: 56svh; }
+    }
+
+    &__vert-label { display: none; }
+
+    &__ghost {
+      font-size: clamp(50px, 22vw, 100px);
+    }
+
+    &__vehicle-wrap {
+      width: clamp(100px, 55vw, 280px);
+    }
+  }
+}
+
+// ── Reduced motion ────────────────────────────────────────────────────────────
+@media (prefers-reduced-motion: reduce) {
+  .accord__panel,
+  .accord__panel-body,
+  .accord__progress-knob,
+  .accord__vehicle-wrap {
+    transition: none;
+  }
+}
