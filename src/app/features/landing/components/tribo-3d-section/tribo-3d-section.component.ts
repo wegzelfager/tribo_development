@@ -175,7 +175,7 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
   private scrollSpanCache = 0;       // wrapEl.offsetHeight - stageEl.offsetHeight
 
   /* mobile layout */
-  private mobileShiftFrac = 0;
+  private mobileShiftPx = 0;
   private isMobilePortrait = false;
   private isShortLandscape = false;
 
@@ -323,7 +323,9 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    this.canvasWrap.nativeElement.appendChild(renderer.domElement);
+    const canvas = renderer.domElement;
+    canvas.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;display:block';
+    this.canvasWrap.nativeElement.appendChild(canvas);
     this.renderer = renderer;
 
     /* WebGL context loss */
@@ -422,8 +424,7 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
   }
 
   private handleScroll = (): void => {
-    if (this.isClamping) return;
-    if (this.navTargetProgress !== null) this.cancelNavTarget();
+    if (this.isClamping || this.navTargetProgress !== null) return;
     this.checkScrollLeash();
     this.tgt = this.getScrollProgress();
   };
@@ -437,7 +438,14 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
 
     /* ResizeObserver: single source of truth for all layout geometry */
     if (typeof ResizeObserver !== 'undefined') {
-      this.resizeObs = new ResizeObserver(() => this.onResize());
+      this.resizeObs = new ResizeObserver(entries => {
+        const entry = entries[0];
+        if (entry?.contentRect) {
+          this.onResize(entry.contentRect.width, entry.contentRect.height);
+        } else {
+          this.onResize();
+        }
+      });
       this.resizeObs.observe(this.stageEl.nativeElement);
     } else {
       (window as Window).addEventListener('resize', () => this.onResize());
@@ -469,12 +477,36 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
       this.wrapEl.nativeElement.offsetHeight - this.stageEl.nativeElement.offsetHeight);
   }
 
-  private onResize(): void {
-    const w = this.canvasWrap.nativeElement.clientWidth  || window.innerWidth;
-    const h = this.canvasWrap.nativeElement.clientHeight || window.innerHeight;
+  private updateMobileShift(w: number, h: number): void {
+    const stageRect = this.stageEl.nativeElement.getBoundingClientRect();
+    const ttlRect   = this.ttlEl.nativeElement.getBoundingClientRect();
+    const descRect  = this.beatD.nativeElement.getBoundingClientRect();
+
+    let safeTop: number;
+    let safeBot: number;
+
+    if (ttlRect.height > 0 && descRect.height > 0) {
+      safeTop = Math.max(0, ttlRect.bottom - stageRect.top);
+      safeBot = Math.min(h, descRect.top - stageRect.top);
+    } else {
+      const TITLE_PX = Math.min(220, h * 0.28);
+      const DESC_PX  = Math.min(160, h * 0.20);
+      safeTop = 120 + TITLE_PX;
+      safeBot = h - 72 - DESC_PX;
+    }
+
+    const bandMidPx = (safeTop + safeBot) / 2;
+    // Stage vertical center is h/2; bandMidPx is desired vertical center
+    const shiftPx = Math.round(h / 2 - bandMidPx);
+    this.mobileShiftPx = cl(shiftPx, -Math.round(h * 0.30), Math.round(h * 0.30));
+  }
+
+  private onResize(contentW?: number, contentH?: number): void {
+    const stage = this.stageEl.nativeElement;
+    const w = contentW || stage.clientWidth || window.innerWidth;
+    const h = contentH || stage.clientHeight || window.innerHeight;
     this.cW = w; this.cH = h;
-    this.stW = this.stageEl.nativeElement.clientWidth  || w;
-    this.stH = this.stageEl.nativeElement.clientHeight || h;
+    this.stW = w; this.stH = h;
 
     this.renderer.setSize(w, h, false);
     this.camera.aspect = w / h;
@@ -487,23 +519,17 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
     this.isShortLandscape = w < 900 && w >= h && h <= 500;
 
     if (this.isMobilePortrait) {
-      const TITLE_PX = Math.min(220, h * 0.28);
-      const DESC_PX  = Math.min(160, h * 0.20);
-      const safeTop  = 120 + TITLE_PX;
-      const safeBot  = h - 72 - DESC_PX;
-      const bandMid  = (safeTop + safeBot) / 2 / h;
-      this.mobileShiftFrac = cl(bandMid - 0.5, -0.30, 0.30);
+      this.updateMobileShift(w, h);
     } else {
-      this.mobileShiftFrac = 0;
+      this.mobileShiftPx = 0;
     }
     this.applyViewOffset(w, h);
     this.fitGhost();
   }
 
   private applyViewOffset(w: number, h: number): void {
-    if (this.mobileShiftFrac !== 0) {
-      const shiftPx = Math.round(this.mobileShiftFrac * h);
-      this.camera.setViewOffset(w, h, 0, shiftPx, w, h);
+    if (this.mobileShiftPx !== 0) {
+      this.camera.setViewOffset(w, h, 0, this.mobileShiftPx, w, h);
     } else {
       this.camera.clearViewOffset();
     }
@@ -569,6 +595,10 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
       void el.offsetWidth;
       el.classList.add('t3d-anim-in');
     });
+    if (this.isMobilePortrait) {
+      this.updateMobileShift(this.cW, this.cH);
+      this.applyViewOffset(this.cW, this.cH);
+    }
   }
 
   /* ── scroll helpers (use cached values — NO layout reads per frame) ─────── */
@@ -744,7 +774,7 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
       stage.appendChild(d); this.labEls.push(d); return d;
     });
 
-    /* Shield dome */
+    
     const shield = new THREE.Group();
     W['dome'] = new THREE.Mesh(
       new THREE.SphereGeometry(3.6, 56, 28, 0, Math.PI*2, 0, Math.PI/2),
@@ -907,11 +937,20 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
     const A = BEATS[kk], B = BEATS[kk + 1];
 
     /* Only write style when string changed — avoids forced style recalc */
+    const wrap  = this.wrapEl.nativeElement;
     const stage = this.stageEl.nativeElement;
     const bgStr    = `rgb(${mx(A.bg, B.bg, g).map(Math.round)})`;
     const colorStr = `rgb(${mx(A.ink, B.ink, g).map(Math.round)})`;
-    if (bgStr    !== this.prevBgStr)    { stage.style.backgroundColor = bgStr;    this.prevBgStr    = bgStr; }
-    if (colorStr !== this.prevColorStr) { stage.style.color = colorStr;            this.prevColorStr = colorStr; }
+    if (bgStr !== this.prevBgStr) {
+      wrap.style.setProperty('--t3d-bg', bgStr);
+      stage.style.backgroundColor = bgStr;
+      this.prevBgStr = bgStr;
+    }
+    if (colorStr !== this.prevColorStr) {
+      wrap.style.setProperty('--t3d-ink', colorStr);
+      stage.style.color = colorStr;
+      this.prevColorStr = colorStr;
+    }
 
     this.setIdx(Math.round(pos));
 

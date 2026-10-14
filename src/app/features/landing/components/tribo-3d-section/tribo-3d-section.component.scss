@@ -8,11 +8,12 @@
   --t3d-gold-b: #F6E2A8;
   --t3d-ink:    #FAF7F2;
   --t3d-dark:   #0B0B0E;
+  --t3d-bg:     #0D1B4B;
 }
 
 .t3d-root {
   display: block;
-  background: var(--t3d-dark);
+  background: var(--t3d-bg, #0D1B4B);
   // No overflow:hidden here — would break position:sticky
 }
 
@@ -79,7 +80,9 @@
 /* ─── Scroll wrapper + sticky stage ──────────────────────────────────────── */
 .t3d-wrap {
   height: 700vh;
+  height: 700lvh;
   position: relative;
+  background: var(--t3d-bg, #0D1B4B);
 }
 
 .t3d-stage {
@@ -87,11 +90,12 @@
   top: 0;
   width: 100%;
   height: 100vh;
-  height: 100svh;
+  height: 100lvh;
   box-sizing: border-box;
   overflow: hidden;
   // Background color interpolated by JS between beats
-  background: #0D1B4B;
+  background: var(--t3d-bg, #0D1B4B);
+  color: var(--t3d-ink, #FAF7F2);
   will-change: background-color;
   padding-top:    env(safe-area-inset-top,    0px);
   padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -104,7 +108,10 @@
   pointer-events: none;
   z-index: 2;
 
+  :host ::ng-deep canvas,
   canvas {
+    position: absolute;
+    inset: 0;
     display: block;
     width:  100% !important;
     height: 100% !important;
@@ -204,6 +211,7 @@
   position: absolute;
   left: 0; right: 0;
   bottom: max(18px, env(safe-area-inset-bottom, 18px));
+  bottom: calc(100lvh - 100dvh + max(18px, env(safe-area-inset-bottom, 18px)));
   display: flex;
   justify-content: center;
   gap: 6px;
@@ -380,6 +388,7 @@
     left: 16px; right: 16px;
     top: auto;
     bottom: max(64px, env(safe-area-inset-bottom, 64px));
+    bottom: calc(100lvh - 100dvh + max(64px, env(safe-area-inset-bottom, 64px)));
     transform: none; max-width: none;
     text-align: center; font-size: 14px;
     padding: 14px 18px;
