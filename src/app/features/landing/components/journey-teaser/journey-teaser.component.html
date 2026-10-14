@@ -1,13 +1,16 @@
-<section class="teaser" aria-label="Teaser — Are you ready to be surprised?">
+<section class="teaser" #sectionEl aria-label="Teaser — Are you ready to be surprised?">
 
   <!-- Ambient gold glow (CSS, no JS needed) -->
   <div class="teaser__glow" aria-hidden="true"></div>
 
-  <!-- Headline -->
-  <div class="teaser__content" #content>
+  <!-- Inner wrapper (container padding, centered flex column) -->
+  <div class="teaser__inner" #innerEl>
     <p class="teaser__eyebrow">The journey begins here</p>
-    <h2 class="teaser__headline">
-      Are you ready<br>to be surprised?
+    <h2 class="teaser__headline" #headlineEl>
+      <span>Are</span> <span>you</span> <br class="bn">
+      <span>ready</span> <br>
+      <span>to</span> <span>be</span> <br class="bn">
+      <span>surprised?</span>
     </h2>
     <p class="teaser__sub">
       Five chapters. One aircraft. The full Tribo story — told in three dimensions.

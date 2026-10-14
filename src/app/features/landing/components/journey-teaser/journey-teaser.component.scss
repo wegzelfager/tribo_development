@@ -1,13 +1,16 @@
 // Journey Teaser — "Are you ready to be surprised?"
-// Dark #0B0B0E bg, gold radial glow, seam → navy at the bottom
+// Dark #0B0B0E bg, gold radial glow, container queries, fit script
 
 .teaser {
+  container-type: inline-size;
   position: relative;
-  height: 100vh; height: 100svh;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  overflow: hidden;
+  overflow: clip;
+  min-height: 100svh;
   background: #0B0B0E;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
 
   // ── radial gold glow ────────────────────────────────────────────────────
   &__glow {
@@ -23,63 +26,115 @@
     animation: teaser-pulse 6s ease-in-out infinite alternate;
   }
 
-  // ── headline content ────────────────────────────────────────────────────
-  &__content {
+  // ── inner wrapper (container-aware flex column) ─────────────────────────
+  &__inner {
     position: relative;
     z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     text-align: center;
-    padding: 0 clamp(20px, 6vw, 80px);
-    opacity: 0;
-    transform: translateY(28px);
-    transition:
-      opacity   0.9s cubic-bezier(0.22, 1, 0.36, 1),
-      transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+    flex: 1 0 auto;
+    gap: clamp(20px, 4.2cqi, 40px);
+    padding-inline: max(16px, 4cqi);
+    padding-block: clamp(40px, 8cqi, 72px) clamp(88px, 14cqi, 120px);
 
-    &--visible {
-      opacity: 1;
-      transform: translateY(0);
+    > * {
+      min-width: 0;
     }
   }
 
+  // ── eyebrow ─────────────────────────────────────────────────────────────
   &__eyebrow {
-    font: 500 12px/1 'Space Grotesk', sans-serif;
+    font: 500 clamp(10px, 2.7cqi, 13px)/1 'Space Grotesk', sans-serif;
     letter-spacing: 0.18em;
     text-transform: uppercase;
     color: #C9A24A;
-    margin: 0 0 32px;
+    margin: 0;
     opacity: 0.85;
+    white-space: nowrap;
   }
 
+  // ── headline ────────────────────────────────────────────────────────────
   &__headline {
-    font: 800 clamp(40px, 8vw, 108px)/0.95 'Syne', sans-serif;
-    letter-spacing: -0.04em;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
     text-transform: uppercase;
+    letter-spacing: -0.03em;
+    line-height: 0.98;
+    white-space: nowrap;
+    width: max-content;
+    margin: 0;
     color: #FAF7F2;
-    margin: 0 0 36px;
+    font-size: var(--fs, 9cqi);
+
+    .bn {
+      display: inline;
+    }
   }
 
+  // ── subline ─────────────────────────────────────────────────────────────
   &__sub {
-    font: 400 clamp(15px, 1.3vw, 18px)/1.7 'Space Grotesk', sans-serif;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 400;
+    font-size: clamp(14px, 3.8cqi, 20px);
+    line-height: 1.65;
+    text-wrap: balance;
+    max-width: 36ch;
     color: rgba(250, 247, 242, 0.55);
-    max-width: 480px;
-    margin: 0 auto;
+    margin: 0;
+  }
+
+  // ── wide layout (avail >= 640 && W/H > 1.25) ───────────────────────────
+  &[data-layout="wide"] {
+    .teaser__headline {
+      font-size: var(--fs, 5.6cqi);
+
+      .bn {
+        display: none;
+      }
+    }
+
+    .teaser__sub {
+      max-width: 46ch;
+    }
+  }
+
+  // ── landscape short screens (H < 480) ───────────────────────────────────
+  &[data-short] {
+    .teaser__inner {
+      padding-block: 20px;
+    }
+
+    .teaser__scroll {
+      display: none;
+    }
   }
 
   // ── scroll hint ──────────────────────────────────────────────────────────
   &__scroll {
     position: absolute;
     bottom: clamp(32px, 5vh, 52px);
-    left: 50%; transform: translateX(-50%);
-    display: flex; flex-direction: column;
-    align-items: center; gap: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
     opacity: 0.45;
     z-index: 2;
     animation: teaser-scroll-bob 2.4s ease-in-out infinite;
+    pointer-events: none;
   }
 
   &__scroll-line {
     display: block;
-    width: 1px; height: 40px;
+    width: 1px;
+    height: 40px;
     background: linear-gradient(to bottom, transparent, #C9A24A 60%, transparent);
   }
 
@@ -90,12 +145,14 @@
     color: #FAF7F2;
   }
 
-  // ── bottom seam → navy of beat 01 ───────────────────────────────────────
+  // ── bottom seam → navy (matches beat 01 of the 3D section) ───────────────
   &__seam {
     position: absolute;
-    left: 0; right: 0; bottom: 0;
-    height: 180px;
-    background: linear-gradient(to bottom, transparent 0%, #0D1B4B 100%);
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 30%;
+    background: linear-gradient(to bottom, rgba(13, 27, 75, 0) 0%, #0D1B4B 100%);
     pointer-events: none;
     z-index: 3;
   }
@@ -114,10 +171,4 @@
 @media (prefers-reduced-motion: reduce) {
   .teaser__glow   { animation: none; }
   .teaser__scroll { animation: none; }
-  .teaser__content { transition: none; }
-}
-
-@media (max-width: 599px) {
-  .teaser__headline { letter-spacing: -0.03em; }
-  .teaser__sub { font-size: 15px; }
 }
