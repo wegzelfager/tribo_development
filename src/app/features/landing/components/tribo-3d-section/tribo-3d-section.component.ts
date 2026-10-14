@@ -261,7 +261,14 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
     /* reduced-motion */
     this.reducedMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
     this.reduced = this.reducedMQ.matches;
-    this.reducedHandler = (e: MediaQueryListEvent) => { this.reduced = e.matches; };
+    if (this.reduced) {
+      this.showStaticFallback();
+      return;
+    }
+    this.reducedHandler = (e: MediaQueryListEvent) => {
+      this.reduced = e.matches;
+      if (this.reduced) this.showStaticFallback();
+    };
     this.reducedMQ.addEventListener('change', this.reducedHandler);
 
     /* ?nose= param */
