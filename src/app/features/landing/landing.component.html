@@ -334,7 +334,11 @@
  
   <!-- TEASER + 3D STORY -->
   <app-journey-teaser></app-journey-teaser>
-  <app-tribo-3d-section></app-tribo-3d-section>
+  @defer (on viewport) {
+    <app-tribo-3d-section></app-tribo-3d-section>
+  } @placeholder {
+    <div class="t3d-placeholder" style="min-height: 100vh; background: #07090E;"></div>
+  }
 
   <!-- FOOTER -->
   <footer class="footer" id="global">

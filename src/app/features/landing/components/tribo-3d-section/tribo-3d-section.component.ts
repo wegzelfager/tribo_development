@@ -1,29 +1,51 @@
 /**
  * Tribo3dSectionComponent — Angular wrapper for the scroll-driven Three.js
- * flight story. All Three.js logic runs outside Angular zone; cleaned up fully
- * in ngOnDestroy. CSS is fully scoped via the .t3d- prefix — no global leakage.
+ * flight story.  All Three.js logic runs outside Angular zone; cleaned up fully
+ * in ngOnDestroy.  CSS is fully scoped via the .t3d- prefix — no global leakage.
+ *
+ * OPTIMISATION NOTES (2025)
+ * ─────────────────────────
+ * • All layout reads (clientWidth/clientHeight, getBoundingClientRect, offsetHeight)
+ *   are cached by ResizeObserver and updated once per resize — never read per-frame.
+ * • Renderer.render() is only called when the playhead moved or ambient is active.
+ *   Ambient (globe spin, lock float) is throttled to 30 fps when stationary.
+ * • Adaptive DPR: starts at min(DPR, 2 desktop / 1.5 mobile).  If average frame
+ *   time over 60 frames exceeds 24 ms, DPR is stepped down by 0.25 to min 1.0.
+ * • Shadow map: 1024 desktop / 512 mobile.  When shadow-casting world props are
+ *   invisible, keyLight.shadow.autoUpdate is set to false to skip the shadow pass.
+ * • fade() skips traversal when the alpha delta is < 0.005.
+ * • backgroundColor / color strings are only written when they change.
+ * • Tab-hidden → loop pauses; tab-shown → resumes and snaps cur = tgt.
+ * • WebGL capability probe: if WebGL is unavailable or the device is low-end
+ *   (saveData, 2g/slow-2g, deviceMemory ≤ 2, hardwareConcurrency ≤ 2) the
+ *   component renders a static fallback — no Three.js or GLB loaded.
+ * • WebGL context-loss: preventDefault on contextlost, re-init on contextrestored.
+ *   If recovery fails, falls back to static card layout.
+ * • ngOnDestroy: disposes every geometry/material/texture, calls
+ *   forceContextLoss(), removes the canvas, removes all DOM labels.
  */
 
 import {
   Component, AfterViewInit, OnDestroy,
   ElementRef, ViewChild, NgZone,
-  PLATFORM_ID, Inject, ChangeDetectionStrategy
+  PLATFORM_ID, Inject, ChangeDetectionStrategy,
+  isDevMode
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { SmoothScrollService } from '../../../../core/smooth-scroll.service';
 
-// Three.js — installed via npm, no CDN
+// Three.js — installed via npm
 import * as THREE from 'three';
 import { GLTFLoader }      from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader }     from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 
-/* ─── scroll pace & leash constants ───────────────────────────────────────── */
-export const MIN_SECONDS_PER_BEAT = 3;     // fastest any beat may play (s)
-export const LEAD_BEATS           = 0.25;  // real scroll lead on desktop (beats)
-export const LEAD_BEATS_TOUCH     = 0.60;  // touch momentum tolerance on mobile (beats)
+/* ─── scroll pace & leash constants ──────────────────────────────────────── */
+export const MIN_SECONDS_PER_BEAT = 3;
+export const LEAD_BEATS           = 0.25;
+export const LEAD_BEATS_TOUCH     = 0.60;
 
-/* ─── tiny math helpers (same as the standalone page) ─────────────────────── */
+/* ─── tiny math helpers ───────────────────────────────────────────────────── */
 const cl  = (v: number, a: number, b: number) => v < a ? a : v > b ? b : v;
 const lr  = (a: number, b: number, t: number) => a + (b - a) * t;
 const ez  = (x: number) => x * x * (3 - 2 * x);
@@ -41,32 +63,57 @@ const kf  = (t: number, k: [number, number][]) => {
   return k[k.length - 1][1];
 };
 
-/* ─── story beats ──────────────────────────────────────────────────────────── */
+/* ─── story beats ─────────────────────────────────────────────────────────── */
 interface Beat {
   k: string; t: string; g: string;
   bg: number[]; ink: number[];
   d: string;
-  cam: { orbit: number; elev: number; dist: number };
+  cam: { orbit: number; elev: number; dist: number; fitW: number };
 }
 const BEATS: Beat[] = [
   { k:'01 / 05', t:'Private Fleet',   g:'SOVEREIGN', bg:[13,27,75],   ink:[250,247,242],
     d:'On-demand access to a curated fleet of private jets and helicopters — ready to lift off within hours.',
-    cam:{ orbit:60,  elev:7,  dist:9 } },
+    cam:{ orbit:60,  elev:7,  dist:9,    fitW:6   } },
   { k:'02 / 05', t:'Global Network',  g:'INFINITE',  bg:[9,110,125],  ink:[250,247,242],
     d:'B2B partners and C2C experiences across 120+ countries. Every operator is verified, rated, and insured.',
-    cam:{ orbit:78,  elev:12, dist:15.5 } },
+    cam:{ orbit:78,  elev:12, dist:15.5, fitW:9.5 } },
   { k:'03 / 05', t:'Above The World', g:'ALTITUDE',  bg:[17,10,45],   ink:[250,247,242],
     d:'At 51,000 ft, above turbulence and crowds — a cabin calibrated for absolute calm.',
-    cam:{ orbit:0,   elev:80, dist:11 } },
+    cam:{ orbit:0,   elev:80, dist:11,   fitW:7   } },
   { k:'04 / 05', t:'AI Itinerary',    g:'PRECISION', bg:[168,72,15],  ink:[250,247,242],
     d:'Our proprietary AI orchestrates every touchpoint — transfers, concierge, climate. Nothing left to chance.',
-    cam:{ orbit:168, elev:13, dist:9.5 } },
+    cam:{ orbit:168, elev:13, dist:9.5,  fitW:8.5 } },
   { k:'05 / 05', t:'Secure Escrow',   g:'PROTECTED', bg:[10,10,14],   ink:[250,247,242],
     d:'Every transaction held in full escrow until service delivery is confirmed. Zero financial risk.',
-    cam:{ orbit:322, elev:14, dist:10 } },
+    cam:{ orbit:322, elev:14, dist:10,   fitW:9   } },
 ];
 const N = BEATS.length;
-export const MAX_SPEED = 1 / (N * MIN_SECONDS_PER_BEAT); // progress units/s (1/15)
+export const MAX_SPEED = 1 / (N * MIN_SECONDS_PER_BEAT);
+
+/* ─── low-end / no-WebGL capability probe ────────────────────────────────── */
+function probeCapability(): { lowEnd: boolean; noWebGL: boolean } {
+  // saveData or very slow connection
+  const conn = (navigator as any).connection;
+  const saveData = conn?.saveData === true;
+  const slowNet  = conn && ['slow-2g','2g'].includes(conn.effectiveType ?? '');
+  if (saveData || slowNet) return { lowEnd: true, noWebGL: false };
+
+  // Device memory / CPU
+  const mem  = (navigator as any).deviceMemory ?? 8;
+  const cpus = navigator.hardwareConcurrency ?? 4;
+  if (mem <= 2 || cpus <= 2) return { lowEnd: true, noWebGL: false };
+
+  // WebGL availability
+  try {
+    const c = document.createElement('canvas');
+    const gl = c.getContext('webgl2') || c.getContext('webgl');
+    if (!gl) return { lowEnd: false, noWebGL: true };
+    (gl as WebGLRenderingContext).getExtension('WEBGL_lose_context')
+      ?.loseContext();
+  } catch { return { lowEnd: false, noWebGL: true }; }
+
+  return { lowEnd: false, noWebGL: false };
+}
 
 @Component({
   selector: 'app-tribo-3d-section',
@@ -102,9 +149,7 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
   /* scroll leash & pace state */
   private isClamping = false;
   private navTargetProgress: number | null = null;
-  private cancelNavTarget = () => {
-    this.navTargetProgress = null;
-  };
+  private cancelNavTarget = () => { this.navTargetProgress = null; };
 
   /* ── Three.js state ────────────────────────────────────────────────────── */
   private renderer!:    THREE.WebGLRenderer;
@@ -122,6 +167,37 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
   private restY = 0.5;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private world: any = null;
+
+  /* ── cached layout geometry (refreshed by ResizeObserver only) ────────── */
+  private cW = 0; private cH = 0;   // canvas px
+  private stW = 0; private stH = 0; // stage px
+  private wrapTopCache = 0;          // wrapEl.offsetTop (from document top)
+  private scrollSpanCache = 0;       // wrapEl.offsetHeight - stageEl.offsetHeight
+
+  /* mobile layout */
+  private mobileShiftFrac = 0;
+  private isMobilePortrait = false;
+  private isShortLandscape = false;
+
+  /* ── adaptive quality ─────────────────────────────────────────────────── */
+  private currentDpr = 1;
+  private frameTimes: number[] = [];   // rolling 60-frame window (ms)
+  private dprLocked = false;            // never raise after being lowered
+
+  /* ── dirty render guard ───────────────────────────────────────────────── */
+  private prevBgStr = '';
+  private prevColorStr = '';
+  // Previous alpha values for fade() skip
+  private prevAlpha: Record<string, number> = { run: -1, globe: -1, clouds: -1, shield: -1 };
+
+  /* ── ambient throttle (30 fps when playhead stationary) ──────────────── */
+  private playheadMoving = false;
+  private lastAmbientNow = 0;
+  private readonly AMBIENT_INTERVAL = 1000 / 30; // ~33 ms
+
+  /* ── visibility ──────────────────────────────────────────────────────── */
+  private tabHidden = false;
+  private visHandler!: () => void;
 
   /* reusable math objects */
   private readonly P       = new THREE.Vector3();
@@ -159,6 +235,10 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
   private reducedHandler!: (e: MediaQueryListEvent) => void;
   private reduced = false;
 
+  /* context-loss handlers */
+  private ctxLostHandler!: (e: Event) => void;
+  private ctxRestoredHandler!: () => void;
+
   /* ── lifecycle ──────────────────────────────────────────────────────────── */
   ngAfterViewInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
@@ -171,6 +251,13 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
 
   /* ── init ──────────────────────────────────────────────────────────────── */
   private init(): void {
+    /* capability probe */
+    const { lowEnd, noWebGL } = probeCapability();
+    if (lowEnd || noWebGL) {
+      this.showStaticFallback();
+      return;
+    }
+
     /* reduced-motion */
     this.reducedMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
     this.reduced = this.reducedMQ.matches;
@@ -182,17 +269,48 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
     const noseMap: Record<string, number> = { '+z': 0, '-z': Math.PI, '+x': -Math.PI / 2, '-x': Math.PI / 2 };
     this.NOSE_YAW = noseMap[nose] ?? 0;
 
+    /* tab visibility — pause/resume loop */
+    this.visHandler = () => {
+      this.tabHidden = document.hidden;
+      if (!this.tabHidden) {
+        // Snap cur = tgt so no catch-up jank after a long tab switch
+        this.cur = this.tgt;
+        this.lastNow = performance.now();
+      }
+    };
+    document.addEventListener('visibilitychange', this.visHandler);
+
     this.buildDots();
     this.initThree();
     this.initScrollAndResize();
     this.loadModel();
   }
 
+  /* ── static fallback (low-end / no-WebGL) ─────────────────────────────── */
+  private showStaticFallback(): void {
+    const stage = this.stageEl.nativeElement;
+    stage.classList.add('t3d-static-fallback');
+    stage.innerHTML = BEATS.map(b => `
+      <div class="t3d-fb-beat" style="background:rgb(${b.bg});color:rgb(${b.ink})">
+        <span class="t3d-beat-k">${b.k}</span>
+        <h2 class="t3d-beat-h">${b.t}</h2>
+        <p class="t3d-beat-d">${b.d}</p>
+      </div>`).join('');
+    // Collapse the 700vh wrap to natural content height
+    this.wrapEl.nativeElement.style.height = 'auto';
+    this.loaderEl.nativeElement.classList.add('t3d-loader--hidden');
+  }
+
   /* ── renderer + scene + lights ─────────────────────────────────────────── */
   private initThree(): void {
+    const isMobile = window.innerWidth < 900;
+
+    /* Adaptive starting DPR: 2 desktop, 1.5 mobile */
+    this.currentDpr = Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2);
+
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setClearColor(0x000000, 0);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(this.currentDpr);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.05;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -200,6 +318,22 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.canvasWrap.nativeElement.appendChild(renderer.domElement);
     this.renderer = renderer;
+
+    /* WebGL context loss */
+    this.ctxLostHandler = (e: Event) => {
+      e.preventDefault();
+      this.stopLoop();
+    };
+    this.ctxRestoredHandler = () => {
+      try {
+        this.initThree();
+        this.loadModel();
+      } catch {
+        this.showStaticFallback();
+      }
+    };
+    renderer.domElement.addEventListener('webglcontextlost', this.ctxLostHandler);
+    renderer.domElement.addEventListener('webglcontextrestored', this.ctxRestoredHandler);
 
     this.scene  = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(38, 1, 0.1, 500);
@@ -213,7 +347,9 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
 
     const kl = new THREE.DirectionalLight(0xfaf0e0, 2.6);
     kl.castShadow = true;
-    kl.shadow.mapSize.set(1024, 1024);
+    /* Shadow map: 1024 desktop / 512 mobile */
+    const smSize = isMobile ? 512 : 1024;
+    kl.shadow.mapSize.set(smSize, smSize);
     kl.shadow.camera.near = 0.5; kl.shadow.camera.far = 60;
     kl.shadow.camera.left = kl.shadow.camera.bottom = -8;
     kl.shadow.camera.right = kl.shadow.camera.top = 8;
@@ -252,28 +388,22 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
   private checkScrollLeash(): void {
     if (this.reduced || this.isClamping) return;
 
-    const span = this.scrollSpan();
-    const wrapEl = this.wrapEl.nativeElement;
-    const wrapTop = wrapEl.getBoundingClientRect().top + window.scrollY;
+    const span    = this.scrollSpanCache;
     const scrollY = window.scrollY;
+    const lead    = this.getLeadBeats() / N;
+    const tolerancePx  = lead * span;
+    const planeScroll  = this.wrapTopCache + this.cur * span;
+    const minAllowed   = planeScroll - tolerancePx;
+    const maxAllowed   = planeScroll + tolerancePx;
 
-    const lead = this.getLeadBeats() / N;
-    const tolerancePx = lead * span;
-    const planeScroll = wrapTop + this.cur * span;
-    const minAllowed = planeScroll - tolerancePx;
-    const maxAllowed = planeScroll + tolerancePx;
-
-    const inStickyZone = scrollY >= wrapTop && scrollY <= wrapTop + span;
-    const leavePastEnd = scrollY > wrapTop + span && this.cur < 0.99;
-    const leavePastStart = scrollY < wrapTop && this.cur > 0.01;
+    const inStickyZone  = scrollY >= this.wrapTopCache && scrollY <= this.wrapTopCache + span;
+    const leavePastEnd  = scrollY > this.wrapTopCache + span && this.cur < 0.99;
+    const leavePastStart= scrollY < this.wrapTopCache && this.cur > 0.01;
 
     if (inStickyZone || leavePastEnd || leavePastStart) {
       let clampedY = scrollY;
-      if (scrollY < minAllowed) {
-        clampedY = minAllowed;
-      } else if (scrollY > maxAllowed) {
-        clampedY = maxAllowed;
-      }
+      if      (scrollY < minAllowed) clampedY = minAllowed;
+      else if (scrollY > maxAllowed) clampedY = maxAllowed;
 
       if (Math.abs(clampedY - scrollY) > 1) {
         this.isClamping = true;
@@ -286,11 +416,7 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
 
   private handleScroll = (): void => {
     if (this.isClamping) return;
-
-    if (this.navTargetProgress !== null) {
-      this.cancelNavTarget();
-    }
-
+    if (this.navTargetProgress !== null) this.cancelNavTarget();
     this.checkScrollLeash();
     this.tgt = this.getScrollProgress();
   };
@@ -298,10 +424,11 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
   private initScrollAndResize(): void {
     this.scrollHandler = this.handleScroll;
     window.addEventListener('scroll', this.scrollHandler, { passive: true });
-    window.addEventListener('wheel', this.cancelNavTarget, { passive: true });
+    window.addEventListener('wheel',      this.cancelNavTarget, { passive: true });
     window.addEventListener('touchstart', this.cancelNavTarget, { passive: true });
-    window.addEventListener('keydown', this.cancelNavTarget, { passive: true });
+    window.addEventListener('keydown',    this.cancelNavTarget, { passive: true });
 
+    /* ResizeObserver: single source of truth for all layout geometry */
     if (typeof ResizeObserver !== 'undefined') {
       this.resizeObs = new ResizeObserver(() => this.onResize());
       this.resizeObs.observe(this.stageEl.nativeElement);
@@ -313,30 +440,73 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
       this.intersObs = new IntersectionObserver(entries => {
         if (!this.modelGroup) return;
         if (entries[0].isIntersecting) {
+          /* Snap cur=tgt so the plane doesn't fly to catch up */
           this.tgt = this.getScrollProgress();
           this.cur = this.tgt;
+          this.refreshWrapTop();
           this.startLoop();
         } else {
           this.stopLoop();
         }
-      }, { threshold: 0 });
+      }, { threshold: 0, rootMargin: '200px 0px' });
       this.intersObs.observe(this.wrapEl.nativeElement);
     }
+  }
+
+  /* ─── Cached layout refresh (ResizeObserver + explicit call) ─────────── */
+  private refreshWrapTop(): void {
+    /* wrapTopCache: distance from document top to the start of the wrap */
+    const rect = this.wrapEl.nativeElement.getBoundingClientRect();
+    this.wrapTopCache    = rect.top + window.scrollY;
+    this.scrollSpanCache = Math.max(1,
+      this.wrapEl.nativeElement.offsetHeight - this.stageEl.nativeElement.offsetHeight);
   }
 
   private onResize(): void {
     const w = this.canvasWrap.nativeElement.clientWidth  || window.innerWidth;
     const h = this.canvasWrap.nativeElement.clientHeight || window.innerHeight;
+    this.cW = w; this.cH = h;
+    this.stW = this.stageEl.nativeElement.clientWidth  || w;
+    this.stH = this.stageEl.nativeElement.clientHeight || h;
+
     this.renderer.setSize(w, h, false);
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
+
+    this.refreshWrapTop();
+
+    /* Mobile layout detection */
+    this.isMobilePortrait = w < 900 && h > w;
+    this.isShortLandscape = w < 900 && w >= h && h <= 500;
+
+    if (this.isMobilePortrait) {
+      const TITLE_PX = Math.min(220, h * 0.28);
+      const DESC_PX  = Math.min(160, h * 0.20);
+      const safeTop  = 120 + TITLE_PX;
+      const safeBot  = h - 72 - DESC_PX;
+      const bandMid  = (safeTop + safeBot) / 2 / h;
+      this.mobileShiftFrac = cl(bandMid - 0.5, -0.30, 0.30);
+    } else {
+      this.mobileShiftFrac = 0;
+    }
+    this.applyViewOffset(w, h);
     this.fitGhost();
+  }
+
+  private applyViewOffset(w: number, h: number): void {
+    if (this.mobileShiftFrac !== 0) {
+      const shiftPx = Math.round(this.mobileShiftFrac * h);
+      this.camera.setViewOffset(w, h, 0, shiftPx, w, h);
+    } else {
+      this.camera.clearViewOffset();
+    }
+    this.camera.updateProjectionMatrix();
   }
 
   /* ── ghost word sizing ─────────────────────────────────────────────────── */
   private fitGhost(): void {
-    const vw = this.stageEl.nativeElement.clientWidth  || window.innerWidth;
-    const vh = this.stageEl.nativeElement.clientHeight || window.innerHeight;
+    const vw   = this.stW || window.innerWidth;
+    const vh   = this.stH || window.innerHeight;
     const span = this.ghostT.nativeElement;
     const ghost = this.ghostEl.nativeElement;
     ghost.style.fontSize = '100px';
@@ -361,13 +531,10 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
       bt.addEventListener('click', () => {
         const targetP = cl((i + 0.5) / N, 0, 1);
         if (this.reduced) {
-          const span = this.scrollSpan();
-          const wrapTop = this.wrapEl.nativeElement.getBoundingClientRect().top + window.scrollY;
-          const top = wrapTop + targetP * span;
+          const top = this.wrapTopCache + targetP * this.scrollSpanCache;
           this.smoothScroll.scrollTo(top, { immediate: true });
           window.scrollTo({ top, behavior: 'auto' });
-          this.tgt = targetP;
-          this.cur = targetP;
+          this.tgt = targetP; this.cur = targetP;
         } else {
           this.navTargetProgress = targetP;
         }
@@ -392,27 +559,29 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
     [this.ttlEl, this.beatD, this.ghostEl].forEach(ref => {
       const el = ref.nativeElement;
       el.classList.remove('t3d-anim-in');
-      void el.offsetWidth; // force reflow
+      void el.offsetWidth;
       el.classList.add('t3d-anim-in');
     });
   }
 
-  /* ── scroll helpers ─────────────────────────────────────────────────────── */
-  private scrollSpan(): number {
-    return Math.max(1,
-      this.wrapEl.nativeElement.offsetHeight -
-      this.stageEl.nativeElement.offsetHeight);
-  }
+  /* ── scroll helpers (use cached values — NO layout reads per frame) ─────── */
+  private scrollSpan(): number { return this.scrollSpanCache; }
 
   private getScrollProgress(): number {
     return cl(
-      -this.wrapEl.nativeElement.getBoundingClientRect().top / this.scrollSpan(),
+      (window.scrollY - this.wrapTopCache) / this.scrollSpanCache,
       0, 1
     );
   }
 
-  /* ── fade helper for prop groups ────────────────────────────────────────── */
-  private fade(obj: THREE.Object3D, alpha: number): void {
+  /* ── fade helper — skips traversal when alpha barely changed ────────────── */
+  private fade(obj: THREE.Object3D, alpha: number, key: string): void {
+    const prev = this.prevAlpha[key] ?? -1;
+    if (Math.abs(alpha - prev) < 0.005 && prev >= 0) {
+      obj.visible = alpha > 0.01;
+      return;
+    }
+    this.prevAlpha[key] = alpha;
     obj.visible = alpha > 0.01;
     if (!obj.visible) return;
     obj.traverse(n => {
@@ -431,7 +600,7 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  /* ── world setup (runway, globe, clouds, gates, shield) ─────────────────── */
+  /* ── world setup ─────────────────────────────────────────────────────────── */
   private setupWorld(): void {
     const scene = this.scene;
     const restY = this.restY;
@@ -501,9 +670,11 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
     );
     core.renderOrder = 0; dotPts.renderOrder = 1; cityPts.renderOrder = 3;
     const arcs = new THREE.Group(); W['arcLines'] = [];
-    ([['cai','lon'],['cai','dxb'],['lon','nyc'],['dxb','sin'],['sin','tok'],
-      ['nyc','lax'],['cai','cpt'],['sin','syd'],['nyc','sao']] as [string,string][])
-    .forEach(([a, b]) => {
+    const routes: [string, string][] = [
+      ['cai', 'lon'], ['cai', 'dxb'], ['lon', 'nyc'], ['dxb', 'sin'], ['sin', 'tok'],
+      ['nyc', 'lax'], ['cai', 'cpt'], ['sin', 'syd'], ['nyc', 'sao']
+    ];
+    routes.forEach(([a, b]) => {
       const A = ll(...(CITY[a] as [number,number]), RG);
       const B = ll(...(CITY[b] as [number,number]), RG);
       const mid = A.clone().add(B).multiplyScalar(.5).normalize()
@@ -593,6 +764,14 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
     scene.add(shield); W['shield'] = shield;
 
     this.world = W;
+
+    /* dev budget logging */
+    if (isDevMode()) {
+      requestAnimationFrame(() => {
+        const info = this.renderer.info.render;
+        console.log(`[Tribo3D] draw calls: ${info.calls}, tris: ${info.triangles}`);
+      });
+    }
   }
 
   /* ── plane pose at scroll position s ───────────────────────────────────── */
@@ -653,11 +832,16 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
     const cloudW  = win(s, 2, 2.25) * (1 - win(s, 3.2, 3.8));
     const gateW   = win(s, 2.8, 3) * (1 - win(s, 3.85, 4));
     const shieldW = win(s, 4.55, 4.95);
-    this.fade(W['run'],    runW);
-    this.fade(W['globe'],  globeW);
-    this.fade(W['clouds'], cloudW);
-    this.fade(W['shield'], shieldW);
+
+    this.fade(W['run'],    runW,    'run');
+    this.fade(W['globe'],  globeW,  'globe');
+    this.fade(W['clouds'], cloudW,  'clouds');
+    this.fade(W['shield'], shieldW, 'shield');
     this.shadowMat.opacity = .3 * Math.max(runW, cloudW * .5);
+
+    /* Shadow auto-update: skip shadow pass when shadow casters are invisible */
+    const shadowCastersVisible = runW > 0.01 || cloudW > 0.01;
+    this.keyLight.shadow.autoUpdate = shadowCastersVisible;
 
     if (W['globe'].visible) {
       W['globe'].rotation.y = s * .9 + (this.reduced ? 0 : now / 30000);
@@ -668,10 +852,10 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
 
     const u = cl(s - 3, 0, 1);
     W['gates'].visible = gateW > .01;
-    const sw = this.stageEl.nativeElement.clientWidth;
-    const sh = this.stageEl.nativeElement.clientHeight;
+    /* Use cached stW/stH — no layout read per frame */
+    const sw = this.stW, sh = this.stH;
     (W['rings'] as THREE.Mesh[]).forEach((r, k) => {
-      const d = (u - W['ru'][k] + .03) / .08;
+      const d   = (u - W['ru'][k] + .03) / .08;
       const lit = ez(cl(d, 0, 1));
       r.scale.setScalar(1 + .3 * Math.sin(Math.PI * cl(d / 2.5, 0, 1)));
       (r.material as THREE.MeshBasicMaterial).color.set(0xFAF7F2).lerp(this.GOLD, lit);
@@ -680,9 +864,16 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
       this.TMP.project(this.camera);
       const o = W['gates'].visible && this.TMP.z < 1
         ? gateW * cl(1.4 - Math.abs(u - W['ru'][k]) / .1, 0, 1) : 0;
-      (W['labs'][k] as HTMLDivElement).style.opacity = o.toFixed(2);
-      (W['labs'][k] as HTMLDivElement).style.transform =
-        `translate(${(this.TMP.x*.5+.5)*sw}px,${(-this.TMP.y*.5+.5)*sh}px) translate(-50%,-50%)`;
+      const lab = W['labs'][k] as HTMLDivElement;
+      const oStr = o.toFixed(2);
+      const tx = ((this.TMP.x*.5+.5)*sw).toFixed(1);
+      const ty = ((-this.TMP.y*.5+.5)*sh).toFixed(1);
+      /* Only write style when value changed */
+      if (lab.style.opacity !== oStr)
+        lab.style.opacity = oStr;
+      const xfm = `translate(${tx}px,${ty}px) translate(-50%,-50%)`;
+      if (lab.style.transform !== xfm)
+        lab.style.transform = xfm;
     });
     ((W['pathDim'] as THREE.Line).material as THREE.LineBasicMaterial).opacity = gateW * .22;
     ((W['pathLit'] as THREE.Line).material as THREE.LineBasicMaterial).opacity = gateW;
@@ -708,9 +899,13 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
     const pos = kk + g;
     const A = BEATS[kk], B = BEATS[kk + 1];
 
+    /* Only write style when string changed — avoids forced style recalc */
     const stage = this.stageEl.nativeElement;
-    stage.style.backgroundColor = `rgb(${mx(A.bg, B.bg, g).map(Math.round)})`;
-    stage.style.color            = `rgb(${mx(A.ink, B.ink, g).map(Math.round)})`;
+    const bgStr    = `rgb(${mx(A.bg, B.bg, g).map(Math.round)})`;
+    const colorStr = `rgb(${mx(A.ink, B.ink, g).map(Math.round)})`;
+    if (bgStr    !== this.prevBgStr)    { stage.style.backgroundColor = bgStr;    this.prevBgStr    = bgStr; }
+    if (colorStr !== this.prevColorStr) { stage.style.color = colorStr;            this.prevColorStr = colorStr; }
+
     this.setIdx(Math.round(pos));
 
     const s = cl(p, 0, 0.9999) * N;
@@ -725,7 +920,18 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
 
     this.camOrbit += (lr(A.cam.orbit, B.cam.orbit, g) - this.camOrbit) * k;
     this.camElev  += (lr(A.cam.elev,  B.cam.elev,  g) - this.camElev)  * k;
-    this.camDist  += (lr(A.cam.dist,  B.cam.dist,  g) - this.camDist)  * k;
+
+    /* Aspect-aware camera distance */
+    const fitWA = lr(A.cam.fitW, B.cam.fitW, g);
+    const fitWB = lr(A.cam.dist, B.cam.dist, g);
+    let targetDist = fitWB;
+    if (this.isMobilePortrait || this.isShortLandscape) {
+      const aspect  = this.camera.aspect;
+      const hFovRad = 2 * Math.atan(Math.tan(rad(this.camera.fov) / 2) * aspect);
+      const minDist = (fitWA / 2) / Math.tan(hFovRad / 2);
+      targetDist = Math.max(fitWB, minDist);
+    }
+    this.camDist += (targetDist - this.camDist) * k;
 
     this.rimLight.intensity = lr(0, 4.8, cl((pos - 2.5) / 1.5, 0, 1));
     if (this.mixer && this.hasAnims) this.mixer.setTime(pos * 2.0);
@@ -744,8 +950,29 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
   /* ── render loop ────────────────────────────────────────────────────────── */
   private loop = (now: number) => {
     this.rafId = requestAnimationFrame(this.loop);
+
+    /* Pause when tab is hidden */
+    if (this.tabHidden) return;
+
     const dt = Math.max(0, Math.min(0.05, (now - this.lastNow) / 1000));
     this.lastNow = now;
+
+    /* ── Adaptive DPR ──────────────────────────────────────────────────── */
+    if (!this.dprLocked) {
+      this.frameTimes.push(dt * 1000);
+      if (this.frameTimes.length >= 60) {
+        const avg = this.frameTimes.reduce((a, b) => a + b, 0) / this.frameTimes.length;
+        this.frameTimes = [];
+        if (avg > 24 && this.currentDpr > 1.0) {
+          this.currentDpr = Math.max(1.0, this.currentDpr - 0.25);
+          this.renderer.setPixelRatio(this.currentDpr);
+          this.dprLocked = true; // never raise in this session
+        }
+      }
+    }
+
+    /* ── Scroll/leash / playhead advance ──────────────────────────────── */
+    const prevCur = this.cur;
 
     if (this.reduced) {
       this.cur = this.tgt;
@@ -759,11 +986,7 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
         const maxStep = MAX_SPEED * dt;
         this.cur += Math.max(-maxStep, Math.min(maxStep, step));
       }
-
-      // Move page scroll position along with playhead at maxSpeed
-      const span = this.scrollSpan();
-      const wrapTop = this.wrapEl.nativeElement.getBoundingClientRect().top + window.scrollY;
-      const targetScrollY = wrapTop + this.cur * span;
+      const targetScrollY = this.wrapTopCache + this.cur * this.scrollSpanCache;
       this.isClamping = true;
       this.smoothScroll.scrollTo(targetScrollY, { immediate: true });
       window.scrollTo({ top: targetScrollY, behavior: 'instant' });
@@ -774,6 +997,13 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
       const maxStep = MAX_SPEED * dt;
       this.cur += Math.max(-maxStep, Math.min(maxStep, step));
     }
+
+    this.playheadMoving = Math.abs(this.cur - prevCur) > 1e-5;
+
+    /* ── Dirty render guard ────────────────────────────────────────────── */
+    const ambientDue = (now - this.lastAmbientNow) >= this.AMBIENT_INTERVAL;
+    if (!this.playheadMoving && !ambientDue) return;
+    if (!this.playheadMoving && ambientDue) this.lastAmbientNow = now;
 
     this.applyBeat(this.cur, now, dt);
     this.renderer.render(this.scene, this.camera);
@@ -793,14 +1023,14 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
   private loadModel(): void {
     const loader = new GLTFLoader();
     const draco  = new DRACOLoader();
-    draco.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/');
+    // Use local Draco decoder (copied to public/draco/ at build time)
+    draco.setDecoderPath('/draco/');
     loader.setDRACOLoader(draco);
 
     loader.load(
       '/assets/plane.glb',
       gltf => {
         draco.dispose();
-        /* normalize */
         const obj = gltf.scene;
         const meshNames: string[] = [];
         obj.traverse(n => {
@@ -811,7 +1041,7 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
             }
           }
         });
-        const bbox   = new THREE.Box3().setFromObject(obj);
+        const bbox      = new THREE.Box3().setFromObject(obj);
         const rawSize   = bbox.getSize(new THREE.Vector3());
         const rawCenter = bbox.getCenter(new THREE.Vector3());
         const normScale = 4.0 / Math.max(rawSize.x, rawSize.y, rawSize.z);
@@ -824,17 +1054,17 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
           this.mixer = new THREE.AnimationMixer(grp);
           gltf.animations.forEach(c => this.mixer!.clipAction(c).play());
         }
-        console.group('%c[Tribo 3D] ✓', 'color:#C9A24A;font-weight:700');
-        console.log(`Meshes:${meshNames.length} normScale:${normScale.toFixed(3)} restY:${this.restY.toFixed(3)}`);
-        console.groupEnd();
+        if (isDevMode()) {
+          console.group('%c[Tribo 3D] ✓', 'color:#C9A24A;font-weight:700');
+          console.log(`Meshes:${meshNames.length} normScale:${normScale.toFixed(3)} restY:${this.restY.toFixed(3)}`);
+          console.groupEnd();
+        }
         this.modelGroup = grp;
         this.modelGroup.rotation.y = this.NOSE_YAW;
         this.rig.add(this.modelGroup);
         this.scene.add(this.rig);
         this.setupWorld();
         this.loaderEl.nativeElement.classList.add('t3d-loader--hidden');
-        if (this.modelBytes / 1048576 > 15)
-          console.warn('[Tribo 3D] plane.glb >15 MB — optimize with gltf-pipeline --draco.compressionLevel=7');
         this.tgt = this.cur = this.getScrollProgress();
         this.onResize(); this.setIdx(0); this.startLoop();
       },
@@ -861,10 +1091,11 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
   /* ── full cleanup ───────────────────────────────────────────────────────── */
   private destroy(): void {
     this.stopLoop();
-    window.removeEventListener('scroll', this.scrollHandler);
-    window.removeEventListener('wheel', this.cancelNavTarget);
+    window.removeEventListener('scroll',     this.scrollHandler);
+    window.removeEventListener('wheel',      this.cancelNavTarget);
     window.removeEventListener('touchstart', this.cancelNavTarget);
-    window.removeEventListener('keydown', this.cancelNavTarget);
+    window.removeEventListener('keydown',    this.cancelNavTarget);
+    if (this.visHandler) document.removeEventListener('visibilitychange', this.visHandler);
     this.resizeObs?.disconnect();
     this.intersObs?.disconnect();
     this.reducedMQ?.removeEventListener('change', this.reducedHandler);
@@ -872,6 +1103,11 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
     this.btns = []; this.labEls = [];
 
     if (this.renderer) {
+      /* Remove context-loss listeners before forceContextLoss */
+      const canvas = this.renderer.domElement;
+      canvas.removeEventListener('webglcontextlost',    this.ctxLostHandler);
+      canvas.removeEventListener('webglcontextrestored', this.ctxRestoredHandler);
+
       this.scene.traverse(node => {
         const mesh = node as THREE.Mesh;
         mesh.geometry?.dispose();
@@ -883,7 +1119,9 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
           });
         }
       });
+      this.renderer.forceContextLoss();
       this.renderer.dispose();
+      canvas.remove();
     }
   }
 }

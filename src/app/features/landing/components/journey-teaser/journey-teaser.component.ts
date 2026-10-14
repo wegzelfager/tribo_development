@@ -38,6 +38,15 @@ export class JourneyTeaserComponent implements AfterViewInit, OnDestroy {
       if (entries[0].isIntersecting) {
         el.classList.add('teaser__content--visible');
         this.obs?.disconnect();
+        // Preload 3D model only when user scrolls near the section
+        if (!document.querySelector('link[href*="plane.glb"]')) {
+          const link = document.createElement('link');
+          link.rel = 'prefetch';
+          link.as = 'fetch';
+          link.href = '/assets/plane.glb';
+          link.crossOrigin = 'anonymous';
+          document.head.appendChild(link);
+        }
       }
     }, { threshold: 0.15 });
     this.obs.observe(el);

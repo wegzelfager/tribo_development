@@ -358,7 +358,7 @@
   to   { transform: translateX(-50%) scale(1.1); opacity: 1;   }
 }
 
-/* ─── Mobile layout (<900px) ──────────────────────────────────────────────── */
+/* ─── Mobile layout (<900px) — portrait phones ────────────────────────────── */
 @media (max-width: 899px) {
   .t3d-eyebrow {
     left: 0; right: 0;
@@ -374,12 +374,73 @@
 
   .t3d-beat-h::after { margin: 18px auto 0; }
 
+  /* Description: pinned near bottom with a glass pill behind it.
+     The JS setViewOffset pushes the 3D subject into the free band above. */
   .t3d-beat-d {
-    left: 20px; right: 20px;
-    top: auto; bottom: 72px;
+    left: 16px; right: 16px;
+    top: auto;
+    bottom: max(64px, env(safe-area-inset-bottom, 64px));
     transform: none; max-width: none;
     text-align: center; font-size: 14px;
+    padding: 14px 18px;
+    background: rgba(0, 0, 0, 0.42);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-radius: 12px;
+    z-index: 21;
   }
+
+  /* Bottom gradient scrim — keeps dots readable over any beat colour */
+  .t3d-stage::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 220px;
+    background: linear-gradient(to top, rgba(0,0,0,0.50) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  .t3d-dots { z-index: 30; }
+}
+
+/* ─── Short landscape phone (<900px wide, ≤500px tall) ───────────────────── */
+@media (max-width: 899px) and (max-height: 500px) and (orientation: landscape) {
+  /* Not enough vertical room for the tagline */
+  .t3d-eyebrow { display: none; }
+
+  /* Compact title block — left column */
+  .t3d-ttl {
+    left:  max(16px, env(safe-area-inset-left,  16px));
+    right: auto;
+    top:   calc(env(safe-area-inset-top, 0px) + 16px);
+    transform: none; text-align: left;
+    padding: 0;
+    max-width: 44vw;
+  }
+
+  .t3d-beat-k  { margin-bottom: 8px; font-size: 10px; }
+  .t3d-beat-h  {
+    font-size: clamp(18px, 3.5vw, 26px);
+    &::after { margin-top: 10px; }
+  }
+
+  /* Description — right column, vertically centred */
+  .t3d-beat-d {
+    left:  auto;
+    right: max(16px, env(safe-area-inset-right, 16px));
+    top:   50%;
+    bottom: auto;
+    transform: translateY(-50%);
+    max-width: 40vw;
+    text-align: left;
+    font-size: 12px;
+    padding: 12px 14px;
+    border-radius: 10px;
+  }
+
+  /* No scrim needed in landscape */
+  .t3d-stage::after { display: none; }
 }
 
 /* ─── Reduced motion ──────────────────────────────────────────────────────── */
