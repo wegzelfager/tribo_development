@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Syne:wght@700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 :root {
+  /* Landing page tokens */
   --sand-gold: #C89D66;
   --sand-gold-light: #D4B483;
   --rock-brown: #5C3D2E;
@@ -9,6 +10,16 @@
   --dark-mid: #2A2220;
   --glass: rgba(200, 157, 102, 0.08);
   --glass-border: rgba(200, 157, 102, 0.2);
+
+  /* Auth page tokens */
+  --auth-ink:     #120f0b;
+  --auth-ember:   #2b1707;
+  --auth-gold:    #d6a93b;
+  --auth-gold-hi: #f0c866;
+  --auth-cream:   #faf6ee;
+  --auth-muted:   #b4ad9f;
+  --auth-dim:     #8f887a;
+  --auth-err:     #ff9d8f;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

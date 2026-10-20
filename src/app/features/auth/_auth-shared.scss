@@ -1,0 +1,459 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Auth Shared Styles
+// Shared design language for Login and Register pages.
+// @import this partial from each auth component's .scss file.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── Page wrapper ──────────────────────────────────────────────────────────────
+.auth-page {
+  --auth-ink:     #120f0b;
+  --auth-ember:   #2b1707;
+  --auth-gold:    #d6a93b;
+  --auth-gold-hi: #f0c866;
+  --auth-cream:   #faf6ee;
+  --auth-muted:   #b4ad9f;
+  --auth-dim:     #8f887a;
+  --auth-err:     #ff9d8f;
+  --stubw: 268px;
+  --stubh: 190px;
+
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow-x: hidden;
+  color: var(--auth-cream);
+  font-family: 'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
+  cursor: auto; // override body cursor: none
+
+  background:
+    radial-gradient(ellipse 58% 40% at 50% 38%,
+      rgba(150,105,25,.5) 0,
+      rgba(150,105,25,.14) 55%,
+      transparent 78%),
+    linear-gradient(180deg,
+      var(--auth-ink) 0,
+      var(--auth-ink) 48%,
+      var(--auth-ember) 100%);
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      repeating-radial-gradient(circle at 50% 38%,
+        transparent 0 118px, rgba(214,169,59,.07) 119px 120px),
+      radial-gradient(1.3px 1.3px at 20px 30px,  #f0c866 50%, transparent 52%),
+      radial-gradient(1px   1px   at 90px 120px, #faf6ee 50%, transparent 52%),
+      radial-gradient(1.5px 1.5px at 160px 60px, #d6a93b 50%, transparent 52%),
+      radial-gradient(1px   1px   at 210px 170px,#faf6ee 50%, transparent 52%);
+    background-size: auto, 240px 200px, 300px 260px, 370px 310px, 210px 240px;
+    -webkit-mask-image: radial-gradient(circle at 50% 38%, #000 0, transparent 72%);
+    mask-image:         radial-gradient(circle at 50% 38%, #000 0, transparent 72%);
+  }
+
+  a {
+    color: var(--auth-gold);
+    text-decoration: none;
+    &:hover { color: var(--auth-gold-hi); text-decoration: underline; }
+  }
+
+  :focus-visible { outline: 2px solid var(--auth-gold); outline-offset: 3px; }
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+.auth-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28px 48px;
+
+  a:last-child { font-size: 14px; font-weight: 500; }
+}
+
+.logo {
+  font: 800 22px 'Syne', 'Arial Black', sans-serif;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--auth-cream);
+  &:hover { color: var(--auth-cream); text-decoration: none; }
+}
+
+// ── Main ──────────────────────────────────────────────────────────────────────
+.auth-main {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 8px 48px 48px;
+}
+
+// ── Pass card ─────────────────────────────────────────────────────────────────
+.pass-wrap {
+  width: 100%;
+  max-width: 960px;
+  filter: drop-shadow(0 34px 50px rgba(0,0,0,.55));
+}
+
+.pass {
+  position: relative;
+  display: flex;
+  border-radius: 28px;
+  background: linear-gradient(180deg, #201b13 0, #15120d 100%);
+
+  -webkit-mask-image:
+    radial-gradient(circle 16px at calc(100% - var(--stubw)) 0,    #0000 15px, #000 16px),
+    radial-gradient(circle 16px at calc(100% - var(--stubw)) 100%, #0000 15px, #000 16px);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    radial-gradient(circle 16px at calc(100% - var(--stubw)) 0,    #0000 15px, #000 16px),
+    radial-gradient(circle 16px at calc(100% - var(--stubw)) 100%, #0000 15px, #000 16px);
+  mask-composite: intersect;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(240,200,102,.75), transparent);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    animation: rise .8s cubic-bezier(.16,.84,.24,1) both;
+  }
+}
+
+// ── Form area ─────────────────────────────────────────────────────────────────
+.pass-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 48px 52px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+
+  h1 {
+    margin: 0 0 12px;
+    font: 800 40px/1.04 'Syne', 'Arial Black', sans-serif;
+    text-transform: uppercase;
+    background: linear-gradient(180deg, var(--auth-cream) 35%, #d8bf7e);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .lead {
+    margin: 0;
+    max-width: 420px;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--auth-muted);
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+}
+
+// ── Form fields ───────────────────────────────────────────────────────────────
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+
+  label, legend {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--auth-muted);
+  }
+}
+
+.box {
+  position: relative;
+
+  > svg {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    width: 18px;
+    height: 18px;
+    margin-top: -9px;
+    stroke: var(--auth-dim);
+    fill: none;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    pointer-events: none;
+    transition: stroke .2s;
+  }
+
+  &:focus-within > svg { stroke: var(--auth-gold); }
+}
+
+input[type=email],
+input[type=password],
+input[type=text],
+input[type=number] {
+  width: 100%;
+  height: 54px;
+  padding: 0 16px 0 46px;
+  border-radius: 14px;
+  border: 1px solid rgba(250,246,238,.18);
+  background: #0e0c09;
+  color: var(--auth-cream);
+  font: 400 16px 'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
+  transition: border-color .2s, box-shadow .2s;
+  -moz-appearance: textfield;
+
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  &::placeholder { color: #7d776a; }
+  &:hover  { border-color: rgba(250,246,238,.34); }
+  &:focus  { outline: none; border-color: var(--auth-gold); box-shadow: 0 0 0 3px rgba(214,169,59,.26); }
+  &[aria-invalid=true] { border-color: var(--auth-err) !important; }
+}
+
+.pw-field { padding-right: 84px; }
+
+.tg {
+  position: absolute;
+  right: 6px;
+  top: 9px;
+  height: 36px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--auth-gold);
+  font: 600 13px 'Space Grotesk', sans-serif;
+  cursor: pointer;
+  &:hover { color: var(--auth-gold-hi); background: rgba(214,169,59,.08); }
+}
+
+.note {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--auth-dim);
+}
+
+fieldset {
+  border: 0; margin: 0; padding: 0; min-width: 0;
+  legend { padding: 0; margin-bottom: 10px; }
+}
+
+// ── Error / success ───────────────────────────────────────────────────────────
+.err {
+  margin: 0;
+  min-height: 21px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--auth-err);
+  &.ok { color: var(--auth-gold-hi); }
+}
+
+// ── Gold button ───────────────────────────────────────────────────────────────
+.go {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 56px;
+  border: 0;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #e2b94d 0, #cfa032 100%);
+  color: var(--auth-ink);
+  font: 600 16px 'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 10px 24px -14px rgba(214,169,59,.6);
+
+  &:disabled { cursor: progress; }
+
+  .lab {
+    position: relative;
+    display: inline-block;
+    white-space: nowrap;
+  }
+
+  .fill {
+    position: absolute;
+    inset: 0;
+    background: rgba(18,15,11,.16);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+
+  .ok-icon {
+    display: none;
+    position: relative;
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+}
+
+// ── "Have account?" ───────────────────────────────────────────────────────────
+.have {
+  margin: 0;
+  text-align: center;
+  font-size: 14px;
+  color: var(--auth-muted);
+  a { font-weight: 600; }
+}
+
+// ── Pass stub ─────────────────────────────────────────────────────────────────
+.stub {
+  flex: 0 0 var(--stubw);
+  padding: 44px 28px 36px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  text-align: center;
+  border-left: 2px dashed rgba(250,246,238,.16);
+  background: rgba(214,169,59,.05);
+  border-radius: 0 28px 28px 0;
+
+  .tag { font-size: 13px; font-weight: 500; color: var(--auth-muted); }
+}
+
+.mid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+}
+
+.route {
+  position: relative;
+  width: 200px;
+  height: 96px;
+
+  .arc {
+    position: absolute;
+    inset: 0;
+    width: 200px;
+    height: 96px;
+    overflow: visible;
+  }
+}
+
+.trail {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  filter: drop-shadow(0 0 4px rgba(240,200,102,.8));
+}
+
+.plane {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 24px;
+  height: 24px;
+  offset-path: path('M12 82 Q100 -14 188 82');
+  offset-rotate: auto;
+  offset-distance: 0%;
+  offset-anchor: 50% 50%;
+  transition: offset-distance .8s cubic-bezier(.45,.05,.25,1);
+
+  svg { width: 24px; height: 24px; fill: var(--auth-gold); transform: rotate(90deg); }
+
+  &.fly { animation: fly 2.6s cubic-bezier(.45,.05,.25,1) both; transition: none; }
+}
+
+.chap { position: absolute; bottom: -4px; font-size: 11px; color: var(--auth-dim); }
+
+.claim { margin: 0; font-size: 18px; line-height: 1.5; }
+
+.bars {
+  width: 100%;
+  height: 44px;
+  opacity: .8;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--auth-cream) 0 2px, transparent 2px 5px,
+    var(--auth-cream) 5px 6px, transparent 6px 8px,
+    var(--auth-cream) 8px 11px, transparent 11px 14px
+  );
+}
+
+.mark {
+  margin-top: 8px;
+  font: 800 12px 'Syne', 'Arial Black', sans-serif;
+  letter-spacing: .3em;
+  color: var(--auth-dim);
+}
+
+// ── Footer ────────────────────────────────────────────────────────────────────
+.auth-footer {
+  position: relative;
+  padding: 0 24px 28px;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--auth-dim);
+}
+
+// ── Keyframes ─────────────────────────────────────────────────────────────────
+@keyframes rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes fly {
+  from { offset-distance: 0%; }
+  to   { offset-distance: 100%; }
+}
+
+// ── Responsive ────────────────────────────────────────────────────────────────
+@media (max-width: 860px) {
+  .auth-header { padding: 20px 16px; }
+  .auth-main   { padding: 8px 16px 36px; }
+
+  .pass {
+    flex-direction: column;
+    -webkit-mask-image:
+      radial-gradient(circle 16px at 0          calc(100% - var(--stubh)), #0000 15px, #000 16px),
+      radial-gradient(circle 16px at 100%        calc(100% - var(--stubh)), #0000 15px, #000 16px);
+    mask-image:
+      radial-gradient(circle 16px at 0          calc(100% - var(--stubh)), #0000 15px, #000 16px),
+      radial-gradient(circle 16px at 100%        calc(100% - var(--stubh)), #0000 15px, #000 16px);
+  }
+
+  .pass-main {
+    padding: 34px 22px 30px;
+    h1 { font-size: 32px; }
+  }
+
+  .stub {
+    flex: 0 0 var(--stubh);
+    height: var(--stubh);
+    padding: 16px 24px;
+    border-left: 0;
+    border-top: 2px dashed rgba(250,246,238,.16);
+    border-radius: 0 0 28px 28px;
+    justify-content: space-around;
+    .tag, .claim { display: none; }
+  }
+}
+
+// ── Reduced motion ────────────────────────────────────────────────────────────
+@media (prefers-reduced-motion: reduce) {
+  .plane { animation: none !important; transition: none; }
+  .trail { animation: none !important; transition: none; }
+}

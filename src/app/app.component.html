@@ -1,1 +1,6 @@
-<router-outlet></router-outlet>
+<!-- Gold-on-dark fallback while a lazy chunk is being fetched -->
+<div class="chunk-loader" [class.chunk-loader--on]="loading" aria-hidden="true">
+  <span class="chunk-loader__ring"></span>
+</div>
+
+<router-outlet />

@@ -1,1 +1,33 @@
 /* Root Component Styles */
+
+.chunk-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: #120f0b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+
+  &--on {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  &__ring {
+    display: block;
+    width: 38px;
+    height: 38px;
+    border: 2px solid rgba(214, 169, 59, 0.18);
+    border-top-color: #d6a93b;
+    border-radius: 50%;
+    animation: chunk-spin 0.75s linear infinite;
+  }
+}
+
+@keyframes chunk-spin {
+  to { transform: rotate(360deg); }
+}

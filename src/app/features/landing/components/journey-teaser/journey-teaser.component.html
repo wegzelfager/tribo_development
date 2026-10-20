@@ -1,29 +1,46 @@
 <section class="teaser" #sectionEl aria-label="Teaser — Are you ready to be surprised?">
 
-  <!-- Ambient gold glow (CSS, no JS needed) -->
-  <div class="teaser__glow" aria-hidden="true"></div>
+  <!-- Subtle film-grain overlay (SVG feTurbulence) -->
+  <div class="teaser__grain" aria-hidden="true"></div>
 
-  <!-- Inner wrapper (container padding, centered flex column) -->
+  <!-- Ambient warm gold radial glow with pointer parallax wrapper -->
+  <div class="teaser__glow-wrap" #glowWrapEl aria-hidden="true">
+    <div class="teaser__glow" #glowEl></div>
+  </div>
+
+  <!-- Inner wrapper (container padding, centered flex column, scroll drift) -->
   <div class="teaser__inner" #innerEl>
-    <p class="teaser__eyebrow">The journey begins here</p>
-    <h2 class="teaser__headline" #headlineEl>
-      <span>Are</span> <span>you</span> <br class="bn">
-      <span>ready</span> <br>
-      <span>to</span> <span>be</span> <br class="bn">
-      <span>surprised?</span>
-    </h2>
+    <!-- Eyebrow: text with gold line on each side -->
+    <p class="teaser__eyebrow">
+      <span class="teaser__eyebrow-line teaser__eyebrow-line--left" aria-hidden="true"></span>
+      <span class="teaser__eyebrow-text">THE JOURNEY BEGINS HERE</span>
+      <span class="teaser__eyebrow-line teaser__eyebrow-line--right" aria-hidden="true"></span>
+    </p>
+
+    <!-- Headline: 4 stacked lines, Syne display font, aria-label on h1, split lines hidden from AT -->
+    <h1 class="teaser__headline" #headlineEl aria-label="Are you ready to be surprised?">
+      <span class="teaser__headline-line" #line0 aria-hidden="true">ARE YOU</span>
+      <span class="teaser__headline-line" #line1 aria-hidden="true">READY</span>
+      <span class="teaser__headline-line" #line2 aria-hidden="true">TO BE</span>
+      <span class="teaser__headline-line" #line3 aria-hidden="true">SURPRISED?</span>
+    </h1>
+
+    <!-- Subtitle: split into three inline-block spans -->
     <p class="teaser__sub">
-      Five chapters. One aircraft. The full Tribo story — told in three dimensions.
+      <span class="teaser__sub-part">Five chapters.</span>
+      <span class="teaser__sub-part">One aircraft.</span>
+      <span class="teaser__sub-part">The full Tribo story, told in three dimensions.</span>
     </p>
   </div>
 
-  <!-- Scroll hint -->
-  <div class="teaser__scroll" aria-hidden="true">
-    <span class="teaser__scroll-line"></span>
+  <!-- Scroll cue: small SCROLL label with thin vertical line under it -->
+  <div class="teaser__scroll" #scrollCueEl aria-hidden="true">
     <span class="teaser__scroll-label">Scroll</span>
+    <div class="teaser__scroll-track">
+      <span class="teaser__scroll-runner"></span>
+    </div>
   </div>
 
-  <!-- Bottom gradient fade → navy (matches beat 01 of the 3D section) -->
-  <div class="teaser__seam" aria-hidden="true"></div>
-
 </section>
+
+

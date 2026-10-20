@@ -1,1 +1,277 @@
-/* Register Component Styles */
+// Register component styles — shared auth design + register-specific additions
+@import '../auth-shared';
+
+// ── Step progress indicators ──────────────────────────────────────────────────
+.steps {
+  display: flex;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--auth-dim);
+    transition: color .2s;
+
+    &::before {
+      content: '';
+      height: 3px;
+      border-radius: 3px;
+      background: rgba(250,246,238,.16);
+      transition: background .3s, box-shadow .3s;
+    }
+
+    &.on::before, &.done::before { background: var(--auth-gold); }
+    &.on::before { box-shadow: 0 0 12px rgba(240,200,102,.7); }
+    &.on   { color: var(--auth-cream); }
+    &.done { color: var(--auth-muted); }
+  }
+}
+
+// ── Step panels ───────────────────────────────────────────────────────────────
+.reg-step {
+  display: none;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+
+  &.on {
+    display: flex;
+    animation: stepin .35s cubic-bezier(.16,.84,.24,1) both;
+  }
+}
+
+@keyframes stepin {
+  from { opacity: 0; transform: translateX(var(--dx, 18px)); }
+  to   { opacity: 1; transform: none; }
+}
+
+// ── Two-column layout (name + age) ────────────────────────────────────────────
+.two {
+  display: grid;
+  grid-template-columns: 1fr 120px;
+  gap: 14px;
+}
+
+// ── Role radio cards ──────────────────────────────────────────────────────────
+.roles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.role {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 14px 16px 14px 44px;
+  border-radius: 14px;
+  border: 1px solid rgba(250,246,238,.18);
+  background: #0e0c09;
+  cursor: pointer;
+  transition: border-color .2s, background-color .2s;
+
+  &:hover { border-color: rgba(250,246,238,.34); }
+
+  input { position: absolute; opacity: 0; pointer-events: none; }
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 16px; top: 17px;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    border: 1.5px solid var(--auth-dim);
+    transition: border-color .2s, box-shadow .2s;
+  }
+
+  &:has(input:checked) {
+    border-color: var(--auth-gold);
+    background: rgba(214,169,59,.09);
+    &::before {
+      border-color: var(--auth-gold);
+      box-shadow: inset 0 0 0 3.5px #0e0c09, inset 0 0 0 9px var(--auth-gold);
+    }
+  }
+
+  &:has(input:focus-visible) { outline: 2px solid var(--auth-gold); outline-offset: 3px; }
+
+  svg {
+    position: absolute;
+    right: 14px; top: 14px;
+    width: 22px; height: 22px;
+    stroke: var(--auth-dim);
+    fill: none;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: stroke .2s, transform .35s cubic-bezier(.3,1.5,.5,1);
+  }
+
+  &:has(input:checked) svg {
+    stroke: var(--auth-gold-hi);
+    transform: rotate(12deg) scale(1.1);
+  }
+
+  b    { font-size: 15px; font-weight: 600; }
+  span { font-size: 13px; color: var(--auth-muted); }
+}
+
+// ── Upload tile grid ──────────────────────────────────────────────────────────
+.ups {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.up {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 132px;
+  padding: 10px;
+  border: 1.5px dashed rgba(250,246,238,.26);
+  border-radius: 14px;
+  background: #0e0c09 center/cover no-repeat;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color .2s;
+
+  &:hover         { border-color: var(--auth-gold); }
+  &:focus-within  { outline: 2px solid var(--auth-gold); outline-offset: 3px; }
+  &:has(input[aria-invalid=true]) { border-color: var(--auth-err); }
+
+  input {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    opacity: 0; cursor: pointer;
+  }
+
+  svg {
+    width: 26px; height: 26px;
+    margin-bottom: 4px;
+    stroke: var(--auth-gold);
+    fill: none;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .t { position: relative; font-size: 14px; font-weight: 600; }
+  .h { position: relative; font-size: 12px; color: var(--auth-muted); }
+
+  &.has {
+    border: 1.5px solid rgba(214,169,59,.7);
+    justify-content: flex-end;
+
+    &::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(180deg, transparent 35%, rgba(10,8,5,.88));
+    }
+    svg { display: none; }
+  }
+}
+
+// ── Action row (Back + Next) ──────────────────────────────────────────────────
+.acts {
+  display: flex;
+  gap: 12px;
+  .go { width: auto; flex: 1; }
+}
+
+.back {
+  height: 56px;
+  padding: 0 24px;
+  border-radius: 14px;
+  border: 1px solid rgba(250,246,238,.26);
+  background: transparent;
+  color: var(--auth-cream);
+  font: 600 16px 'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
+  cursor: pointer;
+  transition: border-color .2s, color .2s;
+
+  &:hover { border-color: var(--auth-gold); color: var(--auth-gold-hi); }
+  &[hidden] { display: none; }
+}
+
+// ── Stub content (register-specific) ─────────────────────────────────────────
+.pax {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  width: 100%;
+  padding: 12px 0;
+  text-align: left;
+  border-top:    1px dashed rgba(250,246,238,.16);
+  border-bottom: 1px dashed rgba(250,246,238,.16);
+
+  span { display: block; font-size: 11.5px; color: var(--auth-dim); }
+  b    { display: block; font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  div:last-child { text-align: right; }
+}
+
+.prog {
+  margin: 0;
+  font-size: 14px;
+  color: var(--auth-muted);
+  b { color: var(--auth-gold-hi); font-weight: 600; }
+}
+
+// ── "Under review" stamp ──────────────────────────────────────────────────────
+.stamp {
+  position: absolute;
+  right: calc(var(--stubw) / 2 - 78px);
+  top: 44%;
+  width: 156px;
+  padding: 10px 0;
+  text-align: center;
+  border: 3px double var(--auth-gold-hi);
+  border-radius: 10px;
+  background: rgba(18,15,11,.6);
+  color: var(--auth-gold-hi);
+  font: 800 20px/1.15 'Syne', 'Arial Black', sans-serif;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  opacity: 0;
+  pointer-events: none;
+  transform: rotate(-14deg) scale(1.7);
+
+  &.on {
+    opacity: .96;
+    transform: rotate(-14deg) scale(1);
+    transition: transform .35s cubic-bezier(.2,1.5,.4,1), opacity .15s;
+  }
+}
+
+// ── Responsive (register-specific) ───────────────────────────────────────────
+@media (max-width: 860px) {
+  .stub .tag, .stub .claim, .prog, .pax { display: none; }
+  .stamp {
+    right: 50%; margin-right: -78px;
+    top: auto; bottom: calc(var(--stubh) / 2 - 28px);
+  }
+}
+
+@media (max-width: 560px) {
+  .ups, .roles { grid-template-columns: 1fr; }
+  .up  { height: 92px; }
+  .two { grid-template-columns: 1fr 96px; }
+}
+
+// ── Reduced motion ────────────────────────────────────────────────────────────
+@media (prefers-reduced-motion: reduce) {
+  .reg-step.on { animation: none; }
+  .stamp.on    { transition: none; }
+}
