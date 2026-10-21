@@ -13,21 +13,24 @@
   top: 0;
   left: 0;
   right: 0;
-  z-index: 100;
+  z-index: 10000;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: clamp(0.85rem, 2.2vw, 2.2rem) clamp(1.25rem, 4.5vw, 4.5rem);
+  pointer-events: none;
  
   &__left {
     display: flex;
     align-items: center;
+    pointer-events: auto;
   }
  
   &__right {
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    pointer-events: auto;
   }
  
   &__links {
@@ -73,7 +76,45 @@
       }
     }
   }
- 
+
+  // Login button (always visible, gold accent on navy/dark)
+  &__login-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(0.32rem, 0.55vw, 0.42rem) clamp(0.85rem, 1.2vw, 1.15rem);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(0.72rem, 0.85vw, 0.82rem);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--sand-gold-light, #D4B483);
+    background: rgba(200, 157, 102, 0.12);
+    border: 1px solid rgba(200, 157, 102, 0.45);
+    border-radius: 999px;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+    transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease, transform 0.2s ease, box-shadow 0.25s ease;
+
+    &:hover {
+      background: var(--sand-gold, #C89D66);
+      border-color: var(--sand-gold-light, #D4B483);
+      color: #1A1615;
+      box-shadow: 0 4px 16px rgba(200, 157, 102, 0.35);
+      transform: translateY(-1px);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--sand-gold, #C89D66);
+      outline-offset: 3px;
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+
   // Mobile phone icon button
   &__mobile-phone {
     display: none;

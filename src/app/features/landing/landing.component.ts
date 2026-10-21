@@ -5,6 +5,7 @@ import {
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { SmoothScrollService } from '../../core/smooth-scroll.service';
+import { RouterLink } from '@angular/router';
 import { HorizonShowcaseComponent } from '../../horizon-showcase/horizon-showcase.component';
 import { JourneyTeaserComponent } from './components/journey-teaser/journey-teaser.component';
 import { Tribo3dSectionComponent } from './components/tribo-3d-section/tribo-3d-section.component';
@@ -23,6 +24,7 @@ interface LenisInstance {
   selector: 'app-landing',
   standalone: true,
   imports: [
+    RouterLink,
     HorizonShowcaseComponent,
     JourneyTeaserComponent,
     Tribo3dSectionComponent,
@@ -107,6 +109,11 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
       document.body.style.overflow = this.mobileMenuOpen ? 'hidden' : '';
     }
   }
+
+  prefetchLogin(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    import('../auth/auth.routes').catch(() => {});
+  }
  
   // ─── NAV THEME ─────────────────────────────────────────────────────────────
   // One place decides the nav colour, so the section triggers never fight each other.
@@ -166,6 +173,7 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
       idle(() => {
         [this.jetImg?.nativeElement, this.ascentJetImg?.nativeElement]
           .forEach(img => img?.decode?.().catch(() => {}));
+        import('../auth/auth.routes').catch(() => {});
       });
  
       // Late layout shifts (fonts, images) move trigger positions -> re-measure once.
