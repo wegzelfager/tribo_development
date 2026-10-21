@@ -71,20 +71,20 @@ interface Beat {
   cam: { orbit: number; elev: number; dist: number; fitW: number };
 }
 const BEATS: Beat[] = [
-  { k:'01 / 05', t:'Private Fleet',   g:'SOVEREIGN', bg:[13,27,75],   ink:[250,247,242],
-    d:'On-demand access to a curated fleet of private jets and helicopters — ready to lift off within hours.',
+  { k:'01 / 05', t:'Seamless Vetting',    g:'VETTING',      bg:[13,27,75],   ink:[250,247,242],
+    d:'One-click applicant approval and screening workflow gives trip organizers effortless moderation in one place.',
     cam:{ orbit:60,  elev:7,  dist:9,    fitW:6   } },
-  { k:'02 / 05', t:'Global Network',  g:'INFINITE',  bg:[9,110,125],  ink:[250,247,242],
-    d:'B2B partners and C2C experiences across 120+ countries. Every operator is verified, rated, and insured.',
+  { k:'02 / 05', t:'Trip Discovery',     g:'DISCOVERY',    bg:[9,110,125],  ink:[250,247,242],
+    d:'Interactive marketplace feed with dynamic filters for age limits, budget tiers, and group capacity.',
     cam:{ orbit:78,  elev:12, dist:15.5, fitW:9.5 } },
-  { k:'03 / 05', t:'Above The World', g:'ALTITUDE',  bg:[17,10,45],   ink:[250,247,242],
-    d:'At 51,000 ft, above turbulence and crowds — a cabin calibrated for absolute calm.',
+  { k:'03 / 05', t:'Real-Time Chat',     g:'REAL-TIME',    bg:[17,10,45],   ink:[250,247,242],
+    d:'Integrated WebSocket live group messaging that keeps the entire crew aligned without scattered apps.',
     cam:{ orbit:0,   elev:80, dist:11,   fitW:7   } },
-  { k:'04 / 05', t:'AI Itinerary',    g:'PRECISION', bg:[168,72,15],  ink:[250,247,242],
-    d:'Our proprietary AI orchestrates every touchpoint — transfers, concierge, climate. Nothing left to chance.',
+  { k:'04 / 05', t:'AI Itinerary Engine', g:'INTELLIGENCE', bg:[168,72,15],  ink:[250,247,242],
+    d:'Powered by Google Gemini API to auto-generate day-by-day plans, budget splits, and packing checklists.',
     cam:{ orbit:168, elev:13, dist:9.5,  fitW:8.5 } },
-  { k:'05 / 05', t:'Secure Escrow',   g:'PROTECTED', bg:[10,10,14],   ink:[250,247,242],
-    d:'Every transaction held in full escrow until service delivery is confirmed. Zero financial risk.',
+  { k:'05 / 05', t:'Split-Billing',       g:'SPLIT-BILLS',  bg:[10,10,14],   ink:[250,247,242],
+    d:'Transparent expense splitting and dynamic group cost tracking so every traveler stays informed.',
     cam:{ orbit:322, elev:14, dist:10,   fitW:9   } },
 ];
 const N = BEATS.length;
@@ -768,7 +768,7 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
     W['pathDim'] = new THREE.Line(new THREE.BufferGeometry().setFromPoints(full), new THREE.LineBasicMaterial({ color: 0xFAF7F2, transparent: true }));
     W['pathLit'] = new THREE.Line(new THREE.BufferGeometry().setFromPoints(full), new THREE.LineBasicMaterial({ color: 0xF6E2A8, transparent: true }));
     gates.add(W['pathDim'], W['pathLit']); scene.add(gates); W['gates'] = gates;
-    W['labs'] = (['Transfer','Concierge','Climate','Arrival'] as string[]).map(text => {
+    W['labs'] = (['Day Plans', 'Budget Splits', 'Checklists', 'Chat Hub'] as string[]).map(text => {
       const d = document.createElement('div');
       d.className = 't3d-lab'; d.textContent = text; d.setAttribute('aria-hidden', 'true');
       stage.appendChild(d); this.labEls.push(d); return d;

@@ -502,9 +502,9 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     const margin  = W * 0.12;   // label is clamped so it never touches the edge
  
     const NODES = [
-      { f: 0.14, title: 'Request confirmed',    sub: 'Jet, yacht or safari' },
-      { f: 0.50, title: 'Funds held in escrow', sub: 'Zero financial risk' },
-      { f: 0.86, title: 'Trip delivered',       sub: 'Funds released on arrival' },
+      { f: 0.14, title: 'One-Click Vetting',    sub: 'Screen and approve applicants' },
+      { f: 0.50, title: 'Real-Time Group Hub', sub: 'Live chat & split-billing' },
+      { f: 0.86, title: 'AI Trip Execution',   sub: 'Instant Gemini itineraries' },
     ];
  
     // ── Build SVG (static road + dashed line + glow/core trail). No <filter>. ──────────

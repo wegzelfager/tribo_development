@@ -195,12 +195,43 @@
     transform: scaleX(0.22);
   }
 
+  &__line-pulse {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 62%;
+    z-index: 3; // Above hz__fill (z-index: 2)
+    height: 5px;
+    margin-top: -2px;
+    border-radius: 3px;
+    pointer-events: none;
+    opacity: 0;
+    transform-origin: center center;
+    transform: scaleX(0);
+    background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(66, 133, 244, 0) 5%,
+      rgba(66, 133, 244, 0.95) 20%,
+      rgba(155, 114, 203, 1) 35%,
+      rgba(238, 75, 82, 1) 45%,
+      #ffffff 50%,
+      rgba(238, 75, 82, 1) 55%,
+      rgba(155, 114, 203, 1) 65%,
+      rgba(66, 133, 244, 0.95) 80%,
+      rgba(66, 133, 244, 0) 95%,
+      transparent 100%
+    );
+    box-shadow: 0 0 15px rgba(66, 133, 244, 0.9),
+                0 0 30px rgba(155, 114, 203, 0.8),
+                0 0 45px rgba(238, 75, 82, 0.7);
+  }
+
   &__seal {
     --s: 18px; // size, driven by the TS (18px marker -> 132px seal)
     position: absolute;
     top: 62%;
     left: 22%;
-    z-index: 3;
+    z-index: 5; // Above the line and pulse
     width: var(--s);
     height: var(--s);
     margin: calc(var(--s) / -2) 0 0 calc(var(--s) / -2);
@@ -208,11 +239,31 @@
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    border: 1.5px solid var(--hz-gold);
-    background: var(--hz-ink);
-    font-family: 'Syne', sans-serif;
-    font-size: 15px;
-    color: var(--hz-gold);
+    border: 1.5px solid rgba(255, 215, 0, 0.85);
+    background: radial-gradient(circle at 45% 40%, #151a30 0%, #0c0e18 65%, #05060a 100%);
+    box-shadow: 0 0 25px rgba(66, 133, 244, 0.6),
+                0 0 50px rgba(155, 114, 203, 0.4),
+                inset 0 0 18px rgba(66, 133, 244, 0.3);
+    overflow: visible;
+  }
+
+  &__seal-glow {
+    position: absolute;
+    inset: -55%; // ~2.1x diameter for rich atmospheric spread
+    border-radius: 50%;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0;
+    transform-origin: center center;
+    background: radial-gradient(circle at center,
+      rgba(255, 255, 255, 1) 0%,
+      rgba(66, 133, 244, 1) 32%,
+      rgba(155, 114, 203, 1) 52%,
+      rgba(238, 75, 82, 0.95) 70%,
+      rgba(251, 191, 36, 0.6) 84%,
+      transparent 100%
+    );
+    filter: blur(24px); // static blur - never animated!
   }
 
   &__seal-dot {
@@ -223,9 +274,41 @@
     background: var(--hz-gold);
   }
 
-  &__seal-label {
-    font-weight: 700;
+  &__seal-sparkle {
+    position: absolute;
+    width: 44%; // Perfectly centered & visible
+    height: 44%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     opacity: 0;
+    transform-origin: center center;
+    pointer-events: none;
+
+    svg,
+    img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: contain;
+      filter: drop-shadow(0 0 6px #ffffff)
+              drop-shadow(0 0 14px #4285F4)
+              drop-shadow(0 0 24px #9B72CB)
+              drop-shadow(0 0 36px #EE4B52)
+              brightness(1.25) contrast(1.1);
+    }
+  }
+
+  &__seal-placeholder {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 7px;
+    line-height: 1.1;
+    text-align: center;
+    color: var(--hz-gold);
+    opacity: 0.9;
+    word-break: break-word;
+    padding: 2px;
+    user-select: none;
   }
 
   // ── Beat buttons ──────────────────────────────────────────────────────────
@@ -274,6 +357,19 @@
 
     &__big {
       font-size: min(11vw, 12vh);
+    }
+  }
+
+  // ── Reduced Motion ────────────────────────────────────────────────────────
+  @media (prefers-reduced-motion: reduce) {
+    &__line-pulse {
+      display: none !important;
+    }
+
+    &__seal-glow,
+    &__seal-sparkle {
+      transition: none !important;
+      animation: none !important;
     }
   }
 }

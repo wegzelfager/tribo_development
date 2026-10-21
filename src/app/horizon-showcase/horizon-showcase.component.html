@@ -1,4 +1,4 @@
-﻿<section class="hz" id="journeys" aria-label="Every journey, protected">
+<section class="hz" id="journeys" aria-label="Four pillars of Tribo group travel">
   <div class="hz__stage">
 
     <div class="hz__row">
@@ -17,21 +17,25 @@
       }
     </div>
 
-    <h2 class="hz__heading">Every journey, protected.</h2>
+    <h2 class="hz__heading">Group travel, revolutionized.</h2>
     <p class="hz__count" aria-hidden="true"><span class="hz__count-now">01</span> / 04</p>
 
-    <p class="hz__big">Paid only on<br />arrival</p>
+    <p class="hz__big">Powered by<br />Gemini AI</p>
 
     <!-- The one horizon: shared by every scene, doubles as progress, ends in the escrow seal -->
     <div class="hz__line" aria-hidden="true"></div>
     <div class="hz__fill" aria-hidden="true"></div>
-    <div class="hz__seal" aria-hidden="true">
-      <i class="hz__seal-dot"></i>
-      <b class="hz__seal-label">Escrow</b>
+    <div class="hz__line-pulse" aria-hidden="true"></div>
+    <div class="hz__seal">
+      <div class="hz__seal-glow" aria-hidden="true"></div>
+      <i class="hz__seal-dot" aria-hidden="true"></i>
+      <div class="hz__seal-sparkle" role="img" aria-label="Gemini">
+        <img class="hz__seal-mark" src="assets/images/google-gemini.webp" alt="Gemini" width="512" height="512" loading="eager" decoding="async" />
+      </div>
     </div>
-    <p class="hz__seal-copy">Your payment stays in escrow until you land, dock or arrive.</p>
+    <p class="hz__seal-copy">Auto-generate day-by-day plans, budget splits, and packing checklists with Google Gemini API.</p>
 
-    <nav class="hz__beats" aria-label="Journey steps">
+    <nav class="hz__beats" aria-label="Platform pillars">
       @for (b of beats; track b; let i = $index) {
         <button type="button" class="hz__beat" [attr.aria-current]="i === 0 ? 'true' : 'false'" (click)="goTo(i)">{{ b }}</button>
       }

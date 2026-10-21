@@ -1,0 +1,68 @@
+<div class="nav-wrap">
+  <header class="nav" id="nav" #navEl [class.open]="isOpen">
+    <a class="logo"
+       routerLink="/auth/login"
+       routerLinkActive="active"
+       #rlaLogo="routerLinkActive"
+       [attr.aria-current]="rlaLogo.isActive ? 'page' : null"
+       (click)="closeMenu()"
+       aria-label="Tribo home">Tribo</a>
+
+    <button class="burger"
+            id="burger"
+            #burgerEl
+            type="button"
+            [attr.aria-label]="isOpen ? 'Close menu' : 'Open menu'"
+            [attr.aria-expanded]="isOpen"
+            aria-controls="menu"
+            (click)="toggleMenu()">
+      <svg class="m" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16M4 12h16M4 16h16"/></svg>
+      <svg class="x" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+
+    <div class="menu" id="menu">
+      <div class="menu-in">
+        <p class="menu-tag">Your route</p>
+
+        <nav class="route" id="route" #routeEl aria-label="Main">
+          <span class="line" aria-hidden="true"></span>
+          <span class="trail" aria-hidden="true"></span>
+          @for (stop of stops; track stop.path; let i = $index) {
+            <a class="stop"
+               [href]="stop.path"
+               (click)="onStopClick($event, i)"
+               (pointerenter)="onStopPointerEnter($event, i)"
+               (pointerleave)="onStopPointerLeave($event)"
+               (focus)="onStopFocus($event, i)"
+               (blur)="onStopBlur()">
+              {{ stop.label }}
+            </a>
+          }
+          <span class="plane" aria-hidden="true">
+            <svg viewBox="0 0 64 64">
+              <path d="M32 4 L36 24 L58 38 L58 43 L36 36 L35 50 L42 56 L42 60 L32 57 L22 60 L22 56 L29 50 L28 36 L6 43 L6 38 L28 24 Z"/>
+            </svg>
+          </span>
+        </nav>
+
+        <div class="actions">
+          <div class="btns">
+            <a class="signin"
+               routerLink="/auth/login"
+               routerLinkActive="active"
+               #rlaLogin="routerLinkActive"
+               [attr.aria-current]="rlaLogin.isActive ? 'page' : null"
+               (click)="closeMenu()">Sign in</a>
+            <a class="join"
+               routerLink="/auth/register"
+               routerLinkActive="active"
+               #rlaRegister="routerLinkActive"
+               [attr.aria-current]="rlaRegister.isActive ? 'page' : null"
+               (click)="closeMenu()">Join Tribo</a>
+          </div>
+          <div class="bars" aria-hidden="true"></div>
+        </div>
+      </div>
+    </div>
+  </header>
+</div>

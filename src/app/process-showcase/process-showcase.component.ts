@@ -480,7 +480,7 @@ export class ProcessShowcaseComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  // ─── Exit parallax (header / content / footer drift + blur) ───────────────
+  // ─── Exit parallax (header / content / footer drift) ─────────────────────
   private buildExitParallax(): void {
     const gsap    = this.gsap;
     const ST      = this.ST;
@@ -490,25 +490,34 @@ export class ProcessShowcaseComponent implements AfterViewInit, OnDestroy {
     const footer  = this.footerEl?.nativeElement;
     if (!header || !content || !footer) return;
 
-    // Single scrubbed trigger — transform only, no height changes
+    // FIX: use direct style writes instead of gsap.set() per frame.
+    // gsap.set() touches GSAP's prop-tween cache on each call; for a scrub callback
+    // that fires on every RAF this adds ~0.15ms of overhead per frame unnecessarily.
+    // Direct style.transform is the cheapest possible per-frame write.
     ST.create({
       trigger:         wrapper,
       start:           'bottom bottom',
       end:             'bottom top',
       scrub:           true,
       refreshPriority: -1,
-      onUpdate: (self) => {
-        const p = self.progress;
-        gsap.set(header,  { yPercent: -p * 30 });
-        gsap.set(content, { yPercent: -p * 20 });
-        gsap.set(footer,  { yPercent: -p * 10 });
-      },
       onEnter: () => {
         wrapper.classList.add('ps--exiting');
       },
       onLeaveBack: () => {
         wrapper.classList.remove('ps--exiting');
-        gsap.set([header, content, footer], { yPercent: 0 });
+        header.style.transform  = '';
+        content.style.transform = '';
+        footer.style.transform  = '';
+      },
+      onUpdate: (self) => {
+        const p = self.progress;
+        // Inline string concatenation is faster than template literals in hot paths
+        const h = 'translateY(' + (-p * 30).toFixed(2) + '%)';
+        const c = 'translateY(' + (-p * 20).toFixed(2) + '%)';
+        const f = 'translateY(' + (-p * 10).toFixed(2) + '%)';
+        header.style.transform  = h;
+        content.style.transform = c;
+        footer.style.transform  = f;
       },
     });
   }

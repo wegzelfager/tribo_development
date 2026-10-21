@@ -5,6 +5,7 @@ import {
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { NavbarComponent } from '../navbar/navbar.component';
 
 type GSAPType = typeof import('gsap').gsap;
 
@@ -19,7 +20,7 @@ interface Check {
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, NavbarComponent],
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss'
 })

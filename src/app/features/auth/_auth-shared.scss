@@ -14,6 +14,16 @@
   --auth-muted:   #b4ad9f;
   --auth-dim:     #8f887a;
   --auth-err:     #ff9d8f;
+
+  /* Shared token aliases */
+  --ink:          var(--auth-ink);
+  --ember:        var(--auth-ember);
+  --gold:         var(--auth-gold);
+  --gold-hi:      var(--auth-gold-hi);
+  --cream:        var(--auth-cream);
+  --muted:        var(--auth-muted);
+  --dim:          var(--auth-dim);
+
   --stubw: 268px;
   --stubh: 190px;
 
@@ -62,24 +72,6 @@
   :focus-visible { outline: 2px solid var(--auth-gold); outline-offset: 3px; }
 }
 
-// ── Header ────────────────────────────────────────────────────────────────────
-.auth-header {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 28px 48px;
-
-  a:last-child { font-size: 14px; font-weight: 500; }
-}
-
-.logo {
-  font: 800 22px 'Syne', 'Arial Black', sans-serif;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: var(--auth-cream);
-  &:hover { color: var(--auth-cream); text-decoration: none; }
-}
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 .auth-main {
@@ -422,7 +414,6 @@ fieldset {
 
 // ── Responsive ────────────────────────────────────────────────────────────────
 @media (max-width: 860px) {
-  .auth-header { padding: 20px 16px; }
   .auth-main   { padding: 8px 16px 36px; }
 
   .pass {

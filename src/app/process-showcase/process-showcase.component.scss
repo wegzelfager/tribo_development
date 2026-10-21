@@ -123,6 +123,8 @@
   color: var(--light-sand, rgba(250, 247, 242, 0.9));
   user-select: none;
   pointer-events: none;
+  // Pre-promote to compositor layer so GSAP yPercent on exit never triggers rasterisation.
+  will-change: transform;
 
   &__row {
     display: block;
@@ -149,6 +151,7 @@
   width: 100%;
   min-height: 0; // prevent grid overflow
   // GSAP owns yPercent on exit; no CSS translateY transforms here
+  will-change: transform; // pre-promote: exit parallax uses yPercent
 }
 
 // ─── LISTS (left and right) ───────────────────────────────────────────────────
@@ -291,6 +294,7 @@
   align-items: center;
   gap: clamp(0.75rem, 1.8vh, 1.8rem);
   user-select: none;
+  will-change: transform; // pre-promote: exit parallax uses yPercent on this element
 
   &__text {
     text-align: center;
@@ -359,6 +363,9 @@
 }
 
 // ─── SOUND TOGGLE (position: absolute inside stage) ───────────────────────────
+// FIX: backdrop-filter:blur() forces a re-composite every frame while the sticky
+// stage scrolls. Replaced with a plain semi-opaque background (same visual intent,
+// zero per-frame cost).
 .ps-sound-toggle {
   position: absolute;
   bottom: var(--bottom-pad);
@@ -368,8 +375,9 @@
   height: 40px;
   border: 1px solid rgba(200, 157, 102, 0.35);
   border-radius: 50%;
-  background: rgba(10, 6, 4, 0.55);
-  backdrop-filter: blur(12px);
+  background: rgba(6, 3, 2, 0.82); // opaque enough to not need blur
+  // FIX: removed backdrop-filter: blur(12px) — triggered re-rasterisation every
+  // scroll frame while the sticky stage moved, contributing directly to jank.
   color: var(--sand-gold, #c89d66);
   cursor: pointer;
   display: flex;
@@ -378,7 +386,7 @@
   transition: background 0.25s, border-color 0.25s, transform 0.2s;
 
   &:hover {
-    background: rgba(200, 157, 102, 0.18);
+    background: rgba(200, 157, 102, 0.25);
     border-color: rgba(200, 157, 102, 0.7);
     transform: scale(1.08);
   }
@@ -394,15 +402,19 @@
   }
 }
 
-// ─── EXIT STATE: blur + dim ──────────────────────────────────────────────────
+// ─── EXIT STATE: opacity-only dim (no blur — blur is the #1 jank source) ─────
+// FIX: `filter:blur()` was applied to 4 elements simultaneously while the scrubbed
+// exit-parallax ScrollTrigger was running. Blur invalidates the GPU raster cache
+// every frame, causing consistent dropped frames on the way out of this section.
+// Replaced with opacity-only fade (GPU compositor-friendly).
 .ps-wrapper.ps--exiting {
   .ps-list,
   .ps-featured,
   .ps-footer__text,
   .ps-progress {
-    filter: blur(6px);
-    opacity: 0.25;
-    transition: filter 0.7s ease, opacity 0.7s ease;
+    opacity: 0.18;
+    transition: opacity 0.5s ease;
+    // No filter:blur — opacity-only transition is compositor-driven (zero repaint)
   }
 }
 

@@ -1,0 +1,481 @@
+:host {
+  display: contents;
+}
+
+/* Local navbar dimensions only */
+.nav-wrap {
+  --stubw: 260px;
+  --stubh: 148px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  padding: 20px 48px 0;
+  filter: drop-shadow(0 26px 34px rgba(0, 0, 0, .55));
+}
+
+/* Ticket bar: same notches + dashed stub as the Register pass, stub on the right. */
+.nav {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto var(--stubw);
+  align-items: center;
+  height: 84px;
+  max-width: 1184px;
+  margin: 0 auto;
+  border-radius: 22px;
+  background: linear-gradient(180deg, #201b13 0, #15120d 100%);
+  -webkit-mask-image: radial-gradient(circle 14px at calc(100% - var(--stubw)) 0, #0000 13px, #000 14px), radial-gradient(circle 14px at calc(100% - var(--stubw)) 100%, #0000 13px, #000 14px);
+  -webkit-mask-composite: source-in;
+  mask-image: radial-gradient(circle 14px at calc(100% - var(--stubw)) 0, #0000 13px, #000 14px), radial-gradient(circle 14px at calc(100% - var(--stubw)) 100%, #0000 13px, #000 14px);
+  mask-composite: intersect;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0 22px auto;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(240, 200, 102, .75), transparent);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .nav {
+    animation: rise .8s cubic-bezier(.16, .84, .24, 1) both;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(-14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  padding-left: 32px;
+  font: 800 22px 'Syne', 'Arial Black', sans-serif;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--cream);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--cream);
+    text-decoration: none;
+  }
+}
+
+.burger {
+  display: none;
+}
+
+/* On desktop the menu wrappers vanish so logo / route / stub become the three grid columns. */
+.menu,
+.menu-in {
+  display: contents;
+}
+
+.menu-tag,
+.bars {
+  display: none;
+}
+
+/* The route: links are stops on a dotted line, the plane sits on one of them.
+   JS measures the stops and writes these variables (defaults = first paint, before JS runs):
+   --fx/--fy first stop centre, --lx/--ly last stop centre, --cx/--cy current plane target. */
+.route {
+  --fx: 64px;
+  --lx: 448px;
+  --cx: 64px;
+  --fy: 28px;
+  --ly: 196px;
+  --cy: 28px;
+  position: relative;
+  display: flex;
+  height: 64px;
+}
+
+.line,
+.trail {
+  position: absolute;
+  bottom: 7px;
+  left: var(--fx);
+  height: 2px;
+  border-radius: 2px;
+}
+
+.line {
+  width: calc(var(--lx) - var(--fx));
+  background: repeating-linear-gradient(90deg, rgba(214, 169, 59, .55) 0 2px, transparent 2px 8px);
+}
+
+.trail {
+  width: calc(var(--cx) - var(--fx));
+  background: var(--gold-hi);
+  box-shadow: 0 0 8px rgba(240, 200, 102, .8);
+  transition: width .55s cubic-bezier(.45, .05, .25, 1);
+}
+
+.stop {
+  position: relative;
+  display: block;
+  flex: 0 0 128px;
+  height: 64px;
+  padding-top: 14px;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color .2s;
+
+  &:hover {
+    text-decoration: none;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 4px;
+    width: 8px;
+    height: 8px;
+    margin-left: -4px;
+    border-radius: 50%;
+    border: 1.5px solid var(--dim);
+    background: #0e0c09;
+    transition: background-color .2s, border-color .2s;
+  }
+
+  &.lit::after {
+    background: var(--gold);
+    border-color: var(--gold);
+  }
+
+  &.hot {
+    color: var(--gold-hi);
+  }
+
+  &[aria-current=page] {
+    color: var(--cream);
+  }
+}
+
+.plane {
+  position: absolute;
+  left: calc(var(--cx) - 11px);
+  bottom: -3px;
+  width: 22px;
+  height: 22px;
+  pointer-events: none;
+  transition: left .55s cubic-bezier(.45, .05, .25, 1);
+
+  svg {
+    display: block;
+    width: 22px;
+    height: 22px;
+    fill: var(--gold-hi);
+    transform: rotate(90deg);
+    filter: drop-shadow(0 0 5px rgba(240, 200, 102, .7));
+  }
+}
+
+/* Stub: auth actions */
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 0 20px;
+  border-left: 2px dashed rgba(250, 246, 238, .16);
+  background: rgba(214, 169, 59, .05);
+  border-radius: 0 22px 22px 0;
+}
+
+.btns {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.signin {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--cream);
+  text-decoration: none;
+  transition: color .2s;
+
+  &:hover {
+    color: var(--gold-hi);
+    text-decoration: none;
+  }
+
+  &[aria-current=page] {
+    color: var(--gold-hi);
+  }
+}
+
+.join {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 20px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #e2b94d 0, #cfa032 100%);
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 10px 24px -14px rgba(214, 169, 59, .6);
+  transition: transform .25s cubic-bezier(.16, .84, .24, 1);
+
+  &:hover {
+    transform: translateY(-2px);
+    text-decoration: none;
+    color: var(--ink);
+  }
+}
+
+/* ---------- NAVBAR: mobile (menu = boarding pass dropdown) ---------- */
+@media (max-width: 860px) {
+  .nav-wrap {
+    padding: 12px 16px 0;
+  }
+
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    height: 64px;
+    padding: 0 10px 0 22px;
+    border-radius: 20px;
+    -webkit-mask-image: none;
+    mask-image: none;
+
+    &::before {
+      inset: 0 20px auto;
+    }
+  }
+
+  .logo {
+    padding-left: 0;
+    font-size: 20px;
+  }
+
+  .burger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 12px;
+    border: 1px solid rgba(250, 246, 238, .18);
+    background: #0e0c09;
+    color: var(--cream);
+    cursor: pointer;
+
+    svg {
+      width: 22px;
+      height: 22px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+    }
+
+    .x {
+      display: none;
+    }
+  }
+
+  .nav.open .burger {
+    color: var(--gold-hi);
+    border-color: rgba(214, 169, 59, .6);
+
+    .x {
+      display: block;
+    }
+
+    .m {
+      display: none;
+    }
+  }
+
+  /* Closed = visibility:hidden, so the links leave the tab order but still have layout for measuring. */
+  .menu {
+    display: block;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 12px);
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(-8px);
+    transition: opacity .25s, transform .3s cubic-bezier(.16, .84, .24, 1), visibility 0s .3s;
+  }
+
+  .nav.open .menu {
+    visibility: visible;
+    opacity: 1;
+    transform: none;
+    transition: opacity .25s, transform .3s cubic-bezier(.16, .84, .24, 1), visibility 0s;
+  }
+
+  .menu-in {
+    position: relative;
+    display: block;
+    border-radius: 24px;
+    background: linear-gradient(180deg, #201b13 0, #15120d 100%);
+    -webkit-mask-image: radial-gradient(circle 14px at 0 calc(100% - var(--stubh)), #0000 13px, #000 14px), radial-gradient(circle 14px at 100% calc(100% - var(--stubh)), #0000 13px, #000 14px);
+    -webkit-mask-composite: source-in;
+    mask-image: radial-gradient(circle 14px at 0 calc(100% - var(--stubh)), #0000 13px, #000 14px), radial-gradient(circle 14px at 100% calc(100% - var(--stubh)), #0000 13px, #000 14px);
+    mask-composite: intersect;
+
+    &::before {
+      content: "";
+      position: absolute;
+      inset: 0 24px auto;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(240, 200, 102, .75), transparent);
+    }
+  }
+
+  .menu-tag {
+    display: block;
+    margin: 0;
+    padding: 22px 22px 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+  }
+
+  /* Route turns vertical: stops stack, the plane flies downward. */
+  .route {
+    display: block;
+    height: auto;
+    margin: 0 22px 14px;
+  }
+
+  .line,
+  .trail {
+    bottom: auto;
+    top: var(--fy);
+    left: 11px;
+    width: 2px;
+  }
+
+  .line {
+    height: calc(var(--ly) - var(--fy));
+    background: repeating-linear-gradient(180deg, rgba(214, 169, 59, .55) 0 2px, transparent 2px 8px);
+  }
+
+  .trail {
+    height: calc(var(--cy) - var(--fy));
+    transition: height .5s cubic-bezier(.45, .05, .25, 1);
+  }
+
+  .stop {
+    display: flex;
+    align-items: center;
+    flex: none;
+    height: 56px;
+    padding: 0 0 0 38px;
+    text-align: left;
+    font-size: 19px;
+
+    &::after {
+      left: 8px;
+      top: 24px;
+      bottom: auto;
+      margin: 0;
+    }
+  }
+
+  .plane {
+    left: 1px;
+    bottom: auto;
+    top: calc(var(--cy) - 11px);
+    transition: top .5s cubic-bezier(.45, .05, .25, 1);
+
+    svg {
+      transform: rotate(180deg);
+    }
+  }
+
+  .actions {
+    flex-direction: column;
+    justify-content: center;
+    gap: 16px;
+    height: var(--stubh);
+    padding: 20px 22px;
+    border-left: 0;
+    border-top: 2px dashed rgba(250, 246, 238, .16);
+    border-radius: 0 0 24px 24px;
+  }
+
+  .btns {
+    width: 100%;
+    gap: 10px;
+  }
+
+  .signin {
+    flex: 1;
+    justify-content: center;
+    height: 48px;
+    padding: 0;
+    border: 1px solid rgba(250, 246, 238, .26);
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .join {
+    flex: 1.3;
+    justify-content: center;
+    height: 48px;
+    padding: 0;
+    border-radius: 14px;
+  }
+
+  .bars {
+    display: block;
+    width: 100%;
+    height: 32px;
+    opacity: .8;
+    background: repeating-linear-gradient(90deg, var(--cream) 0 2px, transparent 2px 5px, var(--cream) 5px 6px, transparent 6px 8px, var(--cream) 8px 11px, transparent 11px 14px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plane,
+  .trail,
+  .stop,
+  .stop::after,
+  .menu,
+  .join {
+    transition: none !important;
+  }
+}

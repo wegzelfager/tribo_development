@@ -20,6 +20,15 @@
   --auth-muted:   #b4ad9f;
   --auth-dim:     #8f887a;
   --auth-err:     #ff9d8f;
+
+  /* Shared token aliases (reused across navbar and auth) */
+  --ink:          var(--auth-ink);
+  --ember:        var(--auth-ember);
+  --gold:         var(--auth-gold);
+  --gold-hi:      var(--auth-gold-hi);
+  --cream:        var(--auth-cream);
+  --muted:        var(--auth-muted);
+  --dim:          var(--auth-dim);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
