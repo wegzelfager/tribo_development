@@ -41,7 +41,7 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
   @ViewChild('heroSection')     heroSection!: ElementRef<HTMLElement>;
   @ViewChild('heroBg')          heroBg!: ElementRef<HTMLDivElement>;
   @ViewChild('windowWrap')      windowWrap!: ElementRef<HTMLDivElement>;
-  @ViewChild('skyLayer')        skyLayer?: ElementRef<HTMLDivElement>;   // used to compute the zoom
+  @ViewChild('skyLayer')        skyLayer?: ElementRef<HTMLDivElement>;  
   @ViewChild('windowRing')      windowRing!: ElementRef<HTMLDivElement>;
   @ViewChild('windowPill')      windowPill!: ElementRef<HTMLDivElement>;
   @ViewChild('skyWatermark')    skyWatermark!: ElementRef<HTMLDivElement>;

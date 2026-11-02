@@ -215,19 +215,25 @@
     &__contact {
       display: none;
     }
- 
+
+    &__login-btn {
+      display: inline-flex;
+      padding: 0.3rem 0.75rem;
+      font-size: 0.72rem;
+    }
+
     &__mobile-phone,
     &__hamburger {
       display: flex;
     }
   }
 }
- 
+
 // ─── MOBILE NAV OVERLAY ────────────────────────────────────────────────────────
 .nav-overlay {
   position: fixed;
   inset: 0;
-  z-index: 200;
+  z-index: 10001;
   background: radial-gradient(ellipse 80% 60% at 50% 30%, #2A1E17 0%, #0E0B0A 100%);
   display: flex;
   flex-direction: column;
@@ -294,6 +300,19 @@
  
       &:hover {
         color: var(--sand-gold-light);
+      }
+
+      &:focus-visible {
+        outline: 2px solid var(--sand-gold, #C89D66);
+        outline-offset: 4px;
+      }
+    }
+
+    .nav-overlay__login-link {
+      color: var(--sand-gold, #C89D66);
+
+      &:hover {
+        color: #ffffff;
       }
     }
   }

@@ -1,11 +1,12 @@
 import {
   Component, AfterViewInit, OnDestroy,
   ElementRef, ViewChild, NgZone,
-  PLATFORM_ID, Inject
+  PLATFORM_ID, Inject, ChangeDetectorRef
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { NavbarComponent } from '../navbar/navbar.component';
+import { AuthService } from '../../../core/services/auth.service';
 
 type GSAPType = typeof import('gsap').gsap;
 
@@ -86,7 +87,10 @@ export class RegisterComponent implements AfterViewInit, OnDestroy {
 
   constructor(
     @Inject(PLATFORM_ID) private platformId: object,
-    private ngZone: NgZone
+    private ngZone: NgZone,
+    private authService: AuthService,
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngAfterViewInit(): void {
@@ -253,18 +257,29 @@ export class RegisterComponent implements AfterViewInit, OnDestroy {
 
   // ── Button label animation ────────────────────────────────────────────────
   setLabel(t: string): void {
-    if (t === this.wantLabel) return;
+    if (t === this.wantLabel && this.buttonLabel === t) return;
     this.wantLabel = t;
-    if (this.prefersReducedMotion || !this.gsap) { this.buttonLabel = t; return; }
+    if (this.prefersReducedMotion || !this.gsap) {
+      this.buttonLabel = t;
+      this.cdr.markForCheck();
+      return;
+    }
 
     const lab = this.labEl?.nativeElement;
-    if (!lab) { this.buttonLabel = t; return; }
+    if (!lab) {
+      this.buttonLabel = t;
+      this.cdr.markForCheck();
+      return;
+    }
 
     this.gsap.killTweensOf(lab);
     this.gsap.to(lab, {
       yPercent: -120, opacity: 0, duration: .2, ease: 'power2.in',
       onComplete: () => {
-        this.buttonLabel = this.wantLabel;
+        this.ngZone.run(() => {
+          this.buttonLabel = this.wantLabel;
+          this.cdr.markForCheck();
+        });
         this.gsap.fromTo(lab, { yPercent: 120, opacity: 0 }, { yPercent: 0, opacity: 1, duration: .32, ease: 'power3.out' });
       }
     });
@@ -340,26 +355,56 @@ export class RegisterComponent implements AfterViewInit, OnDestroy {
       plane.addEventListener('animationend', onEnd);
     }
 
-    // TODO: connect to backend
-    // Build: const fd = new FormData();
-    // fd.append('name', nameInput.value.trim()); fd.append('age', ageInput.value);
-    // fd.append('email', emailInput.value.trim()); fd.append('password', pwInput.value);
-    // fd.append('role', selectedRole);
-    // fd.append('profileImage', photoInput.files[0]);
-    // fd.append('idCardFront',  idfInput.files[0]);
-    // fd.append('idCardBack',   idbInput.files[0]);
-    // POST fd to /api/auth/register.
-    // Server: map idCardFront/idCardBack → idCard.frontImage/backImage;
-    // role comes from form (never allow "admin" from client);
-    // isVerified and idCard.isVerified start false until manual review.
-    setTimeout(() => {
-      this.isSubmitting = false;
-      if (btn) btn.disabled = false;
-      this.showDone();
-      this.errorMsg = 'Account created. Your ID is pending verification.';
-      this.errorOk  = true;
-      this.showStamp = true;
-    }, 2600);
+    // Build FormData exactly as the backend expects
+    const fd = new FormData();
+    fd.append('name',     this.nameInput.nativeElement.value.trim());
+    fd.append('age',      this.ageInput.nativeElement.value);
+    fd.append('email',    this.emailInput.nativeElement.value.trim());
+    fd.append('password', this.pwInput.nativeElement.value);
+    fd.append('role',     this.selectedRole);
+
+    const photoFile = this.photoInput.nativeElement.files?.[0];
+    const idfFile   = this.idfInput.nativeElement.files?.[0];
+    const idbFile   = this.idbInput.nativeElement.files?.[0];
+
+    if (photoFile) fd.append('profileImage', photoFile);
+    if (idfFile)   fd.append('idCardFront',  idfFile);
+    if (idbFile)   fd.append('idCardBack',   idbFile);
+
+    this.authService.register(fd).subscribe({
+      next: () => {
+        this.ngZone.run(() => {
+          this.isSubmitting = false;
+          if (btn) btn.disabled = false;
+          this.showDone();
+          this.errorMsg = 'Account created! Check your email to verify your account.';
+          this.errorOk  = true;
+          this.showStamp = true;
+        });
+      },
+      error: (err: Error) => {
+        this.ngZone.run(() => {
+          this.isSubmitting = false;
+          if (btn) btn.disabled = false;
+          if (!this.prefersReducedMotion && this.gsap) {
+            if (fill) {
+              this.gsap.killTweensOf(fill);
+              this.gsap.set(fill, { scaleX: 0, opacity: 1 });
+            }
+            const lab = this.labEl?.nativeElement;
+            if (lab) {
+              this.gsap.killTweensOf(lab);
+              this.gsap.set(lab, { yPercent: 0, opacity: 1 });
+            }
+          }
+          this.buttonLabel = 'Create account';
+          this.wantLabel = 'Create account';
+          this.errorMsg = err.message || 'Registration failed. Please try again.';
+          this.errorOk  = false;
+          this.cdr.detectChanges();
+        });
+      }
+    });
   }
 
   onFormKeydown(e: KeyboardEvent): void {

@@ -1,0 +1,102 @@
+@import '../auth-shared';
+
+.stub .claim { display: block; }
+
+.status-box {
+  margin: 32px 0 24px;
+  padding: 28px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(214, 169, 59, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+
+  &.loading {
+    border-color: rgba(214, 169, 59, 0.35);
+  }
+
+  &.success {
+    border-color: rgba(74, 222, 128, 0.45);
+    background: rgba(74, 222, 128, 0.04);
+  }
+
+  &.error {
+    border-color: rgba(239, 68, 68, 0.45);
+    background: rgba(239, 68, 68, 0.04);
+  }
+}
+
+.status-icon {
+  width: 54px;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    width: 48px;
+    height: 48px;
+  }
+
+  &.loading-spin svg {
+    stroke: var(--auth-gold);
+    animation: spin 1s linear infinite;
+  }
+
+  &.success-icon svg {
+    stroke: #4ade80;
+  }
+
+  &.error-icon svg {
+    stroke: #ef4444;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.status-message {
+  font-size: 1.05rem;
+  line-height: 1.5;
+  color: var(--auth-cream);
+  max-width: 420px;
+  margin: 0;
+}
+
+.redirect-hint {
+  font-size: 0.88rem;
+  color: var(--auth-muted);
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  margin: 16px 0 24px;
+
+  .action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    min-width: 200px;
+    height: 48px;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, var(--auth-gold) 0%, var(--auth-gold-hi) 100%);
+    color: var(--auth-ink);
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(214, 169, 59, 0.35);
+      text-decoration: none;
+      color: var(--auth-ink);
+    }
+  }
+}

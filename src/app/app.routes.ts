@@ -7,9 +7,19 @@ export const routes: Routes = [
       import('./features/landing/landing.component').then(m => m.LandingComponent)
   },
   {
+    path: 'home',
+    loadComponent: () =>
+      import('./features/home/home.component').then(m => m.HomeComponent)
+  },
+  {
     path: 'login',
     redirectTo: '/auth/login',
     pathMatch: 'full'
+  },
+  {
+    path: 'verify-email',
+    loadComponent: () =>
+      import('./features/auth/verify-email/verify-email.component').then(m => m.VerifyEmailComponent)
   },
   {
     path: 'auth',

@@ -1,11 +1,12 @@
 import {
   Component, AfterViewInit, OnDestroy,
   ElementRef, ViewChild, NgZone,
-  PLATFORM_ID, Inject
+  PLATFORM_ID, Inject, ChangeDetectorRef
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { NavbarComponent } from '../navbar/navbar.component';
+import { AuthService } from '../../../core/services/auth.service';
 
 type GSAPType = typeof import('gsap').gsap;
 
@@ -42,7 +43,10 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
 
   constructor(
     @Inject(PLATFORM_ID) private platformId: object,
-    private ngZone: NgZone
+    private ngZone: NgZone,
+    private authService: AuthService,
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngAfterViewInit(): void {
@@ -98,19 +102,30 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
   }
 
   setLabel(t: string): void {
-    if (t === this.wantLabel) return;
+    if (t === this.wantLabel && this.buttonLabel === t) return;
     this.wantLabel = t;
 
-    if (this.prefersReducedMotion || !this.gsap) { this.buttonLabel = t; return; }
+    if (this.prefersReducedMotion || !this.gsap) {
+      this.buttonLabel = t;
+      this.cdr.markForCheck();
+      return;
+    }
 
     const lab = this.labEl?.nativeElement;
-    if (!lab) { this.buttonLabel = t; return; }
+    if (!lab) {
+      this.buttonLabel = t;
+      this.cdr.markForCheck();
+      return;
+    }
 
     this.gsap.killTweensOf(lab);
     this.gsap.to(lab, {
       yPercent: -120, opacity: 0, duration: .2, ease: 'power2.in',
       onComplete: () => {
-        this.buttonLabel = this.wantLabel;
+        this.ngZone.run(() => {
+          this.buttonLabel = this.wantLabel;
+          this.cdr.markForCheck();
+        });
         this.gsap.fromTo(lab, { yPercent: 120, opacity: 0 }, { yPercent: 0, opacity: 1, duration: .32, ease: 'power3.out' });
       }
     });
@@ -136,7 +151,6 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
     }, 2200);
   }
 
-  // ── Login action ─────────────────────────────────────────────────────────
   login(): void {
     if (this.isSubmitting) return;
 
@@ -167,17 +181,42 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
       this.gsap.fromTo(fill, { scaleX: 0, opacity: 1 }, { scaleX: 1, duration: 2.0, ease: 'power1.inOut' });
     }
 
-    // TODO: connect to backend
-    // POST { email: emailEl.value.trim(), password: pwEl.value } to your login endpoint.
-    // On success store auth token / session and redirect to the dashboard.
-    // On failure display the server error message via this.fail(emailEl, serverMsg).
-    setTimeout(() => {
-      this.isSubmitting = false;
-      if (btn) btn.disabled = false;
-      this.showDone();
-      this.errorMsg = 'Signed in successfully.';
-      this.errorOk  = true;
-    }, 2200);
+    this.authService.login({
+      email: emailEl.value.trim(),
+      password: pwEl.value
+    }).subscribe({
+      next: () => {
+        this.ngZone.run(() => {
+          this.isSubmitting = false;
+          if (btn) btn.disabled = false;
+          this.showDone();
+          this.errorMsg = 'Signed in successfully.';
+          this.errorOk  = true;
+          setTimeout(() => this.router.navigate(['/home']), 1500);
+        });
+      },
+      error: (err: Error) => {
+        this.ngZone.run(() => {
+          this.isSubmitting = false;
+          if (btn) btn.disabled = false;
+          if (!this.prefersReducedMotion && this.gsap) {
+            if (fill) {
+              this.gsap.killTweensOf(fill);
+              this.gsap.set(fill, { scaleX: 0, opacity: 1 });
+            }
+            const lab = this.labEl?.nativeElement;
+            if (lab) {
+              this.gsap.killTweensOf(lab);
+              this.gsap.set(lab, { yPercent: 0, opacity: 1 });
+            }
+          }
+          this.buttonLabel = 'Sign in';
+          this.wantLabel = 'Sign in';
+          this.fail(emailEl, err.message || 'Invalid email or password.');
+          this.cdr.detectChanges();
+        });
+      }
+    });
   }
 
   onFormKeydown(e: KeyboardEvent): void {
