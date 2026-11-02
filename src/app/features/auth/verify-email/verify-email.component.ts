@@ -1,7 +1,6 @@
 import { Component, OnInit, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { NavbarComponent } from '../navbar/navbar.component';
 import { AuthService } from '../../../core/services/auth.service';
 
 type VerifyState = 'loading' | 'success' | 'error';
@@ -9,7 +8,7 @@ type VerifyState = 'loading' | 'success' | 'error';
 @Component({
   selector: 'app-verify-email',
   standalone: true,
-  imports: [CommonModule, RouterLink, NavbarComponent],
+  imports: [CommonModule, RouterLink],
   templateUrl: './verify-email.component.html',
   styleUrl: './verify-email.component.scss'
 })

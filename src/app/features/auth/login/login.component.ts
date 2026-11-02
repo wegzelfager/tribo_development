@@ -5,7 +5,6 @@ import {
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
-import { NavbarComponent } from '../navbar/navbar.component';
 import { AuthService } from '../../../core/services/auth.service';
 
 type GSAPType = typeof import('gsap').gsap;
@@ -13,7 +12,7 @@ type GSAPType = typeof import('gsap').gsap;
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [RouterLink, NavbarComponent],
+  imports: [RouterLink],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })

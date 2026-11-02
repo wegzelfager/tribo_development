@@ -1,245 +1,165 @@
-import {
-  Component, HostListener,
-  ChangeDetectionStrategy, ChangeDetectorRef
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
-export interface HeroSlide {
-  tag:   string;
-  title: string;
-  desc:  string;
-  bg:    string;
-  btn1:  string;
-  btn2:  string;
-}
+// ── Icons (24x24 stroke paths, rendered in the template) ─────────────────────
+const ICONS = {
+  home:     'M3 11.5L12 4l9 7.5M5.5 10V20h13V10M10 20v-5h4v5',
+  compass:  'M12 21a9 9 0 100-18 9 9 0 000 18zM15.5 8.5l-2 5-5 2 2-5z',
+  luggage:  'M8 7V4.5h8V7M6 7h12a1 1 0 011 1v11a1 1 0 01-1 1H6a1 1 0 01-1-1V8a1 1 0 011-1zM9 11v6M15 11v6',
+  user:     'M12 12a4 4 0 100-8 4 4 0 000 8zM4.5 20.5c.8-3.6 3.6-5.5 7.5-5.5s6.7 1.9 7.5 5.5',
+  bell:     'M6 16.5V11a6 6 0 1112 0v5.5l1.5 2h-15zM10 21h4',
+  star:     'M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.9 6.8 19.7l1-5.9L3.5 9.7l5.9-.8z',
+  heart:    'M12 20s-8-5-8-10.5A4.5 4.5 0 0112 7a4.5 4.5 0 018 2.5C20 15 12 20 12 20z',
+  pin:      'M12 21s6.5-5.6 6.5-11a6.5 6.5 0 10-13 0C5.5 15.4 12 21 12 21zM12 12.2a2.2 2.2 0 100-4.4 2.2 2.2 0 000 4.4z',
+  calendar: 'M5 6.5h14a1 1 0 011 1V19a1 1 0 01-1 1H5a1 1 0 01-1-1V7.5a1 1 0 011-1zM4 10.5h16M8 4v4M16 4v4',
+  arrow:    'M5 12h14M13 6l6 6-6 6',
+  prev:     'M15 5l-7 7 7 7',
+  next:     'M9 5l7 7-7 7',
+  pause:    'M8 5v14M16 5v14',
+  play:     'M8 5l11 7-11 7z',
+} as const;
 
-export interface TripItem {
-  c:     string;
+type IconName = keyof typeof ICONS;
+type Category = 'Desert' | 'Wadi' | 'Mountain';
+
+export interface NavItem   { label: string; route: string; icon: IconName; active?: boolean; }
+export interface HeroSlide { tag: string; title: string; desc: string; cta: string; bg: string; img?: string; }
+export interface Trip {
+  id: number;
+  cat: Category;
   title: string;
-  dates: string;
-  spots: number;
+  location: string;
+  tag: string;
   rating: string;
-  price: string;
-  bg:    string;
-}
-
-export interface OrganizerItem {
-  name:    string;
-  trips:   number;
-  rating:  string;
-  initial: string;
-  bg?:     string;
+  days: number;
+  dates: string;
+  price: number;
+  bg: string;
+  img?: string;   // photo path; the gradient in `bg` shows underneath until it loads (or if it is missing)
 }
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, DecimalPipe],
   templateUrl: './home.component.html',
-  styleUrl:    './home.component.scss',
+  styleUrl: './home.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeComponent {
+  readonly icons = ICONS;
 
-  // ── Slideshow State ────────────────────────────────────────────────────────
+  // ── Header ────────────────────────────────────────────────────────────────
+  readonly user = { name: 'Yossif', avatar: '' };   // set avatar to an image URL to show a photo
+
+  readonly greeting = (() => {
+    const h = new Date().getHours();
+    return h < 12 ? 'Good Morning' : h < 18 ? 'Good Afternoon' : 'Good Evening';
+  })();
+
+  readonly nav: NavItem[] = [
+    { label: 'Home',    route: '/home',    icon: 'home', active: true },
+    { label: 'Explore', route: '/explore', icon: 'compass' },
+    { label: 'Trips',   route: '/trips',   icon: 'luggage' },
+    { label: 'Profile', route: '/profile', icon: 'user' },
+  ];
+
+  // ── Hero carousel ─────────────────────────────────────────────────────────
   curSlide = 0;
   isPaused = false;
   isHovered = false;
   private pointerStartX: number | null = null;
 
-  // ── Slides Data ───────────────────────────────────────────────────────────
   readonly slides: HeroSlide[] = [
     {
-      tag:   'Your next trip · 19 days to go',
-      title: 'Siwa Oasis Weekend',
-      desc:  'Nov 14 – 17, organized by Sara K. 12 of 15 travelers have joined.',
+      tag:   'Desert Adventures',
+      title: 'Explore the Untamed Beauty',
+      desc:  'Your next adventure starts in the desert.',
+      cta:   'Explore Trips',
+      bg:    'linear-gradient(160deg,#DCD8CF,#9AA394 55%,#4F5C4F)',
+      img:   'assets/hero/desert.jpg',
+    },
+    {
+      tag:   'Wadi Escapes',
+      title: 'Camp Where the Sky Goes On Forever',
+      desc:  '4x4 quests and nights under the stars in Wadi Rum.',
+      cta:   'Explore Trips',
       bg:    'linear-gradient(160deg,#EADECF,#C89D66 55%,#A87C48)',
-      btn1:  'View trip',
-      btn2:  'Message organizer',
+      img:   'assets/hero/wadi.jpg',
     },
     {
-      tag:   'Only 3 spots left',
-      title: 'White Desert Camping',
-      desc:  'Dec 5 – 8. Chalk rock formations and a night under the stars. EGP 4,200.',
-      bg:    'linear-gradient(160deg,#F4ECE1,#D2C2B0 60%,#A87C48)',
-      btn1:  'Book a spot',
-      btn2:  'See details',
-    },
-    {
-      tag:   '8 spots left',
-      title: 'Sinai Peaks Trek',
-      desc:  'Dec 12 – 15. Sunrise summit and Bedouin camps. EGP 3,600.',
+      tag:   'Mountain Treks',
+      title: 'Chase the Sunrise from the Summit',
+      desc:  'Guided treks with local Bedouin hosts.',
+      cta:   'Explore Trips',
       bg:    'linear-gradient(170deg,#D2C2B0,#7A6B61)',
-      btn1:  'Book a spot',
-      btn2:  'See details',
+      img:   'assets/hero/mountain.jpg',
     },
     {
-      tag:   '5 spots left',
-      title: 'Dahab Dive Week',
-      desc:  'Jan 9 – 16. Certified instructors and reef dives. EGP 7,900.',
+      tag:   'Sea Getaways',
+      title: 'Dive into Crystal Waters',
+      desc:  'Reef dives with certified instructors in Dahab.',
+      cta:   'Explore Trips',
       bg:    'linear-gradient(170deg,#CFE0EE,#4A6E8F)',
-      btn1:  'Book a spot',
-      btn2:  'See details',
+      img:   'assets/hero/sea.jpg',
     },
   ];
 
-  // ── Boarding Pass Seats ───────────────────────────────────────────────────
-  readonly seats: boolean[] = Array.from({ length: 15 }, (_, i) => i < 12);
-
-  // ── Checklist State ───────────────────────────────────────────────────────
-  idUploaded  = false;
-  uploadLabel = 'Upload ID';
-  doneText    = '2 of 3 done';
-
-  // ── Trips Section ─────────────────────────────────────────────────────────
-  readonly filters = ['All', 'Desert', 'Mountains', 'Sea'];
-  activeFilter = 'All';
-
-  readonly trips: TripItem[] = [
-    {
-      c:     'Desert',
-      title: 'White Desert Camping',
-      dates: 'Dec 5 – 8',
-      spots: 3,
-      rating: '4.9',
-      price: '4,200',
-      bg:    'linear-gradient(160deg,#EADECF,#C89D66)',
-    },
-    {
-      c:     'Mountains',
-      title: 'Sinai Peaks Trek',
-      dates: 'Dec 12 – 15',
-      spots: 8,
-      rating: '4.8',
-      price: '3,600',
-      bg:    'linear-gradient(160deg,#D2C2B0,#7A6B61)',
-    },
-    {
-      c:     'Sea',
-      title: 'Dahab Dive Week',
-      dates: 'Jan 9 – 16',
-      spots: 5,
-      rating: '4.9',
-      price: '7,900',
-      bg:    'linear-gradient(160deg,#CFE0EE,#4A6E8F)',
-    },
-    {
-      c:     'Desert',
-      title: 'Fayoum Weekend',
-      dates: 'Dec 19 – 20',
-      spots: 10,
-      rating: '4.7',
-      price: '1,800',
-      bg:    'linear-gradient(160deg,#D2C2B0,#A87C48)',
-    },
-  ];
-
-  savedTrips = new Set<string>();
-
-  get visibleTrips(): TripItem[] {
-    return this.activeFilter === 'All'
-      ? this.trips
-      : this.trips.filter(t => t.c === this.activeFilter);
-  }
-
-  // ── Organizers Section ────────────────────────────────────────────────────
-  readonly orgs: OrganizerItem[] = [
-    { name: 'Sara K.', trips: 24, rating: '4.9', initial: 'SK' },
-    { name: 'Omar H.', trips: 17, rating: '4.8', initial: 'OH', bg: 'var(--soft)' },
-    { name: 'Nour A.', trips: 31, rating: '4.9', initial: 'NA', bg: 'var(--mid)' },
-  ];
-
-  following = new Set<string>();
-
-  constructor(private cdr: ChangeDetectorRef) {}
-
-  // ── Slideshow Controls ────────────────────────────────────────────────────
   go(n: number): void {
     const total = this.slides.length;
     this.curSlide = (n + total) % total;
-    this.cdr.markForCheck();
   }
+  next(): void { this.go(this.curSlide + 1); }
+  prev(): void { this.go(this.curSlide - 1); }
 
-  next(): void {
-    this.go(this.curSlide + 1);
-  }
+  togglePause(): void { this.isPaused = !this.isPaused; }
+  onHover(enter: boolean): void { this.isHovered = enter; }
 
-  prev(): void {
-    this.go(this.curSlide - 1);
-  }
-
-  togglePause(): void {
-    this.isPaused = !this.isPaused;
-    this.cdr.markForCheck();
-  }
-
-  onHover(enter: boolean): void {
-    this.isHovered = enter;
-    this.cdr.markForCheck();
-  }
-
+  // The progress fill on the active dot drives autoplay: when it ends, move on.
   onAnimationEnd(index: number): void {
-    if (index === this.curSlide && !this.isPaused && !this.isHovered) {
-      this.next();
-    }
+    if (index === this.curSlide && !this.isPaused && !this.isHovered) this.next();
   }
 
-  @HostListener('keydown', ['$event'])
-  handleKeyboard(event: KeyboardEvent): void {
-    if (event.key === 'ArrowRight') {
-      this.next();
-    } else if (event.key === 'ArrowLeft') {
-      this.prev();
-    }
-  }
-
-  onPointerDown(e: PointerEvent): void {
-    this.pointerStartX = e.clientX;
-  }
+  onPointerDown(e: PointerEvent): void { this.pointerStartX = e.clientX; }
 
   onPointerUp(e: PointerEvent): void {
-    if (this.pointerStartX !== null) {
-      const diff = e.clientX - this.pointerStartX;
-      if (Math.abs(diff) > 50) {
-        if (diff < 0) {
-          this.next();
-        } else {
-          this.prev();
-        }
-      }
-      this.pointerStartX = null;
-    }
+    if (this.pointerStartX === null) return;
+    const diff = e.clientX - this.pointerStartX;
+    this.pointerStartX = null;
+    if (Math.abs(diff) > 50) diff < 0 ? this.next() : this.prev();
   }
 
-  // ── Interactive Features ──────────────────────────────────────────────────
-  toggleSave(title: string): void {
-    if (this.savedTrips.has(title)) {
-      this.savedTrips.delete(title);
-    } else {
-      this.savedTrips.add(title);
-    }
-    this.cdr.markForCheck();
+  // ── Trips ─────────────────────────────────────────────────────────────────
+  readonly filters: ('All' | Category)[] = ['All', 'Desert', 'Wadi', 'Mountain'];
+  activeFilter: 'All' | Category = 'All';
+  savedTrips = new Set<number>();
+
+  readonly trips: Trip[] = [
+    { id: 1, cat: 'Desert',   title: 'Sahara Grand Traverse', location: 'Merzouga, Morocco', tag: 'Best Seller',    rating: '4.9', days: 10, dates: '11 Nov – 19 Nov 2026', price: 1200, bg: 'linear-gradient(160deg,#DCD8CF,#9AA394 55%,#4F5C4F)', img: 'assets/trips/sahara.jpg' },
+    { id: 2, cat: 'Wadi',     title: 'Wadi Rum 4x4 Quest',    location: 'Wadi Rum, Jordan',  tag: 'Top Rated',      rating: '4.8', days: 8,  dates: '11 Nov – 19 Nov 2026', price: 1440, bg: 'linear-gradient(160deg,#EADECF,#C89D66 55%,#7A5A3A)', img: 'assets/trips/wadi-rum.jpg' },
+    { id: 3, cat: 'Desert',   title: 'Siwa Oasis Weekend',    location: 'Siwa, Egypt',       tag: 'Few Spots Left', rating: '4.9', days: 4,  dates: '14 Nov – 17 Nov 2026', price: 320,  bg: 'linear-gradient(160deg,#F4ECE1,#D2C2B0 60%,#A87C48)', img: 'assets/trips/siwa.jpg' },
+    { id: 4, cat: 'Mountain', title: 'Sinai Peaks Trek',      location: 'Mount Sinai, Egypt', tag: 'New',           rating: '4.8', days: 4,  dates: '12 Dec – 15 Dec 2026', price: 280,  bg: 'linear-gradient(170deg,#D2C2B0,#7A6B61)',              img: 'assets/trips/sinai.jpg' },
+    { id: 5, cat: 'Desert',   title: 'White Desert Camping',  location: 'Farafra, Egypt',    tag: 'Top Rated',      rating: '4.9', days: 4,  dates: '5 Dec – 8 Dec 2026',   price: 330,  bg: 'linear-gradient(160deg,#F4ECE1,#C9BBA8 60%,#8A7C70)', img: 'assets/trips/white-desert.jpg' },
+    { id: 6, cat: 'Mountain', title: 'Atlas Highlands Trek',  location: 'Toubkal, Morocco',  tag: 'New',            rating: '4.7', days: 6,  dates: '2 Jan – 8 Jan 2027',   price: 890,  bg: 'linear-gradient(170deg,#CFD6D0,#6E7F76)',              img: 'assets/trips/atlas.jpg' },
+  ];
+
+  get recommended(): Trip[] {
+    return this.trips.slice(0, 4);
   }
 
-  toggleFollow(name: string): void {
-    if (this.following.has(name)) {
-      this.following.delete(name);
-    } else {
-      this.following.add(name);
-    }
-    this.cdr.markForCheck();
+  get visibleTrips(): Trip[] {
+    return this.activeFilter === 'All' ? this.trips : this.trips.filter(t => t.cat === this.activeFilter);
   }
 
-  setFilter(filter: string): void {
-    this.activeFilter = filter;
-    this.cdr.markForCheck();
+  setFilter(f: 'All' | Category): void { this.activeFilter = f; }
+
+  toggleSave(id: number): void {
+    this.savedTrips.has(id) ? this.savedTrips.delete(id) : this.savedTrips.add(id);
   }
 
-  uploadId(): void {
-    if (this.idUploaded) return;
-    this.idUploaded  = true;
-    this.uploadLabel = 'All set';
-    this.doneText    = '3 of 3 done';
-    this.cdr.markForCheck();
+  /** Photo on top, with the gradient as a fallback layer underneath (shows if the image is missing). */
+  bgOf(x: { bg: string; img?: string }): string {
+    return x.img ? `url(${x.img}) center / cover no-repeat, ${x.bg}` : x.bg;
   }
 }

@@ -1,19 +1,31 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// Auth Shared Styles
+// Auth Shared Styles  (LIGHT)
 // Shared design language for Login and Register pages.
 // @import this partial from each auth component's .scss file.
+//
+// Token names are unchanged so login/register .scss keep working, but the
+// values are flipped by role:
+//   --ink   / --ember  → page background tones (were the darkest tones)
+//   --cream            → main text colour      (was the lightest tone)
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ── Page wrapper ──────────────────────────────────────────────────────────────
 .auth-page {
-  --auth-ink:     #120f0b;
-  --auth-ember:   #2b1707;
-  --auth-gold:    #d6a93b;
-  --auth-gold-hi: #f0c866;
-  --auth-cream:   #faf6ee;
-  --auth-muted:   #b4ad9f;
-  --auth-dim:     #8f887a;
-  --auth-err:     #ff9d8f;
+  color-scheme: light;
+
+  --auth-ink:     #FAF7F2;   // page base
+  --auth-ember:   #F0E6D6;   // page gradient end
+  --auth-gold:    #A87C48;   // links / accents
+  --auth-gold-hi: #8A6234;   // hover / success
+  --auth-cream:   #2A211B;   // main text
+  --auth-muted:   #6F6258;
+  --auth-dim:     #8A7C70;
+  --auth-err:     #B84A39;
+
+  --auth-sand:    #C89D66;   // button + decorative accents
+  --auth-card:    #FFFFFF;
+  --auth-field:   #FAF7F2;
+  --auth-line:    rgba(42, 33, 27, .14);
 
   /* Shared token aliases */
   --ink:          var(--auth-ink);
@@ -38,8 +50,8 @@
 
   background:
     radial-gradient(ellipse 58% 40% at 50% 38%,
-      rgba(150,105,25,.5) 0,
-      rgba(150,105,25,.14) 55%,
+      rgba(200,157,102,.30) 0,
+      rgba(200,157,102,.09) 55%,
       transparent 78%),
     linear-gradient(180deg,
       var(--auth-ink) 0,
@@ -53,11 +65,11 @@
     pointer-events: none;
     background:
       repeating-radial-gradient(circle at 50% 38%,
-        transparent 0 118px, rgba(214,169,59,.07) 119px 120px),
-      radial-gradient(1.3px 1.3px at 20px 30px,  #f0c866 50%, transparent 52%),
-      radial-gradient(1px   1px   at 90px 120px, #faf6ee 50%, transparent 52%),
-      radial-gradient(1.5px 1.5px at 160px 60px, #d6a93b 50%, transparent 52%),
-      radial-gradient(1px   1px   at 210px 170px,#faf6ee 50%, transparent 52%);
+        transparent 0 118px, rgba(168,124,72,.13) 119px 120px),
+      radial-gradient(1.3px 1.3px at 20px 30px,  #C89D66 50%, transparent 52%),
+      radial-gradient(1px   1px   at 90px 120px, #A87C48 50%, transparent 52%),
+      radial-gradient(1.5px 1.5px at 160px 60px, #C89D66 50%, transparent 52%),
+      radial-gradient(1px   1px   at 210px 170px,#A87C48 50%, transparent 52%);
     background-size: auto, 240px 200px, 300px 260px, 370px 310px, 210px 240px;
     -webkit-mask-image: radial-gradient(circle at 50% 38%, #000 0, transparent 72%);
     mask-image:         radial-gradient(circle at 50% 38%, #000 0, transparent 72%);
@@ -69,7 +81,7 @@
     &:hover { color: var(--auth-gold-hi); text-decoration: underline; }
   }
 
-  :focus-visible { outline: 2px solid var(--auth-gold); outline-offset: 3px; }
+  :focus-visible { outline: 2px solid var(--auth-sand); outline-offset: 3px; }
 }
 
 
@@ -78,23 +90,24 @@
   position: relative;
   flex: 1;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  padding: 8px 48px 48px;
+  padding: 40px 48px 48px;
 }
 
 // ── Pass card ─────────────────────────────────────────────────────────────────
 .pass-wrap {
   width: 100%;
   max-width: 960px;
-  filter: drop-shadow(0 34px 50px rgba(0,0,0,.55));
+  filter: drop-shadow(0 30px 40px rgba(92,61,46,.16));
 }
 
 .pass {
   position: relative;
   display: flex;
   border-radius: 28px;
-  background: linear-gradient(180deg, #201b13 0, #15120d 100%);
+  background: linear-gradient(180deg, var(--auth-card) 0, #FDFBF7 100%);
+  box-shadow: inset 0 0 0 1px #EDE3D5;
 
   -webkit-mask-image:
     radial-gradient(circle 16px at calc(100% - var(--stubw)) 0,    #0000 15px, #000 16px),
@@ -110,7 +123,7 @@
     position: absolute;
     inset: 0 0 auto;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(240,200,102,.75), transparent);
+    background: linear-gradient(90deg, transparent, rgba(200,157,102,.8), transparent);
   }
 
   @media (prefers-reduced-motion: no-preference) {
@@ -131,7 +144,7 @@
     margin: 0 0 12px;
     font: 800 40px/1.04 'Syne', 'Arial Black', sans-serif;
     text-transform: uppercase;
-    background: linear-gradient(180deg, var(--auth-cream) 35%, #d8bf7e);
+    background: linear-gradient(180deg, var(--auth-cream) 35%, #7A5A3A);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -196,8 +209,8 @@ input[type=number] {
   height: 54px;
   padding: 0 16px 0 46px;
   border-radius: 14px;
-  border: 1px solid rgba(250,246,238,.18);
-  background: #0e0c09;
+  border: 1px solid rgba(42,33,27,.2);
+  background: var(--auth-field);
   color: var(--auth-cream);
   font: 400 16px 'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
   transition: border-color .2s, box-shadow .2s;
@@ -205,9 +218,9 @@ input[type=number] {
 
   &::-webkit-outer-spin-button,
   &::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-  &::placeholder { color: #7d776a; }
-  &:hover  { border-color: rgba(250,246,238,.34); }
-  &:focus  { outline: none; border-color: var(--auth-gold); box-shadow: 0 0 0 3px rgba(214,169,59,.26); }
+  &::placeholder { color: #9A8C7F; }
+  &:hover  { border-color: rgba(42,33,27,.38); }
+  &:focus  { outline: none; border-color: var(--auth-sand); box-shadow: 0 0 0 3px rgba(200,157,102,.3); background: #fff; }
   &[aria-invalid=true] { border-color: var(--auth-err) !important; }
 }
 
@@ -225,7 +238,7 @@ input[type=number] {
   color: var(--auth-gold);
   font: 600 13px 'Space Grotesk', sans-serif;
   cursor: pointer;
-  &:hover { color: var(--auth-gold-hi); background: rgba(214,169,59,.08); }
+  &:hover { color: var(--auth-gold-hi); background: rgba(200,157,102,.16); }
 }
 
 .note {
@@ -249,7 +262,7 @@ fieldset {
   &.ok { color: var(--auth-gold-hi); }
 }
 
-// ── Gold button ───────────────────────────────────────────────────────────────
+// ── Sand button ───────────────────────────────────────────────────────────────
 .go {
   position: relative;
   overflow: hidden;
@@ -257,16 +270,18 @@ fieldset {
   height: 56px;
   border: 0;
   border-radius: 14px;
-  background: linear-gradient(180deg, #e2b94d 0, #cfa032 100%);
-  color: var(--auth-ink);
+  background: linear-gradient(180deg, #D4AA72 0, #C89D66 100%);
+  color: #2A211B;
   font: 600 16px 'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  box-shadow: 0 10px 24px -14px rgba(214,169,59,.6);
+  box-shadow: 0 10px 24px -14px rgba(168,124,72,.7);
+  transition: background .25s;
 
+  &:hover:not(:disabled) { background: linear-gradient(180deg, #CFA469 0, #BE9156 100%); }
   &:disabled { cursor: progress; }
 
   .lab {
@@ -278,7 +293,7 @@ fieldset {
   .fill {
     position: absolute;
     inset: 0;
-    background: rgba(18,15,11,.16);
+    background: rgba(42,33,27,.14);
     transform: scaleX(0);
     transform-origin: left;
   }
@@ -316,8 +331,8 @@ fieldset {
   align-items: center;
   justify-content: space-between;
   text-align: center;
-  border-left: 2px dashed rgba(250,246,238,.16);
-  background: rgba(214,169,59,.05);
+  border-left: 2px dashed rgba(42,33,27,.16);
+  background: rgba(200,157,102,.1);
   border-radius: 0 28px 28px 0;
 
   .tag { font-size: 13px; font-weight: 500; color: var(--auth-muted); }
@@ -348,7 +363,7 @@ fieldset {
 .trail {
   stroke-dasharray: 100;
   stroke-dashoffset: 100;
-  filter: drop-shadow(0 0 4px rgba(240,200,102,.8));
+  filter: drop-shadow(0 0 4px rgba(200,157,102,.7));
 }
 
 .plane {
@@ -414,7 +429,7 @@ fieldset {
 
 // ── Responsive ────────────────────────────────────────────────────────────────
 @media (max-width: 860px) {
-  .auth-main   { padding: 8px 16px 36px; }
+  .auth-main   { padding: 24px 16px 36px; }
 
   .pass {
     flex-direction: column;
@@ -436,7 +451,7 @@ fieldset {
     height: var(--stubh);
     padding: 16px 24px;
     border-left: 0;
-    border-top: 2px dashed rgba(250,246,238,.16);
+    border-top: 2px dashed rgba(42,33,27,.16);
     border-radius: 0 0 28px 28px;
     justify-content: space-around;
     .tag, .claim { display: none; }
