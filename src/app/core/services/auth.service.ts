@@ -89,6 +89,28 @@ export class AuthService {
     console.log('Logged out. Access token cleared from memory.');
   }
 
+  forgotPassword(email: string): Observable<any> {
+    return this.http
+      .post<any>(`${this.apiUrl}/v1/auths/forgot-password`, { email }, { withCredentials: true })
+      .pipe(
+        tap(() => console.log('Forgot-password email requested.')),
+        catchError(this.handleError)
+      );
+  }
+
+  resetPassword(token: string, newPassword: string): Observable<any> {
+    return this.http
+      .post<any>(
+        `${this.apiUrl}/v1/auths/reset-password/${token}`,
+        { newPassword },
+        { withCredentials: true }
+      )
+      .pipe(
+        tap(() => console.log('Password reset successfully.')),
+        catchError(this.handleError)
+      );
+  }
+
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'An unexpected error occurred';
 
