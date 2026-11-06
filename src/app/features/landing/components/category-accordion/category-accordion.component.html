@@ -1,8 +1,8 @@
-<section class="accord" aria-label="Our services — Sky, Sea, Land, Seal">
+<section class="accord" [attr.aria-label]="'accordion.section_label' | translate">
 
   <!-- Top bar -->
   <header class="accord__top-bar">
-    <h2 class="accord__top-headline">Every journey, protected.</h2>
+    <h2 class="accord__top-headline">{{ 'accordion.headline' | translate }}</h2>
     <span class="accord__counter" aria-live="polite" aria-atomic="true">
       {{ activeIndex + 1 | number:'2.0' }} / 04
     </span>
@@ -12,7 +12,7 @@
   <div
     class="accord__panels"
     role="tablist"
-    aria-label="Journey categories"
+    [attr.aria-label]="'accordion.journey_cats_label' | translate"
     (keydown)="onKeydown($event)">
 
     @for (panel of panels; track panel.id; let i = $index) {
@@ -77,7 +77,7 @@
     </div>
 
     <!-- Tab nav + progress line (bottom-center) -->
-    <nav class="accord__tab-nav" aria-label="Category tabs">
+    <nav class="accord__tab-nav" [attr.aria-label]="'accordion.tab_nav_label' | translate">
       <div class="accord__progress-track">
         <div
           class="accord__progress-knob"

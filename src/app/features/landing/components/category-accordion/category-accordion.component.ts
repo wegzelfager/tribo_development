@@ -5,6 +5,8 @@ import {
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { DecimalPipe } from '@angular/common';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { Subscription } from 'rxjs';
 
 export interface AccordPanel {
   id:     string;
@@ -19,61 +21,25 @@ export interface AccordPanel {
 @Component({
   selector: 'app-category-accordion',
   standalone: true,
-  imports: [DecimalPipe],
+  imports: [DecimalPipe, TranslatePipe],
   templateUrl: './category-accordion.component.html',
   styleUrl:    './category-accordion.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CategoryAccordionComponent implements OnInit, OnDestroy {
 
-  readonly panels: AccordPanel[] = [
-    {
-      id:     'sky',
-      word:   'Sky',
-      label:  'Private jets',
-      desc:   'Charter by the flight. Your payment stays in escrow until you land.',
-      img:    '/assets/images/jet-photoreal.webp',
-      imgAlt: 'Private jet top-down view',
-      bg:     '/assets/images/sky_view.webp',
-    },
-    {
-      id:     'sea',
-      word:   'Sea',
-      label:  'Superyachts',
-      desc:   'Sail with verified captains. Funds are released only after your voyage.',
-      // ⚠ No yacht hero shot yet — uses side view (see summary).
-      img:    '/assets/images/yacht-side.png',
-      imgAlt: 'Luxury superyacht',
-      bg:     '/assets/images/sky-day.png',   // placeholder; replace with ocean image
-    },
-    {
-      id:     'land',
-      word:   'Land',
-      label:  'Safari & ground',
-      desc:   'Private transfers and expeditions, confirmed before you pay in full.',
-      img:    '/assets/images/suv-cutout.webp',
-      imgAlt: 'Luxury 4×4 SUV',
-      bg:     '/assets/images/sky-dusk.png',
-    },
-    {
-      id:     'seal',
-      word:   'Seal',
-      label:  'Secure escrow',
-      desc:   'Every transaction sealed in escrow until delivery is confirmed.',
-      img:    '/assets/images/plane-q90.webp',
-      imgAlt: 'Tribo secure seal illustration',
-      bg:     '/assets/images/sky-dawn.png',
-    },
-  ];
+  panels: AccordPanel[] = [];
 
   activeIndex = 0;
   isMobile    = false;
 
   private autoTimer?: ReturnType<typeof setInterval>;
+  private langSub?: Subscription;
 
   constructor(
     @Inject(PLATFORM_ID) private platformId: object,
     private cdr: ChangeDetectorRef,
+    private translate: TranslateService,
   ) {}
 
   get activePanel(): AccordPanel { return this.panels[this.activeIndex]; }
@@ -84,6 +50,13 @@ export class CategoryAccordionComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.buildPanels();
+    // Re-build panels whenever the language changes
+    this.langSub = this.translate.onLangChange.subscribe(() => {
+      this.buildPanels();
+      this.cdr.markForCheck();
+    });
+
     if (!isPlatformBrowser(this.platformId)) return;
     this.checkMobile();
     // Auto-advance every 5 s when not interacted with
@@ -94,6 +67,7 @@ export class CategoryAccordionComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     if (this.autoTimer) clearInterval(this.autoTimer);
+    this.langSub?.unsubscribe();
   }
 
   @HostListener('window:resize')
@@ -101,6 +75,48 @@ export class CategoryAccordionComponent implements OnInit, OnDestroy {
 
   private checkMobile(): void {
     this.isMobile = window.innerWidth < 768;
+  }
+
+  private buildPanels(): void {
+    const t = (key: string) => this.translate.instant(key);
+    this.panels = [
+      {
+        id:     'sky',
+        word:   t('accordion.sky_word'),
+        label:  t('accordion.sky_label'),
+        desc:   t('accordion.sky_desc'),
+        img:    '/assets/images/jet-photoreal.webp',
+        imgAlt: t('accordion.sky_img_alt'),
+        bg:     '/assets/images/sky_view.webp',
+      },
+      {
+        id:     'sea',
+        word:   t('accordion.sea_word'),
+        label:  t('accordion.sea_label'),
+        desc:   t('accordion.sea_desc'),
+        img:    '/assets/images/yacht-side.png',
+        imgAlt: t('accordion.sea_img_alt'),
+        bg:     '/assets/images/sky-day.png',
+      },
+      {
+        id:     'land',
+        word:   t('accordion.land_word'),
+        label:  t('accordion.land_label'),
+        desc:   t('accordion.land_desc'),
+        img:    '/assets/images/suv-cutout.webp',
+        imgAlt: t('accordion.land_img_alt'),
+        bg:     '/assets/images/sky-dusk.png',
+      },
+      {
+        id:     'seal',
+        word:   t('accordion.seal_word'),
+        label:  t('accordion.seal_label'),
+        desc:   t('accordion.seal_desc'),
+        img:    '/assets/images/plane-q90.webp',
+        imgAlt: t('accordion.seal_img_alt'),
+        bg:     '/assets/images/sky-dawn.png',
+      },
+    ];
   }
 
   setActive(i: number): void {

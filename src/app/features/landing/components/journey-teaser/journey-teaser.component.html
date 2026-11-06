@@ -1,4 +1,4 @@
-<section class="teaser" #sectionEl aria-label="Teaser — Ready for smart group travel?">
+<section class="teaser" #sectionEl [attr.aria-label]="'teaser.section_label' | translate">
 
   <!-- Subtle film-grain overlay (SVG feTurbulence) -->
   <div class="teaser__grain" aria-hidden="true"></div>
@@ -13,34 +13,32 @@
     <!-- Eyebrow: text with gold line on each side -->
     <p class="teaser__eyebrow">
       <span class="teaser__eyebrow-line teaser__eyebrow-line--left" aria-hidden="true"></span>
-      <span class="teaser__eyebrow-text">SMART GROUP TRAVEL &amp; EXPERIENCE</span>
+      <span class="teaser__eyebrow-text">{{ 'teaser.eyebrow' | translate }}</span>
       <span class="teaser__eyebrow-line teaser__eyebrow-line--right" aria-hidden="true"></span>
     </p>
 
     <!-- Headline: 4 stacked lines, Syne display font, aria-label on h1, split lines hidden from AT -->
-    <h1 class="teaser__headline" #headlineEl aria-label="Ready for smart group travel?">
-      <span class="teaser__headline-line" #line0 aria-hidden="true">READY</span>
-      <span class="teaser__headline-line" #line1 aria-hidden="true">FOR SMART</span>
-      <span class="teaser__headline-line" #line2 aria-hidden="true">GROUP</span>
-      <span class="teaser__headline-line" #line3 aria-hidden="true">TRAVEL?</span>
+    <h1 class="teaser__headline" #headlineEl [attr.aria-label]="'teaser.headline_aria' | translate">
+      <span class="teaser__headline-line" #line0 aria-hidden="true">{{ 'teaser.headline_line0' | translate }}</span>
+      <span class="teaser__headline-line" #line1 aria-hidden="true">{{ 'teaser.headline_line1' | translate }}</span>
+      <span class="teaser__headline-line" #line2 aria-hidden="true">{{ 'teaser.headline_line2' | translate }}</span>
+      <span class="teaser__headline-line" #line3 aria-hidden="true">{{ 'teaser.headline_line3' | translate }}</span>
     </h1>
 
     <!-- Subtitle: split into three inline-block spans -->
     <p class="teaser__sub">
-      <span class="teaser__sub-part">Five chapters.</span>
-      <span class="teaser__sub-part">One unified platform.</span>
-      <span class="teaser__sub-part">The Tribo group travel experience, in three dimensions.</span>
+      <span class="teaser__sub-part">{{ 'teaser.sub_part1' | translate }}</span>
+      <span class="teaser__sub-part">{{ 'teaser.sub_part2' | translate }}</span>
+      <span class="teaser__sub-part">{{ 'teaser.sub_part3' | translate }}</span>
     </p>
   </div>
 
   <!-- Scroll cue: small SCROLL label with thin vertical line under it -->
   <div class="teaser__scroll" #scrollCueEl aria-hidden="true">
-    <span class="teaser__scroll-label">Scroll</span>
+    <span class="teaser__scroll-label">{{ 'teaser.scroll' | translate }}</span>
     <div class="teaser__scroll-track">
       <span class="teaser__scroll-runner"></span>
     </div>
   </div>
 
 </section>
-
-

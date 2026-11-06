@@ -121,9 +121,15 @@ h1, h2, h3, p { margin: 0; }
   }
 }
 
+.top-actions {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .bell {
   position: relative;
-  justify-self: end;
   width: 48px;
   height: 48px;
   border-radius: 50%;
@@ -131,6 +137,11 @@ h1, h2, h3, p { margin: 0; }
   background: var(--card);
   display: grid;
   place-items: center;
+  transition: transform 0.2s, background 0.2s;
+
+  &:hover {
+    background: var(--soft);
+  }
 
   .ping {
     position: absolute;
@@ -142,6 +153,35 @@ h1, h2, h3, p { margin: 0; }
     border-radius: 50%;
     background: var(--err);
     border: 2px solid var(--card);
+  }
+}
+
+.logout-btn {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink2);
+  display: grid;
+  place-items: center;
+  transition: color 0.2s, border-color 0.2s, background 0.2s, transform 0.2s;
+
+  &:hover {
+    color: var(--err);
+    border-color: var(--err);
+    background: rgba(184, 74, 57, 0.08);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 }
 

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Syne:wght@700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Syne:wght@700;800&family=Space+Grotesk:wght@400;500;600;700&family=Cairo:wght@400;600;700;800&display=swap');
 
 :root {
   /* Landing page tokens */
@@ -88,3 +88,154 @@ body {
 
 .gold { color: var(--sand-gold); }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+/* ── Arabic language overrides ─────────────────────────────────────────────── */
+/* Applied when <body class="lang-ar"> is set by I18nService                   */
+
+body.lang-ar {
+  font-family: 'Cairo', 'Inter', sans-serif;
+  /* Arabic text does not use letter-spacing or uppercase transforms */
+  letter-spacing: 0 !important;
+  line-height: 1.7;
+}
+
+/* Prevent uppercase text-transform from breaking Arabic joining */
+body.lang-ar .teaser__eyebrow-text,
+body.lang-ar .hero__scroll-txt,
+body.lang-ar .hero__scroll-dest,
+body.lang-ar .ascent__meta-brand,
+body.lang-ar .ascent__meta-model,
+body.lang-ar .accord__vert-label,
+body.lang-ar .accord__ghost,
+body.lang-ar .t3d-eyebrow,
+body.lang-ar .t3d-beat-k,
+body.lang-ar .value__eyebrow,
+body.lang-ar .ascent__p1-label,
+body.lang-ar .hz__word,
+body.lang-ar .hz__label,
+body.lang-ar .hz__beat {
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+}
+
+body.lang-ar .hz__heading,
+body.lang-ar .hz__info-title,
+body.lang-ar .hz__info-copy,
+body.lang-ar .hz__beat,
+body.lang-ar .hz__big,
+body.lang-ar .hz__seal-copy,
+body.lang-ar .hz__word,
+body.lang-ar .hz__label {
+  font-family: 'Cairo', sans-serif;
+}
+
+/* Arabic font on display/heading elements */
+body.lang-ar h1,
+body.lang-ar h2,
+body.lang-ar h3,
+body.lang-ar h4,
+body.lang-ar p,
+body.lang-ar a,
+body.lang-ar button,
+body.lang-ar span,
+body.lang-ar li {
+  font-family: 'Cairo', 'Inter', sans-serif;
+}
+
+/* Teaser headline: Arabic uses Cairo bold, not Syne */
+body.lang-ar .teaser__headline {
+  font-family: 'Cairo', sans-serif;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+/* RTL flex/grid logical corrections */
+[dir="rtl"] .nav__links,
+[dir="rtl"] .footer__links {
+  flex-direction: row-reverse;
+}
+
+/* Nav RTL layout */
+[dir="rtl"] .nav {
+  flex-direction: row-reverse;
+}
+
+/* Language switcher button */
+.lang-switcher {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid rgba(200, 157, 102, 0.35);
+  border-radius: 20px;
+  padding: 4px 10px;
+  color: var(--light-sand);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+  white-space: nowrap;
+  font-family: 'Space Grotesk', sans-serif;
+
+  &:hover {
+    border-color: var(--sand-gold);
+    color: var(--sand-gold);
+  }
+
+  &__label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+
+  &__divider {
+    opacity: 0.4;
+    font-size: 10px;
+  }
+}
+
+/* Dark nav variant */
+.nav--dark .lang-switcher {
+  color: var(--dark-luxury);
+  border-color: rgba(26, 22, 21, 0.3);
+
+  &:hover {
+    border-color: var(--dark-luxury);
+    color: var(--dark-luxury);
+  }
+}
+
+/* RTL arrow/chevron mirroring */
+[dir="rtl"] svg[data-mirror] {
+  transform: scaleX(-1);
+}
+
+/* Progress bars: in RTL grow from right */
+[dir="rtl"] .ascent__progress-fill,
+[dir="rtl"] .accord__progress-knob {
+  transform-origin: right center;
+}
+
+/* Ensure buttons / nav items don't overflow in Arabic */
+body.lang-ar .nav__links li a,
+body.lang-ar .nav__login-btn,
+body.lang-ar .nav-overlay__links li a {
+  white-space: nowrap;
+}
+
+body.lang-ar .hero__pill-text,
+body.lang-ar .value__cell-title,
+body.lang-ar .value__cell-desc,
+body.lang-ar .ascent__spec-label,
+body.lang-ar .ascent__spec-value {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* Overlay mobile menu RTL */
+[dir="rtl"] .nav-overlay__close {
+  right: auto;
+  left: 1.5rem;
+}
+

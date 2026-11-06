@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../core/services/auth.service';
 
 // ── Icons (24x24 stroke paths, rendered in the template) ─────────────────────
 const ICONS = {
@@ -18,6 +19,7 @@ const ICONS = {
   next:     'M9 5l7 7-7 7',
   pause:    'M8 5v14M16 5v14',
   play:     'M8 5l11 7-11 7z',
+  logout:   'M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9',
 } as const;
 
 type IconName = keyof typeof ICONS;
@@ -48,10 +50,34 @@ export interface Trip {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeComponent {
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly cdr = inject(ChangeDetectorRef);
+
   readonly icons = ICONS;
 
-  // ── Header ────────────────────────────────────────────────────────────────
-  readonly user = { name: 'Yossif', avatar: '' };   // set avatar to an image URL to show a photo
+  user = {
+    name: this.authService.getCurrentUser()?.name || 'Yossif',
+    avatar: ''
+  };
+
+  isLoggingOut = false;
+
+  logout(): void {
+    if (this.isLoggingOut) return;
+    this.isLoggingOut = true;
+    this.cdr.markForCheck();
+
+    this.authService.logout().subscribe({
+      next: () => {
+        this.router.navigate(['/auth/login']);
+      },
+      error: (err) => {
+        console.warn('Logout server request failed, but session was cleared locally:', err);
+        this.router.navigate(['/auth/login']);
+      }
+    });
+  }
 
   readonly greeting = (() => {
     const h = new Date().getHours();

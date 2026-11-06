@@ -1,4 +1,4 @@
-<section class="hz" id="journeys" aria-label="Four pillars of Tribo group travel">
+<section class="hz" id="journeys" [attr.aria-label]="'horizon.section_label' | translate">
   <div class="hz__stage">
 
     <div class="hz__row">
@@ -7,20 +7,23 @@
                  [style.--img]="'url(' + s.image + ')'"
                  [style.--pos]="s.pos"
                  [style.--grad]="s.fallback">
-          <div class="hz__word" aria-hidden="true">{{ s.word }}</div>
-          <div class="hz__label" aria-hidden="true">{{ s.word }}</div>
+          <div class="hz__word" aria-hidden="true">{{ ('horizon.slides.' + s.id + '.word') | translate }}</div>
+          <div class="hz__label" aria-hidden="true">{{ ('horizon.slides.' + s.id + '.word') | translate }}</div>
           <div class="hz__info">
-            <h3 class="hz__info-title">{{ s.title }}</h3>
-            <p class="hz__info-copy">{{ s.copy }}</p>
+            <h3 class="hz__info-title">{{ ('horizon.slides.' + s.id + '.title') | translate }}</h3>
+            <p class="hz__info-copy">{{ ('horizon.slides.' + s.id + '.copy') | translate }}</p>
           </div>
         </article>
       }
     </div>
 
-    <h2 class="hz__heading">Group travel, revolutionized.</h2>
+    <h2 class="hz__heading">{{ 'horizon.heading' | translate }}</h2>
     <p class="hz__count" aria-hidden="true"><span class="hz__count-now">01</span> / 04</p>
 
-    <p class="hz__big">Powered by<br />Gemini AI</p>
+    <p class="hz__big">
+      {{ 'horizon.powered_by_line1' | translate }}<br />
+      {{ 'horizon.powered_by_line2' | translate }}
+    </p>
 
     <!-- The one horizon: shared by every scene, doubles as progress, ends in the escrow seal -->
     <div class="hz__line" aria-hidden="true"></div>
@@ -29,15 +32,15 @@
     <div class="hz__seal">
       <div class="hz__seal-glow" aria-hidden="true"></div>
       <i class="hz__seal-dot" aria-hidden="true"></i>
-      <div class="hz__seal-sparkle" role="img" aria-label="Gemini">
+      <div class="hz__seal-sparkle" role="img" [attr.aria-label]="'horizon.seal_aria' | translate">
         <img class="hz__seal-mark" src="assets/images/google-gemini.webp" alt="Gemini" width="512" height="512" loading="eager" decoding="async" />
       </div>
     </div>
-    <p class="hz__seal-copy">Auto-generate day-by-day plans, budget splits, and packing checklists with Google Gemini API.</p>
+    <p class="hz__seal-copy">{{ 'horizon.seal_copy' | translate }}</p>
 
-    <nav class="hz__beats" aria-label="Platform pillars">
-      @for (b of beats; track b; let i = $index) {
-        <button type="button" class="hz__beat" [attr.aria-current]="i === 0 ? 'true' : 'false'" (click)="goTo(i)">{{ b }}</button>
+    <nav class="hz__beats" [attr.aria-label]="'horizon.beats_nav_label' | translate">
+      @for (b of beats; track b.id; let i = $index) {
+        <button type="button" class="hz__beat" [attr.aria-current]="i === 0 ? 'true' : 'false'" (click)="goTo(i)">{{ b.key | translate }}</button>
       }
     </nav>
 

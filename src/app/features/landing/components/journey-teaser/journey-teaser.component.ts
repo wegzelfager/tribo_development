@@ -4,10 +4,12 @@ import {
   PLATFORM_ID, Inject, ChangeDetectionStrategy
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-journey-teaser',
   standalone: true,
+  imports: [TranslatePipe],
   templateUrl: './journey-teaser.component.html',
   styleUrl:    './journey-teaser.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

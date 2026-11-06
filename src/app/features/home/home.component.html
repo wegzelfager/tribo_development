@@ -26,10 +26,21 @@
       }
     </nav>
 
-    <button class="bell" type="button" aria-label="Notifications">
-      <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.bell" /></svg>
-      <i class="ping"></i>
-    </button>
+    <div class="top-actions">
+      <button class="bell" type="button" aria-label="Notifications">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.bell" /></svg>
+        <i class="ping"></i>
+      </button>
+
+      <button class="logout-btn"
+              type="button"
+              aria-label="Log out"
+              title="Log out"
+              [disabled]="isLoggingOut"
+              (click)="logout()">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.logout" /></svg>
+      </button>
+    </div>
   </header>
 
   <!-- Hero carousel -->

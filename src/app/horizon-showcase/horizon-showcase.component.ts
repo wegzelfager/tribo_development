@@ -3,6 +3,7 @@ import {
   PLATFORM_ID, Inject, NgZone, ChangeDetectionStrategy
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
 
 type GSAPType = typeof import('gsap').gsap;
 type STType = typeof import('gsap/ScrollTrigger').ScrollTrigger;
@@ -10,41 +11,44 @@ type STInstance = ReturnType<STType['create']>;
 type GSTimeline = ReturnType<GSAPType['timeline']>;
 type GSTween = ReturnType<GSAPType['to']>;
 
-interface Slide {
+interface SlideMeta {
   id: string;
-  word: string;
-  title: string;
-  copy: string;
   image: string;
   pos: string;
   fallback: string;
 }
 
-const SLIDES: Slide[] = [
+interface BeatMeta {
+  id: string;
+  key: string;
+}
+
+const SLIDES: SlideMeta[] = [
   {
-    id: 'vetting', word: 'VETTING',
-    title: 'Seamless vetting',
-    copy: 'Applicant screening and one-click approval workflow, all in one place.',
+    id: 'vetting',
     image: 'assets/images/process/process-01.webp',
     pos: 'center 60%',
     fallback: 'linear-gradient(180deg,#171a33 0%,#3a2f55 45%,#b9774f 62%,#120f14 62.1%,#0b0910 100%)',
   },
   {
-    id: 'chat', word: 'CHAT',
-    title: 'Real-time group chat',
-    copy: 'Live WebSocket group messaging that keeps organizers and travelers aligned.',
+    id: 'chat',
     image: 'assets/images/process/process-02.webp',
     pos: 'center 60%',
     fallback: 'linear-gradient(180deg,#1b2238 0%,#4a3a4a 50%,#c08052 62%,#0d2c33 62.1%,#08191d 100%)',
   },
   {
-    id: 'split', word: 'SPLIT',
-    title: 'Dynamic split-billing',
-    copy: 'Integrated, transparent expense splitting and cost tracking for the whole crew.',
+    id: 'split',
     image: 'assets/images/process/process-03.webp',
     pos: 'center 60%',
     fallback: 'linear-gradient(180deg,#2a2236 0%,#6a4a3a 48%,#c9904e 62%,#2c1c0e 62.1%,#150d06 100%)',
   },
+];
+
+const BEATS: BeatMeta[] = [
+  { id: 'vetting', key: 'horizon.beats.vetting' },
+  { id: 'chat',    key: 'horizon.beats.chat' },
+  { id: 'split',   key: 'horizon.beats.split' },
+  { id: 'gemini',  key: 'horizon.beats.gemini' },
 ];
 
 const SEG = [22, 50, 78, 100];
@@ -52,6 +56,7 @@ const SEG = [22, 50, 78, 100];
 @Component({
   selector: 'app-horizon-showcase',
   standalone: true,
+  imports: [TranslatePipe],
   templateUrl: './horizon-showcase.component.html',
   styleUrl: './horizon-showcase.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -59,13 +64,12 @@ const SEG = [22, 50, 78, 100];
 export class HorizonShowcaseComponent implements AfterViewInit, OnDestroy {
 
   readonly slides = SLIDES;
-  readonly beats = [...SLIDES.map(s => s.word.charAt(0) + s.word.slice(1).toLowerCase()), 'Gemini'];
+  readonly beats = BEATS;
 
   private gsap?: GSAPType;
   private trigger?: STInstance;
   private tickFn?: (time: number, deltaMs: number) => void;
   private igniteTl?: GSTimeline;
-  private breatheTween?: GSTween;
   private destroyed = false;
 
   constructor(
@@ -78,7 +82,7 @@ export class HorizonShowcaseComponent implements AfterViewInit, OnDestroy {
     const sec = this.host.nativeElement.querySelector('.hz') as HTMLElement | null;
     if (!sec) return;
     const max = Math.max(1, sec.offsetHeight - window.innerHeight);
-    const top = sec.getBoundingClientRect().top + window.scrollY + max * (beat / SLIDES.length);
+    const top = sec.getBoundingClientRect().top + window.scrollY + max * (beat / this.slides.length);
     window.scrollTo({ top, behavior: 'auto' });
   }
 
@@ -140,56 +144,35 @@ export class HorizonShowcaseComponent implements AfterViewInit, OnDestroy {
       }
 
       this.igniteTl?.kill();
-      this.breatheTween?.kill();
-
-      if (sealSparkle) sealSparkle.style.willChange = 'transform, opacity';
-      if (sealGlow) sealGlow.style.willChange = 'transform, opacity';
-      if (linePulse) linePulse.style.willChange = 'transform, opacity';
 
       const tl = gsap.timeline({
         onComplete: () => {
-          if (sealSparkle) sealSparkle.style.willChange = 'auto';
-          if (linePulse) {
-            linePulse.style.willChange = 'auto';
-            gsap.set(linePulse, { opacity: 0, scaleX: 0 });
-          }
           if (slide4Active && sealGlow) {
-            // Settle into idle breathing loop (4.8s total loop)
-            this.breatheTween = gsap.to(sealGlow, {
-              scale: 1.15,
-              opacity: 0.85,
-              duration: 2.4,
-              yoyo: true,
-              repeat: -1,
-              ease: 'sine.inOut'
-            });
+            sealGlow.classList.add('is-breathing');
           }
         }
       });
       this.igniteTl = tl;
 
-      // 1. Sparkle scales from 0.6 to 1 and fades in
       if (sealSparkle) {
         tl.fromTo(sealSparkle,
           { scale: 0.6, opacity: 0 },
-          { scale: 1, opacity: 1, duration: 0.9, ease: 'power2.out' },
+          { scale: 1, opacity: 1, duration: 0.8, ease: 'power2.out' },
           0
         );
       }
 
-      // 2. Glow fades in and pulses once
       if (sealGlow) {
         tl.fromTo(sealGlow,
           { scale: 0.7, opacity: 0 },
-          { scale: 1.18, opacity: 0.95, duration: 0.45, ease: 'power2.out' },
+          { scale: 1.15, opacity: 0.95, duration: 0.45, ease: 'power2.out' },
           0
         ).to(sealGlow,
-          { scale: 1.0, opacity: 0.65, duration: 0.65, ease: 'sine.inOut' },
+          { scale: 1.0, opacity: 0.7, duration: 0.6, ease: 'sine.inOut' },
           0.45
         );
       }
 
-      // 3. Soft gradient pulse travels along the gold line from circle outward in both directions
       if (linePulse) {
         tl.fromTo(linePulse,
           { scaleX: 0, opacity: 0 },
@@ -207,19 +190,16 @@ export class HorizonShowcaseComponent implements AfterViewInit, OnDestroy {
 
     const deactivateSlide4 = () => {
       this.igniteTl?.kill();
-      this.breatheTween?.kill();
       this.igniteTl = undefined;
-      this.breatheTween = undefined;
 
-      if (sealSparkle) {
-        sealSparkle.style.willChange = 'auto';
-      }
       if (sealGlow) {
-        sealGlow.style.willChange = 'auto';
+        sealGlow.classList.remove('is-breathing');
         gsap.set(sealGlow, { opacity: 0, scale: 0.8 });
       }
+      if (sealSparkle) {
+        gsap.set(sealSparkle, { opacity: 0, scale: 0.8 });
+      }
       if (linePulse) {
-        linePulse.style.willChange = 'auto';
         gsap.set(linePulse, { opacity: 0, scaleX: 0 });
       }
     };
@@ -240,7 +220,8 @@ export class HorizonShowcaseComponent implements AfterViewInit, OnDestroy {
       const x = seg(t);
       fill.style.transform = `scaleX(${(x / 100).toFixed(4)})`;
       seal.style.left = `${(x * (1 - s) + 50 * s).toFixed(2)}%`;
-      seal.style.setProperty('--s', `${(18 + 114 * s).toFixed(1)}px`);
+      const sealScale = (18 + 114 * s) / 132;
+      seal.style.transform = `scale(${sealScale.toFixed(4)}) translateZ(0)`;
       sealDot.style.opacity = String(1 - s);
       big.style.opacity = String(s);
       big.style.transform = `translate3d(0,${((1 - s) * 24).toFixed(1)}px,0)`;
@@ -253,28 +234,18 @@ export class HorizonShowcaseComponent implements AfterViewInit, OnDestroy {
         beatBtns.forEach((b, k) => b.setAttribute('aria-current', k === beat ? 'true' : 'false'));
       }
 
-      // ── Slide 04 state & ignite orchestration ──
       const isSlide4 = (beat === N);
       if (isSlide4 && !slide4Active) {
         slide4Active = true;
         if (!first) {
           playSlide4Ignite();
         } else {
-          // Initial mount when already on slide 04: show static / settled state
           if (reduce) {
             if (sealGlow) gsap.set(sealGlow, { opacity: 0.65, scale: 1 });
             if (sealSparkle) gsap.set(sealSparkle, { opacity: 1, scale: 1 });
           } else {
             if (sealGlow) {
-              gsap.set(sealGlow, { opacity: 0.65, scale: 1 });
-              this.breatheTween = gsap.to(sealGlow, {
-                scale: 1.15,
-                opacity: 0.85,
-                duration: 2.4,
-                yoyo: true,
-                repeat: -1,
-                ease: 'sine.inOut'
-              });
+              sealGlow.classList.add('is-breathing');
             }
             if (sealSparkle) gsap.set(sealSparkle, { opacity: 1, scale: 1 });
           }
@@ -319,7 +290,6 @@ export class HorizonShowcaseComponent implements AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroyed = true;
     this.igniteTl?.kill();
-    this.breatheTween?.kill();
     this.trigger?.kill();
     if (this.gsap && this.tickFn) this.gsap.ticker.remove(this.tickFn);
   }

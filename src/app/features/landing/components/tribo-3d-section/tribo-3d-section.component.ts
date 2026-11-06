@@ -32,6 +32,7 @@ import {
   isDevMode
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { SmoothScrollService } from '../../../../core/smooth-scroll.service';
 
 // Three.js — installed via npm
@@ -118,6 +119,7 @@ function probeCapability(): { lowEnd: boolean; noWebGL: boolean } {
 @Component({
   selector: 'app-tribo-3d-section',
   standalone: true,
+  imports: [TranslatePipe],
   templateUrl: './tribo-3d-section.component.html',
   styleUrl:    './tribo-3d-section.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -144,6 +146,7 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
     @Inject(PLATFORM_ID) private platformId: object,
     private ngZone: NgZone,
     private smoothScroll: SmoothScrollService,
+    private translate: TranslateService,
   ) {}
 
   /* scroll leash & pace state */
@@ -297,12 +300,17 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
   private showStaticFallback(): void {
     const stage = this.stageEl.nativeElement;
     stage.classList.add('t3d-static-fallback');
-    stage.innerHTML = BEATS.map(b => `
-      <div class="t3d-fb-beat" style="background:rgb(${b.bg});color:rgb(${b.ink})">
-        <span class="t3d-beat-k">${b.k}</span>
-        <h2 class="t3d-beat-h">${b.t}</h2>
-        <p class="t3d-beat-d">${b.d}</p>
-      </div>`).join('');
+    stage.innerHTML = BEATS.map((b, i) => {
+      const bk = this.translate ? this.translate.instant(`t3d.beats.b${i + 1}_k`) : b.k;
+      const bt = this.translate ? this.translate.instant(`t3d.beats.b${i + 1}_t`) : b.t;
+      const bd = this.translate ? this.translate.instant(`t3d.beats.b${i + 1}_d`) : b.d;
+      return `
+        <div class="t3d-fb-beat" style="background:rgb(${b.bg});color:rgb(${b.ink})">
+          <span class="t3d-beat-k">${bk}</span>
+          <h2 class="t3d-beat-h">${bt}</h2>
+          <p class="t3d-beat-d">${bd}</p>
+        </div>`;
+    }).join('');
     // Collapse the 700vh wrap to natural content height
     this.wrapEl.nativeElement.style.height = 'auto';
     this.loaderEl.nativeElement.classList.add('t3d-loader--hidden');
@@ -557,7 +565,10 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
     BEATS.forEach((b, i) => {
       const bt = document.createElement('button');
       bt.type = 'button';
-      bt.setAttribute('aria-label', `Go to ${b.t}`);
+      // Use translated aria-label if translate service is available
+      const beatTitle = this.translate ? this.translate.instant(`t3d.beats.b${i + 1}_t`) : b.t;
+      const goToLabel = this.translate ? this.translate.instant('t3d.beats.goto_aria', { beat: beatTitle }) : `Go to ${b.t}`;
+      bt.setAttribute('aria-label', goToLabel);
       bt.setAttribute('aria-current', 'false');
       bt.className = 't3d-dot-btn';
       bt.innerHTML = '<i></i>';
@@ -582,10 +593,15 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
     if (i === this.activeIdx) return;
     this.activeIdx = i;
     const b = BEATS[i];
-    this.beatK.nativeElement.textContent = b.k;
-    this.beatH.nativeElement.textContent = b.t;
-    this.beatD.nativeElement.textContent = b.d;
-    this.ghostT.nativeElement.textContent = b.g;
+    // Use translated strings when available, fall back to static BEATS data
+    const bk = this.translate ? this.translate.instant(`t3d.beats.b${i + 1}_k`) : b.k;
+    const bt = this.translate ? this.translate.instant(`t3d.beats.b${i + 1}_t`) : b.t;
+    const bd = this.translate ? this.translate.instant(`t3d.beats.b${i + 1}_d`) : b.d;
+    const bg = this.translate ? this.translate.instant(`t3d.beats.b${i + 1}_g`) : b.g;
+    this.beatK.nativeElement.textContent = bk;
+    this.beatH.nativeElement.textContent = bt;
+    this.beatD.nativeElement.textContent = bd;
+    this.ghostT.nativeElement.textContent = bg;
     this.fitGhost();
     this.btns.forEach((btn, j) =>
       btn.setAttribute('aria-current', j === i ? 'true' : 'false'));

@@ -3,13 +3,13 @@
 
   <!-- 700 vh scroll wrapper -->
   <div class="t3d-wrap" #wrapEl>
-    <section class="t3d-stage" #stageEl aria-label="Tribo — 5 core capabilities">
+    <section class="t3d-stage" #stageEl [attr.aria-label]="'t3d.section_label' | translate">
 
       <!-- Loading overlay (absolute, local to stage) -->
       <div class="t3d-loader" #loaderEl role="status" aria-live="polite">
         <div class="t3d-loader__logo">TRIBO</div>
         <div class="t3d-loader__bar-wrap"><div class="t3d-loader__bar" #loaderBar></div></div>
-        <div class="t3d-loader__pct" #loaderPct>Loading experience…</div>
+        <div class="t3d-loader__pct" #loaderPct>{{ 't3d.loader_text' | translate }}</div>
         <div class="t3d-loader__err" #loaderErr></div>
       </div>
 
@@ -22,7 +22,7 @@
       </div>
 
       <!-- Eyebrow -->
-      <p class="t3d-eyebrow" aria-hidden="true">Connecting travelers, empowering organizers</p>
+      <p class="t3d-eyebrow" aria-hidden="true">{{ 't3d.eyebrow' | translate }}</p>
 
       <!-- Beat title (left) -->
       <div class="t3d-ttl" #ttlEl>
@@ -34,19 +34,19 @@
       <p class="t3d-beat-d" #beatD aria-live="polite" aria-atomic="true"></p>
 
       <!-- Dot nav -->
-      <nav class="t3d-dots" #dotsNav aria-label="Story navigation"></nav>
+      <nav class="t3d-dots" #dotsNav [attr.aria-label]="'t3d.dots_nav_label' | translate"></nav>
 
     </section>
   </div>
 
   <!-- Closing CTA — "Revolutionizing group travel." -->
-  <section class="t3d-cta" aria-label="Call to action — join Tribo">
-    <h2 class="t3d-cta__headline">Revolutionizing<br>group travel.</h2>
+  <section class="t3d-cta" [attr.aria-label]="'t3d.cta_section_label' | translate">
+    <h2 class="t3d-cta__headline">{{ 't3d.cta_headline_line1' | translate }}<br>{{ 't3d.cta_headline_line2' | translate }}</h2>
     <a href="#hero-cta-book"
        class="t3d-cta__btn"
        id="t3d-book-btn"
-       aria-label="Discover group travel on Tribo">
-      Discover Trips
+       [attr.aria-label]="'t3d.cta_btn_aria' | translate">
+      {{ 't3d.cta_btn' | translate }}
     </a>
   </section>
 

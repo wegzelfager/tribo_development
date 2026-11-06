@@ -6,9 +6,11 @@ import {
 import { isPlatformBrowser } from '@angular/common';
 import { SmoothScrollService } from '../../core/smooth-scroll.service';
 import { RouterLink } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { HorizonShowcaseComponent } from '../../horizon-showcase/horizon-showcase.component';
 import { JourneyTeaserComponent } from './components/journey-teaser/journey-teaser.component';
 import { Tribo3dSectionComponent } from './components/tribo-3d-section/tribo-3d-section.component';
+import { I18nService } from '../../core/services/i18n.service';
 
 type GSAPType = typeof import('gsap').gsap;
 type STType = typeof import('gsap/ScrollTrigger').ScrollTrigger;
@@ -25,6 +27,7 @@ interface LenisInstance {
   standalone: true,
   imports: [
     RouterLink,
+    TranslatePipe,
     HorizonShowcaseComponent,
     JourneyTeaserComponent,
     Tribo3dSectionComponent,
@@ -75,6 +78,14 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
   @ViewChild('routeCar')        routeCar?: ElementRef<HTMLDivElement>;
  
   mobileMenuOpen = false;
+  get isArabic(): boolean { return this.i18n.isRtl; }
+
+  toggleLang(): void {
+    this.i18n.toggle();
+    if (isPlatformBrowser(this.platformId)) {
+      window.location.reload();
+    }
+  }
  
   private gsap!: GSAPType;
   private ST!: STType;
@@ -101,6 +112,8 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     @Inject(PLATFORM_ID) private platformId: object,
     private zone: NgZone,
     private smoothScroll: SmoothScrollService,
+    private i18n: I18nService,
+    private translate: TranslateService,
   ) {}
  
   toggleMobileMenu(): void {
@@ -509,10 +522,11 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     const fSub    = Math.round(W * (vertical ? 0.030 : 0.009));
     const margin  = W * 0.12;   // label is clamped so it never touches the edge
  
+    const t = (k: string) => this.translate ? this.translate.instant(k) : k;
     const NODES = [
-      { f: 0.14, title: 'One-Click Vetting',    sub: 'Screen and approve applicants' },
-      { f: 0.50, title: 'Real-Time Group Hub', sub: 'Live chat & split-billing' },
-      { f: 0.86, title: 'AI Trip Execution',   sub: 'Instant Gemini itineraries' },
+      { f: 0.14, title: t('route.node1_title'), sub: t('route.node1_sub') },
+      { f: 0.50, title: t('route.node2_title'), sub: t('route.node2_sub') },
+      { f: 0.86, title: t('route.node3_title'), sub: t('route.node3_sub') },
     ];
  
     // ── Build SVG (static road + dashed line + glow/core trail). No <filter>. ──────────
