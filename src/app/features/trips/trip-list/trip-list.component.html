@@ -1,1 +1,178 @@
-<!-- Trip List Component Placeholder -->
+<div class="trips-catalog-page">
+  <!-- Top Hero Banner -->
+  <header class="catalog-hero">
+    <div class="hero-content">
+      <span class="hero-badge">EXPLORE EXPEDITIONS</span>
+      <h1 class="hero-title">Discover Authentic Adventures</h1>
+      <p class="hero-sub">Hand-crafted journeys guided by certified local expedition leaders.</p>
+    </div>
+  </header>
+
+  <!-- Filter & Search Controls Bar -->
+  <section class="filter-bar-container">
+    <div class="filter-card">
+      <div class="filter-input-wrap">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.search"/></svg>
+        <input
+          type="text"
+          placeholder="Search by destination or location..."
+          [(ngModel)]="searchLocation"
+          (keyup.enter)="onFilterChange()"
+        />
+      </div>
+
+      <div class="filter-range-wrap">
+        <span class="filter-label">Price USD:</span>
+        <input
+          type="number"
+          placeholder="Min"
+          [(ngModel)]="minPrice"
+          (change)="onFilterChange()"
+          class="price-input"
+        />
+        <span class="sep">-</span>
+        <input
+          type="number"
+          placeholder="Max"
+          [(ngModel)]="maxPrice"
+          (change)="onFilterChange()"
+          class="price-input"
+        />
+      </div>
+
+      <div class="filter-sort-wrap">
+        <select [(ngModel)]="sortBy" (change)="onFilterChange()">
+          <option value="createdAt">Newest First</option>
+          <option value="pricePerPerson">Price</option>
+          <option value="durationDays">Duration</option>
+        </select>
+        <select [(ngModel)]="sortOrder" (change)="onFilterChange()">
+          <option value="desc">Descending</option>
+          <option value="asc">Ascending</option>
+        </select>
+      </div>
+
+      <div class="filter-actions">
+        <button class="btn btn-search" type="button" (click)="onFilterChange()">
+          Filter
+        </button>
+        <button class="btn btn-clear" type="button" (click)="resetFilters()">
+          Clear
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Results Count -->
+  <div class="results-header">
+    <p class="results-count">
+      @if (loading()) {
+        Searching expeditions...
+      } @else {
+        Found <strong>{{ total() }}</strong> expeditions
+      }
+    </p>
+  </div>
+
+  <!-- Trips Grid -->
+  @if (loading()) {
+    <div class="trips-grid">
+      @for (n of [1, 2, 3, 4, 5, 6]; track n) {
+        <div class="trip-card skeleton-card">
+          <div class="skeleton-cover"></div>
+          <div class="skeleton-body">
+            <div class="skeleton-line full"></div>
+            <div class="skeleton-line half"></div>
+            <div class="skeleton-line third"></div>
+          </div>
+        </div>
+      }
+    </div>
+  } @else if (trips().length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon-wrap">
+        <svg class="i" viewBox="0 0 24 24"><path [attr.d]="icons.filter"/></svg>
+      </div>
+      <h3 class="empty-title">No expeditions found</h3>
+      <p class="empty-desc">Try loosening your search criteria or resetting the filters.</p>
+      <button class="btn btn-reset" (click)="resetFilters()">Reset All Filters</button>
+    </div>
+  } @else {
+    <div class="trips-grid">
+      @for (trip of trips(); track trip._id; let i = $index) {
+        <article class="trip-card" (click)="goToTrip(trip._id)">
+          <!-- Cover Image -->
+          <div
+            class="trip-cover"
+            [style.background]="trip.coverImage ? 'url(' + trip.coverImage + ') center/cover no-repeat' : gradient(i)"
+          >
+            <div class="cover-gradient-shade"></div>
+            <span class="duration-badge">
+              <svg class="i i-sm" viewBox="0 0 24 24"><path [attr.d]="icons.clock"/></svg>
+              {{ trip.durationDays }} Days
+            </span>
+            <div class="price-pill">
+              ${{ trip.pricePerPerson }} <span class="per">/person</span>
+            </div>
+          </div>
+
+          <!-- Body Content -->
+          <div class="trip-body">
+            <div class="location-row">
+              <svg class="i i-sm" viewBox="0 0 24 24"><path [attr.d]="icons.pin"/></svg>
+              <span>{{ trip.location }}</span>
+            </div>
+
+            <h3 class="trip-title" [title]="trip.title">{{ trip.title }}</h3>
+
+            <p class="trip-summary">{{ trip.description }}</p>
+
+            @if (trip.highlights && trip.highlights.length) {
+              <div class="tags-row">
+                @for (h of trip.highlights.slice(0, 3); track h) {
+                  <span class="tag-chip">{{ h }}</span>
+                }
+                @if (trip.highlights.length > 3) {
+                  <span class="tag-chip more">+{{ trip.highlights.length - 3 }}</span>
+                }
+              </div>
+            }
+
+            <!-- Footer Card Details -->
+            <div class="card-footer">
+              <div class="capacity-info">
+                <svg class="i i-sm" viewBox="0 0 24 24"><path [attr.d]="icons.users"/></svg>
+                <span>Max {{ trip.maxCapacity }} guests</span>
+              </div>
+              <button class="view-btn" type="button" aria-label="View details">
+                <span>View</span>
+                <svg class="i i-sm" viewBox="0 0 24 24"><path [attr.d]="icons.arrow"/></svg>
+              </button>
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+
+    <!-- Pagination -->
+    @if (totalPages() > 1) {
+      <nav class="pagination-bar" aria-label="Catalog pages">
+        <button
+          class="btn-page"
+          [disabled]="currentPage() <= 1"
+          (click)="fetchTrips(currentPage() - 1)"
+        >
+          Previous
+        </button>
+        <span class="page-indicator">Page {{ currentPage() }} of {{ totalPages() }}</span>
+        <button
+          class="btn-page"
+          [disabled]="currentPage() >= totalPages()"
+          (click)="fetchTrips(currentPage() + 1)"
+        >
+          Next
+        </button>
+      </nav>
+    }
+  }
+</div>

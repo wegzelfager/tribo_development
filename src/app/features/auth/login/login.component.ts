@@ -4,7 +4,7 @@ import {
   PLATFORM_ID, Inject, ChangeDetectorRef
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 
 type GSAPType = typeof import('gsap').gsap;
@@ -45,6 +45,7 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
     private ngZone: NgZone,
     private authService: AuthService,
     private router: Router,
+    private route: ActivatedRoute,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -191,7 +192,15 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
           this.showDone();
           this.errorMsg = 'Signed in successfully.';
           this.errorOk  = true;
-          setTimeout(() => this.router.navigate(['/home']), 1500);
+          setTimeout(() => {
+            const returnUrl = this.route.snapshot.queryParams['returnUrl'];
+            if (returnUrl) {
+              this.router.navigateByUrl(returnUrl);
+            } else {
+              const role = this.authService.getCurrentUser()?.role?.toLowerCase();
+              this.router.navigate([role === 'organizer' ? '/organizer' : '/home']);
+            }
+          }, 1500);
         });
       },
       error: (err: Error) => {

@@ -1,0 +1,2501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create a Trip — Basics · Tribo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ============================================================
+       DESIGN TOKENS & SYSTEM VARIABLES
+       ============================================================ */
+    :root {
+      /* Backgrounds */
+      --color-bg:            #F9F6F1;
+      --color-card:          #FFFFFF;
+      --color-card-subtle:   #FBF8F5;
+
+      /* Borders */
+      --color-border:        #EDE6DC;
+      --color-border-hover:  #D8CCC0;
+      --color-border-dash:   #D9CEBF;
+
+      /* Primary Brand (Rich Warm Brown) */
+      --color-primary:       #8B5A2B;
+      --color-primary-hover: #754B23;
+      --color-primary-bg:    #EDE3CF;
+      --color-primary-tint:  #F7F3EC;
+      --color-primary-light: #F4ECE1;
+
+      /* Typography Colors */
+      --color-ink:           #1C1917;
+      --color-label:         #292524;
+      --color-muted:         #78716C;
+      --color-helper:        #8A7F73;
+
+      /* Status Colors (No Blue!) */
+      --color-error:         #C0462B;
+      --color-error-bg:      #FDF3F0;
+      --color-success:       #3D7A5F;
+
+      /* Stepper Colors */
+      --color-step-active:   #8B5A2B;
+      --color-step-idle:     #D5C9B7;
+      --color-step-text:     #A39482;
+
+      /* Radii */
+      --radius-card:         16px;
+      --radius-input:        10px;
+      --radius-chip:         9999px;
+      --radius-sm:           8px;
+
+      /* Shadows */
+      --shadow-card:         0 1px 3px rgba(43, 33, 24, 0.04), 0 4px 16px rgba(43, 33, 24, 0.03);
+      --shadow-pop:          0 4px 20px rgba(43, 33, 24, 0.12);
+
+      /* Timing & Font */
+      --transition:          180ms cubic-bezier(0.16, 1, 0.3, 1);
+      --font:                'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    /* ============================================================
+       RESET & BASE RESETS (STRICTLY NO BLUE ANYWHERE)
+       ============================================================ */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    ::selection {
+      background: var(--color-primary-bg);
+      color: var(--color-ink);
+    }
+
+    html {
+      font-size: 16px;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font);
+      background-color: var(--color-bg);
+      color: var(--color-ink);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    a {
+      color: var(--color-primary);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      transition: color var(--transition);
+    }
+    a:hover {
+      color: var(--color-primary-hover);
+    }
+
+    button {
+      font-family: var(--font);
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: inherit;
+    }
+
+    input, textarea {
+      font-family: var(--font);
+      font-size: 0.9375rem;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--color-primary) !important;
+      outline-offset: 2px !important;
+    }
+
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover, 
+    input:-webkit-autofill:focus {
+      -webkit-text-fill-color: var(--color-ink);
+      -webkit-box-shadow: 0 0 0px 1000px #fff inset;
+      transition: background-color 5000s ease-in-out 0s;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        transition-duration: 0ms !important;
+        animation-duration: 0ms !important;
+      }
+    }
+
+    /* ============================================================
+       LAYOUT & PAGE SHELL
+       ============================================================ */
+    .page-wrapper {
+      min-height: 100vh;
+      padding-bottom: 80px;
+    }
+
+    .container {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ============================================================
+       STEPPER
+       ============================================================ */
+    .stepper-section {
+      padding: 36px 0 28px;
+    }
+
+    .stepper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      max-width: 460px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .step-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      flex: 1;
+      text-align: center;
+    }
+
+    /* Connecting lines between steps */
+    .step-line {
+      position: absolute;
+      top: 15px;
+      left: 50%;
+      width: 100%;
+      height: 1.5px;
+      background-color: var(--color-border);
+      z-index: 0;
+    }
+
+    .step-circle {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8125rem;
+      font-weight: 700;
+      position: relative;
+      z-index: 1;
+      background-color: var(--color-bg);
+      border: 1.5px solid var(--color-step-idle);
+      color: var(--color-step-text);
+      transition: all var(--transition);
+    }
+
+    .step-item.active .step-circle {
+      background-color: var(--color-step-active);
+      border-color: var(--color-step-active);
+      color: #FFFFFF;
+      box-shadow: 0 2px 8px rgba(139, 90, 43, 0.25);
+    }
+
+    .step-item.done .step-circle {
+      background-color: var(--color-step-active);
+      border-color: var(--color-step-active);
+      color: #FFFFFF;
+    }
+
+    .step-label {
+      margin-top: 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--color-step-text);
+      transition: color var(--transition);
+    }
+
+    .step-item.active .step-label {
+      color: var(--color-ink);
+      font-weight: 700;
+    }
+
+    /* ============================================================
+       PAGE HEADER
+       ============================================================ */
+    .page-header {
+      padding: 12px 0 32px;
+    }
+
+    .eyebrow {
+      font-size: 0.6875rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 8px;
+    }
+
+    .page-title {
+      font-size: 2.25rem;
+      font-weight: 800;
+      color: var(--color-ink);
+      letter-spacing: -0.025em;
+      line-height: 1.15;
+      margin-bottom: 10px;
+    }
+
+    .page-subtitle {
+      font-size: 0.9375rem;
+      color: var(--color-muted);
+      max-width: 620px;
+      line-height: 1.55;
+    }
+
+    /* ============================================================
+       TWO-COLUMN LAYOUT
+       ============================================================ */
+    .two-column-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.7fr) minmax(310px, 1fr);
+      gap: 32px;
+      align-items: start;
+    }
+
+    /* ============================================================
+       CARDS (LEFT COLUMN)
+       ============================================================ */
+    .form-card {
+      background: var(--color-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow-card);
+      padding: 28px;
+      margin-bottom: 24px;
+      transition: border-color var(--transition);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .card-icon-box {
+      width: 38px;
+      height: 38px;
+      border-radius: var(--radius-sm);
+      background-color: var(--color-primary-tint);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--color-primary);
+    }
+
+    .card-icon-box svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .card-title {
+      font-size: 1.0625rem;
+      font-weight: 700;
+      color: var(--color-ink);
+      line-height: 1.25;
+      margin-bottom: 3px;
+    }
+
+    .card-subtitle {
+      font-size: 0.8125rem;
+      color: var(--color-muted);
+      line-height: 1.4;
+    }
+
+    /* ============================================================
+       FORM FIELDS & CONTROLS
+       ============================================================ */
+    .field-group {
+      margin-bottom: 20px;
+    }
+
+    .field-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .field-row-split {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .field-row-split.equal {
+      grid-template-columns: 1fr 1.2fr;
+    }
+
+    .field-row-split .field-group {
+      margin-bottom: 0;
+    }
+
+    .label-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--color-label);
+    }
+
+    .pill-badge {
+      font-size: 0.6875rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      padding: 3px 9px;
+      border-radius: var(--radius-chip);
+      text-transform: capitalize;
+    }
+
+    .pill-badge.required {
+      background-color: #F8EFE9;
+      color: #9C572B;
+    }
+
+    .pill-badge.optional {
+      background-color: #F3EFEA;
+      color: var(--color-muted);
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-icon-left {
+      position: absolute;
+      left: 12px;
+      color: var(--color-helper);
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .input-icon-left svg {
+      width: 17px;
+      height: 17px;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      height: 44px;
+      padding: 0 14px;
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-input);
+      background-color: #FFFFFF;
+      color: var(--color-ink);
+      font-size: 0.9375rem;
+      font-weight: 500;
+      transition: border-color var(--transition), box-shadow var(--transition);
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    .input-wrapper.has-icon input {
+      padding-left: 38px;
+    }
+
+    input::placeholder {
+      color: #BAAEA2;
+      font-weight: 400;
+    }
+
+    input:hover {
+      border-color: var(--color-border-hover);
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(139, 90, 43, 0.12);
+    }
+
+    input.field-error {
+      border-color: var(--color-error) !important;
+      background-color: #FFFAF9;
+    }
+
+    input.field-error:focus {
+      box-shadow: 0 0 0 3px rgba(192, 70, 43, 0.12) !important;
+    }
+
+    .field-hint-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-top: 6px;
+      font-size: 0.78125rem;
+      color: var(--color-helper);
+    }
+
+    .live-counter {
+      color: var(--color-helper);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+      margin-left: 8px;
+    }
+
+    .error-feedback {
+      display: none;
+      font-size: 0.78125rem;
+      font-weight: 500;
+      color: var(--color-error);
+      margin-top: 6px;
+    }
+
+    .error-feedback.visible {
+      display: block;
+    }
+
+    /* ============================================================
+       NUMBER STEPPERS (- / +)
+       ============================================================ */
+    .stepper-control {
+      display: flex;
+      align-items: center;
+      height: 44px;
+      background: #FFFFFF;
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-input);
+      padding: 3px;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+
+    .stepper-control:focus-within {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(139, 90, 43, 0.12);
+    }
+
+    .stepper-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-ink);
+      background: var(--color-primary-tint);
+      transition: background-color var(--transition), color var(--transition), opacity var(--transition);
+      flex-shrink: 0;
+    }
+
+    .stepper-btn:hover:not(:disabled) {
+      background-color: var(--color-primary-bg);
+      color: var(--color-primary);
+    }
+
+    .stepper-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      background-color: transparent;
+    }
+
+    .stepper-center {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      flex: 1;
+      padding: 0 8px;
+    }
+
+    .stepper-input-num {
+      width: 32px;
+      border: none;
+      background: transparent;
+      font-size: 0.9375rem;
+      font-weight: 700;
+      color: var(--color-ink);
+      text-align: center;
+      padding: 0;
+      outline: none;
+    }
+
+    .stepper-unit-label {
+      font-size: 0.8125rem;
+      color: var(--color-muted);
+      font-weight: 500;
+      user-select: none;
+    }
+
+    /* ============================================================
+       AGE RESTRICTION PILL CHIPS
+       ============================================================ */
+    .age-chips-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .age-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 16px;
+      border-radius: var(--radius-chip);
+      border: 1.5px solid var(--color-border);
+      background-color: #FFFFFF;
+      color: var(--color-label);
+      font-size: 0.875rem;
+      font-weight: 600;
+      transition: all var(--transition);
+      user-select: none;
+    }
+
+    .age-pill svg {
+      width: 14px;
+      height: 14px;
+      stroke-width: 2.5;
+    }
+
+    .age-pill:hover:not(.active) {
+      border-color: var(--color-border-hover);
+      background-color: var(--color-primary-tint);
+      color: var(--color-primary);
+    }
+
+    .age-pill.active {
+      background-color: var(--color-primary);
+      border-color: var(--color-primary);
+      color: #FFFFFF;
+      box-shadow: 0 2px 8px rgba(139, 90, 43, 0.2);
+    }
+
+    /* ============================================================
+       DROPZONE — COVER PHOTO
+       ============================================================ */
+    .dropzone-container {
+      border: 2px dashed var(--color-border-dash);
+      border-radius: var(--radius-card);
+      background-color: #FDFAF6;
+      padding: 36px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      cursor: pointer;
+      position: relative;
+      transition: all var(--transition);
+      min-height: 180px;
+    }
+
+    .dropzone-container:hover,
+    .dropzone-container.is-dragover {
+      border-color: var(--color-primary);
+      background-color: var(--color-primary-tint);
+    }
+
+    .dropzone-container.has-file {
+      border-style: solid;
+      border-color: var(--color-border);
+      padding: 0;
+      overflow: hidden;
+      background: #000;
+    }
+
+    .dropzone-container input[type="file"] {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+      z-index: 2;
+    }
+
+    .dropzone-icon-circle {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background-color: var(--color-primary-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-primary);
+      margin-bottom: 12px;
+      transition: transform var(--transition);
+    }
+
+    .dropzone-container:hover .dropzone-icon-circle {
+      transform: translateY(-2px);
+    }
+
+    .dropzone-icon-circle svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .dropzone-main-text {
+      font-size: 0.9375rem;
+      font-weight: 700;
+      color: var(--color-ink);
+      margin-bottom: 4px;
+    }
+
+    .browse-link {
+      color: var(--color-primary);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      font-weight: 700;
+    }
+
+    .dropzone-sub-text {
+      font-size: 0.78125rem;
+      color: var(--color-helper);
+    }
+
+    /* Cover Preview in Dropzone */
+    .cover-img-preview {
+      width: 100%;
+      height: 240px;
+      object-fit: cover;
+      display: none;
+    }
+
+    .dropzone-actions-bar {
+      display: none;
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      gap: 8px;
+      z-index: 3;
+    }
+
+    .action-badge-btn {
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.78125rem;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(4px);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+      transition: all var(--transition);
+    }
+
+    .action-badge-btn.replace {
+      border: 1px solid var(--color-border);
+      color: var(--color-ink);
+    }
+    .action-badge-btn.replace:hover {
+      background: #FFFFFF;
+      color: var(--color-primary);
+    }
+
+    .action-badge-btn.remove {
+      border: 1px solid #F5C7BC;
+      color: var(--color-error);
+    }
+    .action-badge-btn.remove:hover {
+      background: var(--color-error);
+      color: #FFFFFF;
+    }
+
+    .dropzone-container.has-file .cover-img-preview {
+      display: block;
+    }
+    .dropzone-container.has-file .dropzone-actions-bar {
+      display: flex;
+    }
+    .dropzone-container.has-file .dropzone-icon-circle,
+    .dropzone-container.has-file .dropzone-main-text,
+    .dropzone-container.has-file .dropzone-sub-text {
+      display: none;
+    }
+
+    .info-tip-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-top: 10px;
+      font-size: 0.78125rem;
+      color: var(--color-helper);
+      line-height: 1.45;
+    }
+
+    .info-tip-row svg {
+      width: 15px;
+      height: 15px;
+      color: var(--color-primary);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    /* ============================================================
+       MORE PHOTOS GRID
+       ============================================================ */
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .photo-cell {
+      aspect-ratio: 1;
+      border-radius: 12px;
+      border: 1.5px dashed var(--color-border-dash);
+      background-color: #FDFAF6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      transition: all var(--transition);
+    }
+
+    .photo-cell.add-tile {
+      cursor: pointer;
+      flex-direction: column;
+      gap: 4px;
+      color: var(--color-primary);
+    }
+
+    .photo-cell.add-tile:hover {
+      border-color: var(--color-primary);
+      background-color: var(--color-primary-tint);
+    }
+
+    .photo-cell.add-tile svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .photo-cell.add-tile span {
+      font-size: 0.6875rem;
+      font-weight: 700;
+      color: var(--color-primary);
+    }
+
+    .photo-cell.empty-tile {
+      color: #D1C5B4;
+    }
+
+    .photo-cell.empty-tile svg {
+      width: 22px;
+      height: 22px;
+      opacity: 0.6;
+    }
+
+    .photo-cell.filled-tile {
+      border-style: solid;
+      border-color: var(--color-border);
+      background-color: #000;
+    }
+
+    .photo-cell.filled-tile img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .photo-remove-btn {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(28, 25, 23, 0.7);
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      backdrop-filter: blur(2px);
+      transition: background var(--transition);
+    }
+
+    .photo-remove-btn:hover {
+      background: var(--color-error);
+    }
+
+    /* ============================================================
+       FORM FOOTER
+       ============================================================ */
+    .form-footer-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 8px;
+    }
+
+    .btn-secondary {
+      height: 46px;
+      padding: 0 22px;
+      border-radius: 10px;
+      border: 1.5px solid var(--color-border);
+      background: #FFFFFF;
+      color: var(--color-ink);
+      font-size: 0.9375rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+
+    .footer-right-group {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .fields-remaining-text {
+      font-size: 0.875rem;
+      color: var(--color-muted);
+      font-weight: 500;
+      transition: color var(--transition);
+    }
+
+    .fields-remaining-text.completed {
+      color: var(--color-success);
+      font-weight: 700;
+    }
+
+    .btn-primary {
+      height: 46px;
+      padding: 0 24px;
+      border-radius: 10px;
+      background-color: var(--color-primary);
+      color: #FFFFFF;
+      font-size: 0.9375rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 2px 8px rgba(139, 90, 43, 0.25);
+      transition: all var(--transition);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--color-primary-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(139, 90, 43, 0.3);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary svg {
+      width: 16px;
+      height: 16px;
+      transition: transform var(--transition);
+    }
+
+    .btn-primary:hover svg {
+      transform: translateX(2px);
+    }
+
+    /* ============================================================
+       STICKY SIDEBAR (RIGHT COLUMN)
+       ============================================================ */
+    .sidebar-wrapper {
+      position: sticky;
+      top: 24px;
+    }
+
+    .sidebar-header-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .live-preview-tag {
+      font-size: 0.6875rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--color-primary);
+    }
+
+    .live-updates-hint {
+      font-size: 0.75rem;
+      color: var(--color-helper);
+    }
+
+    /* Preview Card */
+    .preview-card-box {
+      background: var(--color-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+      margin-bottom: 12px;
+      transition: box-shadow var(--transition);
+    }
+
+    .preview-cover-zone {
+      aspect-ratio: 16 / 9;
+      background-color: var(--color-primary-bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      color: var(--color-primary);
+    }
+
+    .preview-cover-zone svg {
+      width: 32px;
+      height: 32px;
+      opacity: 0.7;
+      margin-bottom: 6px;
+    }
+
+    .preview-placeholder-text {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--color-primary);
+      opacity: 0.8;
+    }
+
+    .preview-real-cover {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+      opacity: 0;
+      transition: opacity 250ms ease;
+    }
+
+    .preview-real-cover.active {
+      display: block;
+      opacity: 1;
+    }
+
+    .preview-details-body {
+      padding: 18px 20px 20px;
+    }
+
+    .preview-trip-title {
+      font-size: 1.125rem;
+      font-weight: 800;
+      color: var(--color-ink);
+      line-height: 1.3;
+      margin-bottom: 6px;
+      transition: color var(--transition);
+    }
+
+    .preview-trip-title.is-empty {
+      color: #A89885;
+      font-weight: 700;
+    }
+
+    .preview-location-line {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8125rem;
+      color: var(--color-muted);
+      margin-bottom: 14px;
+    }
+
+    .preview-location-line svg {
+      width: 14px;
+      height: 14px;
+      color: var(--color-helper);
+      flex-shrink: 0;
+    }
+
+    .preview-badges-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .preview-tag-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--color-muted);
+      border: 1px solid var(--color-border);
+      background-color: #FDFAF6;
+      border-radius: var(--radius-chip);
+      padding: 4px 10px;
+    }
+
+    .preview-tag-chip svg {
+      width: 12px;
+      height: 12px;
+      color: var(--color-helper);
+    }
+
+    .preview-divider-line {
+      height: 1px;
+      background-color: var(--color-border);
+      margin: 0 -20px 14px;
+    }
+
+    .preview-price-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8125rem;
+    }
+
+    .preview-price-footer .label-txt {
+      color: var(--color-muted);
+    }
+
+    .preview-price-footer .val-txt {
+      color: var(--color-helper);
+      font-weight: 600;
+    }
+
+    .preview-caption-note {
+      font-size: 0.75rem;
+      color: var(--color-helper);
+      text-align: center;
+      margin-bottom: 16px;
+      line-height: 1.4;
+    }
+
+    /* Before You Continue Card */
+    .checklist-panel {
+      background: var(--color-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow-card);
+      padding: 20px 22px;
+    }
+
+    .checklist-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .checklist-title-txt {
+      font-size: 0.9375rem;
+      font-weight: 700;
+      color: var(--color-ink);
+    }
+
+    .checklist-tally {
+      font-size: 0.8125rem;
+      font-weight: 700;
+      color: var(--color-muted);
+    }
+
+    .checklist-tally.completed {
+      color: var(--color-success);
+    }
+
+    .checklist-rows {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .checklist-row-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.875rem;
+      color: var(--color-muted);
+      font-weight: 500;
+      transition: color var(--transition);
+    }
+
+    .checklist-row-item.is-valid {
+      color: var(--color-ink);
+      font-weight: 600;
+    }
+
+    .check-marker {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 1.5px solid var(--color-border-dash);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      background-color: #FFFFFF;
+      transition: all var(--transition);
+      color: transparent;
+    }
+
+    .checklist-row-item.is-valid .check-marker {
+      background-color: var(--color-primary);
+      border-color: var(--color-primary);
+      color: #FFFFFF;
+    }
+
+    .check-marker svg {
+      width: 11px;
+      height: 11px;
+      stroke-width: 3;
+    }
+
+    /* ============================================================
+       TOAST POPUP (DRAFT SAVED / STATUS)
+       ============================================================ */
+    .toast-mount {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .toast-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background-color: var(--color-ink);
+      color: #FFFFFF;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      box-shadow: var(--shadow-pop);
+      pointer-events: auto;
+      animation: toastSlideUp 240ms ease forwards;
+    }
+
+    .toast-box.is-err {
+      background-color: var(--color-error);
+    }
+
+    .toast-box.is-exiting {
+      animation: toastSlideDown 200ms ease forwards;
+    }
+
+    .toast-box svg {
+      width: 18px;
+      height: 18px;
+      color: #86EFAC;
+    }
+    .toast-box.is-err svg {
+      color: #FFFFFF;
+    }
+
+    @keyframes toastSlideUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes toastSlideDown {
+      from { opacity: 1; transform: translateY(0); }
+      to   { opacity: 0; transform: translateY(12px); }
+    }
+
+    /* ============================================================
+       RESPONSIVE ADAPTATIONS
+       ============================================================ */
+    @media (max-width: 1023px) {
+      .two-column-layout {
+        grid-template-columns: 1fr;
+      }
+      .sidebar-wrapper {
+        position: static;
+        order: 2;
+        margin-top: 12px;
+      }
+      .preview-card-box,
+      .checklist-panel {
+        max-width: 520px;
+      }
+    }
+
+    @media (max-width: 639px) {
+      .container {
+        padding: 0 16px;
+      }
+      .page-title {
+        font-size: 1.75rem;
+      }
+      .field-row-split {
+        grid-template-columns: 1fr !important;
+      }
+      .form-card {
+        padding: 20px 16px;
+      }
+      .form-footer-bar {
+        flex-direction: column;
+        gap: 16px;
+        align-items: stretch;
+      }
+      .footer-right-group {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+      }
+      .btn-secondary,
+      .btn-primary {
+        width: 100%;
+        justify-content: center;
+      }
+      .step-label {
+        display: none;
+      }
+      .step-item.active .step-label {
+        display: block;
+      }
+      .photo-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-wrapper">
+  <div class="container">
+
+    <!-- ── STEPPER NAVIGATION ── -->
+    <nav class="stepper-section" aria-label="Wizard Steps">
+      <div class="stepper">
+        <div class="step-item active" aria-current="step">
+          <div class="step-line" aria-hidden="true"></div>
+          <div class="step-circle" aria-hidden="true">1</div>
+          <span class="step-label">Basics</span>
+        </div>
+        <div class="step-item">
+          <div class="step-line" aria-hidden="true"></div>
+          <div class="step-circle" aria-hidden="true">2</div>
+          <span class="step-label">Description</span>
+        </div>
+        <div class="step-item">
+          <div class="step-line" aria-hidden="true"></div>
+          <div class="step-circle" aria-hidden="true">3</div>
+          <span class="step-label">Itinerary</span>
+        </div>
+        <div class="step-item">
+          <div class="step-circle" aria-hidden="true">4</div>
+          <span class="step-label">Pricing</span>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ── MAIN PAGE HEADER ── -->
+    <header class="page-header">
+      <p class="eyebrow">STEP 1 OF 4</p>
+      <h1 class="page-title">Let’s set up the basics</h1>
+      <p class="page-subtitle">
+        Tell travelers what the trip is, where it starts and who it's for.
+        <a href="#editable" onclick="return false;">You can change any of this later.</a>
+      </p>
+    </header>
+
+    <!-- ── 2-COLUMN MAIN CONTENT ── -->
+    <main class="two-column-layout">
+
+      <!-- =========================================================
+           LEFT COLUMN: FORM CARDS (2/3 WIDTH)
+           ========================================================= -->
+      <section class="form-column" aria-label="Trip Basics Form">
+        <form id="trip-basics-form" novalidate autocomplete="off">
+
+          <!-- ──── CARD 1: THE ESSENTIALS ──── -->
+          <div class="form-card" id="card-essentials">
+            <div class="card-header">
+              <div class="card-icon-box" aria-hidden="true">
+                <!-- Flag Icon -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
+                  <line x1="4" y1="22" x2="4" y2="15"></line>
+                </svg>
+              </div>
+              <div>
+                <h2 class="card-title">The essentials</h2>
+                <p class="card-subtitle">Name your trip, pick a place and set how long it lasts.</p>
+              </div>
+            </div>
+
+            <!-- Trip Title -->
+            <div class="field-group" id="group-title">
+              <div class="label-line">
+                <label for="trip-title">Trip title</label>
+                <span class="pill-badge required">Required</span>
+              </div>
+              <div class="input-wrapper">
+                <input
+                  type="text"
+                  id="trip-title"
+                  name="title"
+                  placeholder="e.g. Sahara Desert Adventure"
+                  maxlength="40"
+                  aria-required="true"
+                  aria-describedby="title-hint title-err"
+                />
+              </div>
+              <div class="field-hint-line">
+                <span id="title-hint">Short and vivid. Travelers see this first.</span>
+                <span class="live-counter" id="title-counter" aria-live="polite">0/40</span>
+              </div>
+              <div class="error-feedback" id="title-err" role="alert">Trip title is required (up to 40 characters).</div>
+            </div>
+
+            <!-- Location & Duration (Side-by-side row) -->
+            <div class="field-row-split">
+              <!-- Location -->
+              <div class="field-group" id="group-location">
+                <div class="label-line">
+                  <label for="trip-location">Location</label>
+                  <span class="pill-badge required">Required</span>
+                </div>
+                <div class="input-wrapper has-icon">
+                  <span class="input-icon-left" aria-hidden="true">
+                    <!-- Map Pin Icon -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"></path>
+                      <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                  </span>
+                  <input
+                    type="text"
+                    id="trip-location"
+                    name="location"
+                    placeholder="e.g. Marrakech, Morocco"
+                    aria-required="true"
+                    aria-describedby="location-hint location-err"
+                  />
+                </div>
+                <div class="field-hint-line">
+                  <span id="location-hint">City, region or country.</span>
+                </div>
+                <div class="error-feedback" id="location-err" role="alert">Location is required.</div>
+              </div>
+
+              <!-- Duration Stepper -->
+              <div class="field-group" id="group-duration">
+                <div class="label-line">
+                  <label for="duration-val">Duration</label>
+                </div>
+                <div class="stepper-control" role="group" aria-label="Duration stepper in days">
+                  <button type="button" class="stepper-btn" id="dur-dec" aria-label="Decrease duration by 1 day" disabled>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                  </button>
+                  <div class="stepper-center">
+                    <input type="number" class="stepper-input-num" id="duration-val" name="durationDays" value="1" min="1" max="60" aria-label="Duration in days" />
+                    <span class="stepper-unit-label" id="duration-unit">day</span>
+                  </div>
+                  <button type="button" class="stepper-btn" id="dur-inc" aria-label="Increase duration by 1 day">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                  </button>
+                </div>
+                <div class="field-hint-line">
+                  <span>How many days the trip lasts.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ──── CARD 2: GROUP AND MEETING POINT ──── -->
+          <div class="form-card" id="card-group">
+            <div class="card-header">
+              <div class="card-icon-box" aria-hidden="true">
+                <!-- Users Icon -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M23 21v-2a4 4 0 00-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 010 7.75"></path>
+                </svg>
+              </div>
+              <div>
+                <h2 class="card-title">Group and meeting point</h2>
+                <p class="card-subtitle">How many people, who can join and where you'll meet.</p>
+              </div>
+            </div>
+
+            <!-- Group Size & Meeting Point (Side-by-side) -->
+            <div class="field-row-split equal">
+              <!-- Max Group Size -->
+              <div class="field-group" id="group-capacity">
+                <div class="label-line">
+                  <label for="group-val">Max group size</label>
+                </div>
+                <div class="stepper-control" role="group" aria-label="Maximum travelers per departure">
+                  <button type="button" class="stepper-btn" id="grp-dec" aria-label="Decrease travelers">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                  </button>
+                  <div class="stepper-center">
+                    <input type="number" class="stepper-input-num" id="group-val" name="maxGroupSize" value="10" min="1" max="50" aria-label="Max travelers" />
+                    <span class="stepper-unit-label">travelers</span>
+                  </div>
+                  <button type="button" class="stepper-btn" id="grp-inc" aria-label="Increase travelers">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                  </button>
+                </div>
+                <div class="field-hint-line">
+                  <span>Maximum travelers per departure.</span>
+                </div>
+              </div>
+
+              <!-- Meeting Point -->
+              <div class="field-group" id="group-meeting">
+                <div class="label-line">
+                  <label for="trip-meeting">Meeting point</label>
+                  <span class="pill-badge required">Required</span>
+                </div>
+                <div class="input-wrapper has-icon">
+                  <span class="input-icon-left" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"></path>
+                      <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                  </span>
+                  <input
+                    type="text"
+                    id="trip-meeting"
+                    name="meetingPoint"
+                    placeholder="e.g. Jemaa el-Fna Square"
+                    aria-required="true"
+                    aria-describedby="meeting-hint meeting-err"
+                  />
+                </div>
+                <div class="field-hint-line">
+                  <span id="meeting-hint">A landmark or address travelers can find easily.</span>
+                </div>
+                <div class="error-feedback" id="meeting-err" role="alert">Meeting point is required.</div>
+              </div>
+            </div>
+
+            <!-- Age Restriction Chips -->
+            <div class="field-group" style="margin-top: 22px;">
+              <div class="label-line">
+                <label id="age-group-label">Age restriction</label>
+                <span class="pill-badge optional">Optional</span>
+              </div>
+              <div class="age-chips-wrap" role="radiogroup" aria-labelledby="age-group-label">
+                <button type="button" class="age-pill active" data-age="null" role="radio" aria-checked="true">
+                  <!-- Check Icon -->
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                  <span>Any age</span>
+                </button>
+                <button type="button" class="age-pill" data-age="12" role="radio" aria-checked="false">
+                  <span>12+</span>
+                </button>
+                <button type="button" class="age-pill" data-age="16" role="radio" aria-checked="false">
+                  <span>16+</span>
+                </button>
+                <button type="button" class="age-pill" data-age="18" role="radio" aria-checked="false">
+                  <span>18+</span>
+                </button>
+                <button type="button" class="age-pill" data-age="21" role="radio" aria-checked="false">
+                  <span>21+</span>
+                </button>
+              </div>
+              <div class="field-hint-line">
+                <span>Who can join this trip. Leave it on "Any age" if there's no limit.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ──── CARD 3: PHOTOS ──── -->
+          <div class="form-card" id="card-photos">
+            <div class="card-header">
+              <div class="card-icon-box" aria-hidden="true">
+                <!-- Image Icon -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                  <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+              </div>
+              <div>
+                <h2 class="card-title">Photos</h2>
+                <p class="card-subtitle">Show travelers what to expect.</p>
+              </div>
+            </div>
+
+            <!-- Cover Photo Upload -->
+            <div class="field-group" id="group-cover">
+              <div class="label-line">
+                <label>Cover photo</label>
+                <span class="pill-badge required">Required</span>
+              </div>
+
+              <div class="dropzone-container" id="cover-dropzone" tabindex="0" role="button" aria-label="Upload trip cover photo" aria-describedby="cover-err">
+                <input type="file" id="cover-file-input" accept="image/jpeg,image/png" tabindex="-1" />
+                <img src="" alt="Cover photo preview" class="cover-img-preview" id="cover-image-node" />
+
+                <div class="dropzone-icon-circle" aria-hidden="true">
+                  <!-- Upload Cloud/Arrow Icon -->
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="16 16 12 12 8 16"></polyline>
+                    <line x1="12" y1="12" x2="12" y2="21"></line>
+                    <path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"></path>
+                  </svg>
+                </div>
+                <p class="dropzone-main-text">
+                  Drag a photo here, or <span class="browse-link" id="trigger-cover-browse">browse your files</span>
+                </p>
+                <p class="dropzone-sub-text">JPG or PNG · at least 1600 × 900 px · up to 5 MB</p>
+
+                <!-- Action buttons when image loaded -->
+                <div class="dropzone-actions-bar">
+                  <button type="button" class="action-badge-btn replace" id="btn-replace-cover">Replace</button>
+                  <button type="button" class="action-badge-btn remove" id="btn-remove-cover">Remove</button>
+                </div>
+              </div>
+
+              <!-- Information hint -->
+              <div class="info-tip-row" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <span>Pick a bright, landscape photo. It's the first thing travelers see in search results and on your trip page.</span>
+              </div>
+              <div class="error-feedback" id="cover-err" role="alert">Please upload a valid cover photo.</div>
+            </div>
+
+            <!-- More Photos (Optional) -->
+            <div class="field-group" style="margin-top: 24px;">
+              <div class="label-line">
+                <label>More photos <span style="font-weight: 400; color: var(--color-helper);">(optional)</span></label>
+                <span class="live-counter" id="more-photos-counter" aria-live="polite">0 / 10</span>
+              </div>
+              <div class="field-hint-line" style="margin-top: 0; margin-bottom: 8px;">
+                <span>Add the group, the food, the places you'll stop. Up to 10 photos.</span>
+              </div>
+
+              <div class="photo-grid" id="photo-grid-slots">
+                <!-- Add Photos Button Tile -->
+                <div class="photo-cell add-tile" id="tile-add-more" role="button" tabindex="0" aria-label="Add additional photos">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                  </svg>
+                  <span>Add photos</span>
+                </div>
+
+                <!-- 4 Empty Placeholder Tiles -->
+                <div class="photo-cell empty-tile">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                </div>
+                <div class="photo-cell empty-tile">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                </div>
+                <div class="photo-cell empty-tile">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                </div>
+                <div class="photo-cell empty-tile">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                </div>
+              </div>
+              <input type="file" id="more-photos-input" accept="image/jpeg,image/png" multiple hidden />
+            </div>
+          </div>
+
+          <!-- ──── FOOTER ACTIONS BAR ──── -->
+          <footer class="form-footer-bar">
+            <button type="button" class="btn-secondary" id="btn-save-draft">
+              Save as draft
+            </button>
+            <div class="footer-right-group">
+              <span class="fields-remaining-text" id="fields-left-tally" aria-live="polite">4 required fields left</span>
+              <button type="button" class="btn-primary" id="btn-next-step">
+                <span>Next: Description</span>
+                <!-- Arrow Right Icon -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+              </button>
+            </div>
+          </footer>
+
+        </form>
+      </section>
+
+      <!-- =========================================================
+           RIGHT COLUMN: STICKY LIVE PREVIEW & CHECKLIST (1/3 WIDTH)
+           ========================================================= -->
+      <aside class="sidebar-wrapper" aria-label="Trip Live Preview & Requirements">
+
+        <!-- Top Labels -->
+        <div class="sidebar-header-line">
+          <span class="live-preview-tag">LIVE PREVIEW</span>
+          <span class="live-updates-hint">Updates as you type</span>
+        </div>
+
+        <!-- Trip Search Result Preview Card -->
+        <article class="preview-card-box">
+          <div class="preview-cover-zone" id="preview-cover-box">
+            <img src="" alt="" class="preview-real-cover" id="preview-cover-img" />
+            <svg id="preview-cover-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+            <span class="preview-placeholder-text" id="preview-cover-placeholder">Your cover photo</span>
+          </div>
+
+          <div class="preview-details-body">
+            <h3 class="preview-trip-title is-empty" id="preview-title-node">Your trip title</h3>
+            <div class="preview-location-line">
+              <!-- Pin Icon -->
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+              <span id="preview-location-node">Location</span>
+            </div>
+
+            <!-- Chips -->
+            <div class="preview-badges-row">
+              <span class="preview-tag-chip">
+                <!-- Clock Icon -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                <span id="preview-days-node">1 day</span>
+              </span>
+              <span class="preview-tag-chip">
+                <!-- Users Icon -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+                <span id="preview-group-node">Up to 10</span>
+              </span>
+              <span class="preview-tag-chip">
+                <!-- Age Tag Icon -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 7v5l3 3"></path></svg>
+                <span id="preview-age-node">All ages</span>
+              </span>
+            </div>
+
+            <div class="preview-divider-line"></div>
+
+            <div class="preview-price-footer">
+              <span class="label-txt">Price</span>
+              <span class="val-txt">Set in step 4</span>
+            </div>
+          </div>
+        </article>
+
+        <p class="preview-caption-note">This is how travelers will see your trip in search results.</p>
+
+        <!-- "Before You Continue" Checklist Card -->
+        <section class="checklist-panel" aria-label="Completion Checklist">
+          <div class="checklist-top">
+            <h4 class="checklist-title-txt">Before you continue</h4>
+            <span class="checklist-tally" id="checklist-tally-node" aria-live="polite">0 of 4 done</span>
+          </div>
+
+          <ul class="checklist-rows">
+            <li class="checklist-row-item" id="chk-title">
+              <span class="check-marker" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </span>
+              <span>Trip title</span>
+            </li>
+            <li class="checklist-row-item" id="chk-location">
+              <span class="check-marker" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </span>
+              <span>Location</span>
+            </li>
+            <li class="checklist-row-item" id="chk-meeting">
+              <span class="check-marker" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </span>
+              <span>Meeting point</span>
+            </li>
+            <li class="checklist-row-item" id="chk-cover">
+              <span class="check-marker" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </span>
+              <span>Cover photo</span>
+            </li>
+          </ul>
+        </section>
+
+      </aside>
+
+    </main>
+  </div>
+</div>
+
+<!-- ── TOAST NOTIFICATIONS MOUNT ── -->
+<div class="toast-mount" id="toast-mount" aria-live="assertive" aria-atomic="true"></div>
+
+<!-- ============================================================
+     VANILLA JAVASCRIPT LOGIC & REACTIVE BINDINGS
+     ============================================================ -->
+<script>
+(() => {
+  'use strict';
+
+  /* ------------------------------------------------------------
+     1. APPLICATION STATE
+     ------------------------------------------------------------ */
+  const state = {
+    title: '',
+    location: '',
+    durationDays: 1,
+    maxGroupSize: 10,
+    meetingPoint: '',
+    ageRestriction: null, // null | 12 | 16 | 18 | 21
+    coverPhoto: null,     // { file: File|null, dataUrl: string }
+    photos: [],           // Array<{ file: File|null, dataUrl: string }>
+    touched: {
+      title: false,
+      location: false,
+      meetingPoint: false,
+      cover: false
+    }
+  };
+
+  const DRAFT_STORAGE_KEY = 'tribo_trip_draft';
+  const MAX_MORE_PHOTOS = 10;
+
+  /* ------------------------------------------------------------
+     2. DOM ELEMENT REFERENCES
+     ------------------------------------------------------------ */
+  const $ = id => document.getElementById(id);
+
+  // Form inputs
+  const titleInput        = $('trip-title');
+  const titleCounter      = $('title-counter');
+  const titleErr          = $('title-err');
+
+  const locationInput     = $('trip-location');
+  const locationErr       = $('location-err');
+
+  const durationInput     = $('duration-val');
+  const durDecBtn         = $('dur-dec');
+  const durIncBtn         = $('dur-inc');
+  const durationUnit      = $('duration-unit');
+
+  const groupInput        = $('group-val');
+  const grpDecBtn         = $('grp-dec');
+  const grpIncBtn         = $('grp-inc');
+
+  const meetingInput      = $('trip-meeting');
+  const meetingErr        = $('meeting-err');
+
+  const agePills          = document.querySelectorAll('.age-pill');
+
+  // Photo elements
+  const coverDropzone     = $('cover-dropzone');
+  const coverFileInput    = $('cover-file-input');
+  const coverImageNode    = $('cover-image-node');
+  const coverErr          = $('cover-err');
+  const triggerCoverBrowse= $('trigger-cover-browse');
+  const btnReplaceCover   = $('btn-replace-cover');
+  const btnRemoveCover    = $('btn-remove-cover');
+
+  const tileAddMore       = $('tile-add-more');
+  const morePhotosInput   = $('more-photos-input');
+  const morePhotosCounter = $('more-photos-counter');
+  const photoGridSlots    = $('photo-grid-slots');
+
+  // Preview elements
+  const previewTitleNode  = $('preview-title-node');
+  const previewLocNode    = $('preview-location-node');
+  const previewDaysNode   = $('preview-days-node');
+  const previewGroupNode  = $('preview-group-node');
+  const previewAgeNode    = $('preview-age-node');
+  const previewCoverImg   = $('preview-real-cover');
+  const previewCoverIcon  = $('preview-cover-icon');
+  const previewCoverLabel = $('preview-cover-placeholder');
+
+  // Checklist elements
+  const chkTitle          = $('chk-title');
+  const chkLocation       = $('chk-location');
+  const chkMeeting        = $('chk-meeting');
+  const chkCover          = $('chk-cover');
+  const checklistTally    = $('checklist-tally-node');
+  const fieldsLeftTally   = $('fields-left-tally');
+
+  // Action buttons
+  const btnSaveDraft      = $('btn-save-draft');
+  const btnNextStep       = $('btn-next-step');
+
+  /* ------------------------------------------------------------
+     3. VALIDATION RULES
+     ------------------------------------------------------------ */
+  const isValidTitle   = () => state.title.trim().length > 0 && state.title.length <= 40;
+  const isValidLoc     = () => state.location.trim().length > 0;
+  const isValidMeeting = () => state.meetingPoint.trim().length > 0;
+  const isValidCover   = () => state.coverPhoto !== null;
+
+  const countValidFields = () => {
+    let count = 0;
+    if (isValidTitle())   count++;
+    if (isValidLoc())     count++;
+    if (isValidMeeting()) count++;
+    if (isValidCover())   count++;
+    return count;
+  };
+
+  /* ------------------------------------------------------------
+     4. ERROR DISPLAY UTILITIES
+     ------------------------------------------------------------ */
+  const setFieldError = (inputNode, errNode, message) => {
+    if (inputNode) inputNode.classList.add('field-error');
+    if (errNode) {
+      if (message) errNode.textContent = message;
+      errNode.classList.add('visible');
+    }
+  };
+
+  const clearFieldError = (inputNode, errNode) => {
+    if (inputNode) inputNode.classList.remove('field-error');
+    if (errNode) errNode.classList.remove('visible');
+  };
+
+  /* ------------------------------------------------------------
+     5. REACTIVE UI SYNCHRONIZATION
+     ------------------------------------------------------------ */
+  const syncChecklistAndTally = () => {
+    const validCount = countValidFields();
+    const remaining = 4 - validCount;
+
+    // Checklist ticks
+    chkTitle.classList.toggle('is-valid', isValidTitle());
+    chkLocation.classList.toggle('is-valid', isValidLoc());
+    chkMeeting.classList.toggle('is-valid', isValidMeeting());
+    chkCover.classList.toggle('is-valid', isValidCover());
+
+    // Sidebar tally
+    checklistTally.textContent = `${validCount} of 4 done`;
+    checklistTally.classList.toggle('completed', remaining === 0);
+
+    // Footer remaining counter
+    if (remaining === 0) {
+      fieldsLeftTally.textContent = 'All required fields done ✓';
+      fieldsLeftTally.classList.add('completed');
+    } else {
+      fieldsLeftTally.textContent = `${remaining} required field${remaining > 1 ? 's' : ''} left`;
+      fieldsLeftTally.classList.remove('completed');
+    }
+  };
+
+  const syncLivePreview = () => {
+    // Title
+    const trimmedTitle = state.title.trim();
+    if (trimmedTitle) {
+      previewTitleNode.textContent = trimmedTitle;
+      previewTitleNode.classList.remove('is-empty');
+    } else {
+      previewTitleNode.textContent = 'Your trip title';
+      previewTitleNode.classList.add('is-empty');
+    }
+
+    // Location
+    previewLocNode.textContent = state.location.trim() || 'Location';
+
+    // Duration days
+    const days = state.durationDays;
+    previewDaysNode.textContent = `${days} ${days === 1 ? 'day' : 'days'}`;
+
+    // Max capacity
+    previewGroupNode.textContent = `Up to ${state.maxGroupSize}`;
+
+    // Age restriction chip
+    previewAgeNode.textContent = state.ageRestriction === null ? 'All ages' : `${state.ageRestriction}+`;
+
+    // Cover image preview
+    if (state.coverPhoto && state.coverPhoto.dataUrl) {
+      previewCoverImg.src = state.coverPhoto.dataUrl;
+      previewCoverImg.classList.add('active');
+      previewCoverIcon.style.display = 'none';
+      previewCoverLabel.style.display = 'none';
+    } else {
+      previewCoverImg.classList.remove('active');
+      previewCoverImg.src = '';
+      previewCoverIcon.style.display = '';
+      previewCoverLabel.style.display = '';
+    }
+  };
+
+  /* ------------------------------------------------------------
+     6. FORM FIELD EVENT HANDLERS
+     ------------------------------------------------------------ */
+
+  // 1. Trip Title
+  titleInput.addEventListener('input', () => {
+    state.title = titleInput.value;
+    titleCounter.textContent = `${state.title.length}/40`;
+
+    if (state.touched.title) {
+      if (isValidTitle()) clearFieldError(titleInput, titleErr);
+      else setFieldError(titleInput, titleErr, 'Trip title is required (up to 40 characters).');
+    }
+    syncLivePreview();
+    syncChecklistAndTally();
+  });
+
+  titleInput.addEventListener('blur', () => {
+    state.touched.title = true;
+    if (!isValidTitle()) {
+      setFieldError(titleInput, titleErr, 'Trip title is required (up to 40 characters).');
+    } else {
+      clearFieldError(titleInput, titleErr);
+    }
+  });
+
+  // 2. Location
+  locationInput.addEventListener('input', () => {
+    state.location = locationInput.value;
+    if (state.touched.location) {
+      if (isValidLoc()) clearFieldError(locationInput, locationErr);
+      else setFieldError(locationInput, locationErr, 'Location is required.');
+    }
+    syncLivePreview();
+    syncChecklistAndTally();
+  });
+
+  locationInput.addEventListener('blur', () => {
+    state.touched.location = true;
+    if (!isValidLoc()) {
+      setFieldError(locationInput, locationErr, 'Location is required.');
+    } else {
+      clearFieldError(locationInput, locationErr);
+    }
+  });
+
+  // 3. Duration Stepper
+  const applyDuration = (val) => {
+    const sanitized = Math.max(1, Math.min(60, Math.round(Number(val)) || 1));
+    state.durationDays = sanitized;
+    durationInput.value = sanitized;
+    durationUnit.textContent = sanitized === 1 ? 'day' : 'days';
+
+    durDecBtn.disabled = (sanitized <= 1);
+    durIncBtn.disabled = (sanitized >= 60);
+
+    syncLivePreview();
+  };
+
+  durDecBtn.addEventListener('click', () => applyDuration(state.durationDays - 1));
+  durIncBtn.addEventListener('click', () => applyDuration(state.durationDays + 1));
+  durationInput.addEventListener('change', () => applyDuration(durationInput.value));
+
+  // 4. Group Size Stepper
+  const applyGroupSize = (val) => {
+    const sanitized = Math.max(1, Math.min(50, Math.round(Number(val)) || 1));
+    state.maxGroupSize = sanitized;
+    groupInput.value = sanitized;
+
+    grpDecBtn.disabled = (sanitized <= 1);
+    grpIncBtn.disabled = (sanitized >= 50);
+
+    syncLivePreview();
+  };
+
+  grpDecBtn.addEventListener('click', () => applyGroupSize(state.maxGroupSize - 1));
+  grpIncBtn.addEventListener('click', () => applyGroupSize(state.maxGroupSize + 1));
+  groupInput.addEventListener('change', () => applyGroupSize(groupInput.value));
+
+  // 5. Meeting Point
+  meetingInput.addEventListener('input', () => {
+    state.meetingPoint = meetingInput.value;
+    if (state.touched.meetingPoint) {
+      if (isValidMeeting()) clearFieldError(meetingInput, meetingErr);
+      else setFieldError(meetingInput, meetingErr, 'Meeting point is required.');
+    }
+    syncChecklistAndTally();
+  });
+
+  meetingInput.addEventListener('blur', () => {
+    state.touched.meetingPoint = true;
+    if (!isValidMeeting()) {
+      setFieldError(meetingInput, meetingErr, 'Meeting point is required.');
+    } else {
+      clearFieldError(meetingInput, meetingErr);
+    }
+  });
+
+  // 6. Age Restriction Radiogroup
+  agePills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      agePills.forEach(p => {
+        p.classList.remove('active');
+        p.setAttribute('aria-checked', 'false');
+        // Remove check icon if present
+        const svg = p.querySelector('svg');
+        if (svg) svg.remove();
+      });
+
+      pill.classList.add('active');
+      pill.setAttribute('aria-checked', 'true');
+
+      // Inject checkmark SVG to selected pill
+      const checkSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      checkSvg.setAttribute('viewBox', '0 0 24 24');
+      checkSvg.setAttribute('fill', 'none');
+      checkSvg.setAttribute('stroke', 'currentColor');
+      checkSvg.setAttribute('stroke-linecap', 'round');
+      checkSvg.setAttribute('stroke-linejoin', 'round');
+      checkSvg.innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>';
+      pill.insertBefore(checkSvg, pill.firstChild);
+
+      const raw = pill.dataset.age;
+      state.ageRestriction = (raw === 'null') ? null : parseInt(raw, 10);
+      syncLivePreview();
+    });
+
+    pill.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        pill.click();
+      }
+    });
+  });
+
+  /* ------------------------------------------------------------
+     7. PHOTO MANAGEMENT & VALIDATION
+     ------------------------------------------------------------ */
+
+  // Validates an image file for JPG/PNG, size <= 5MB, min dimension 1600x900
+  const inspectImageFile = (file) => {
+    return new Promise((resolve, reject) => {
+      if (!file) return reject('No file selected.');
+      if (!['image/jpeg', 'image/png'].includes(file.type)) {
+        return reject('Only JPG or PNG images are supported.');
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        return reject('Image must be under 5 MB in file size.');
+      }
+
+      const reader = new FileReader();
+      reader.onerror = () => reject('Failed to read image file.');
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onerror = () => reject('The selected file is not a valid image.');
+        img.onload = () => {
+          if (img.width < 1600 || img.height < 900) {
+            reject(`Image must be at least 1600 × 900 px (uploaded: ${img.width} × ${img.height} px).`);
+          } else {
+            resolve(e.target.result);
+          }
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  // Set Cover Photo
+  const handleCoverUpload = (file) => {
+    inspectImageFile(file)
+      .then(dataUrl => {
+        state.coverPhoto = { file, dataUrl };
+        state.touched.cover = true;
+
+        coverImageNode.src = dataUrl;
+        coverDropzone.classList.add('has-file');
+        clearFieldError(null, coverErr);
+
+        syncLivePreview();
+        syncChecklistAndTally();
+      })
+      .catch(errorMessage => {
+        state.touched.cover = true;
+        setFieldError(null, coverErr, errorMessage);
+      });
+  };
+
+  const removeCoverPhoto = () => {
+    state.coverPhoto = null;
+    coverImageNode.src = '';
+    coverDropzone.classList.remove('has-file');
+    coverFileInput.value = '';
+
+    syncLivePreview();
+    syncChecklistAndTally();
+  };
+
+  // Cover Drag-and-Drop & Browse
+  coverDropzone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    if (!state.coverPhoto) coverDropzone.classList.add('is-dragover');
+  });
+
+  coverDropzone.addEventListener('dragleave', () => {
+    coverDropzone.classList.remove('is-dragover');
+  });
+
+  coverDropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    coverDropzone.classList.remove('is-dragover');
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleCoverUpload(e.dataTransfer.files[0]);
+    }
+  });
+
+  coverDropzone.addEventListener('click', (e) => {
+    if (state.coverPhoto) return;
+    if (e.target.closest('#trigger-cover-browse') || e.target.closest('.dropzone-actions-bar')) return;
+    coverFileInput.click();
+  });
+
+  triggerCoverBrowse.addEventListener('click', (e) => {
+    e.stopPropagation();
+    coverFileInput.click();
+  });
+
+  coverFileInput.addEventListener('change', () => {
+    if (coverFileInput.files && coverFileInput.files[0]) {
+      handleCoverUpload(coverFileInput.files[0]);
+    }
+  });
+
+  btnReplaceCover.addEventListener('click', (e) => {
+    e.stopPropagation();
+    coverFileInput.click();
+  });
+
+  btnRemoveCover.addEventListener('click', (e) => {
+    e.stopPropagation();
+    removeCoverPhoto();
+  });
+
+  coverDropzone.addEventListener('keydown', (e) => {
+    if ((e.key === 'Enter' || e.key === ' ') && !state.coverPhoto) {
+      e.preventDefault();
+      coverFileInput.click();
+    }
+  });
+
+  // Additional Photos Grid (up to 10 photos)
+  const renderPhotoGrid = () => {
+    // Remove all filled thumbnail tiles
+    document.querySelectorAll('.photo-cell.filled-tile').forEach(el => el.remove());
+
+    morePhotosCounter.textContent = `${state.photos.length} / ${MAX_MORE_PHOTOS}`;
+
+    // Insert rendered images right after the Add Photos tile
+    state.photos.forEach((photoObj, index) => {
+      const tile = document.createElement('div');
+      tile.className = 'photo-cell filled-tile';
+
+      const img = document.createElement('img');
+      img.src = photoObj.dataUrl;
+      img.alt = `Gallery photo ${index + 1}`;
+
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'photo-remove-btn';
+      removeBtn.innerHTML = '&times;';
+      removeBtn.setAttribute('aria-label', `Remove photo ${index + 1}`);
+      removeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        state.photos.splice(index, 1);
+        renderPhotoGrid();
+      });
+
+      tile.appendChild(img);
+      tile.appendChild(removeBtn);
+      tileAddMore.insertAdjacentElement('afterend', tile);
+    });
+
+    // Disable add tile if limit reached
+    if (state.photos.length >= MAX_MORE_PHOTOS) {
+      tileAddMore.style.pointerEvents = 'none';
+      tileAddMore.style.opacity = '0.35';
+    } else {
+      tileAddMore.style.pointerEvents = '';
+      tileAddMore.style.opacity = '';
+    }
+
+    // Toggle empty placeholder slots visibility
+    const emptyPlaceholders = document.querySelectorAll('.photo-cell.empty-tile');
+    const totalOccupied = state.photos.length + 1; // +1 for the add tile
+    emptyPlaceholders.forEach((slot, i) => {
+      slot.style.display = (totalOccupied + i < 5) ? '' : 'none';
+    });
+  };
+
+  const processAdditionalPhotos = (fileList) => {
+    const availableSlots = MAX_MORE_PHOTOS - state.photos.length;
+    const filesToRead = Array.from(fileList).slice(0, availableSlots);
+
+    const readPromises = filesToRead.map(file => {
+      if (!['image/jpeg', 'image/png'].includes(file.type)) return Promise.resolve(null);
+      if (file.size > 5 * 1024 * 1024) return Promise.resolve(null);
+
+      return new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve({ file, dataUrl: e.target.result });
+        reader.readAsDataURL(file);
+      });
+    });
+
+    Promise.all(readPromises).then(results => {
+      results.filter(Boolean).forEach(photo => {
+        if (state.photos.length < MAX_MORE_PHOTOS) {
+          state.photos.push(photo);
+        }
+      });
+      renderPhotoGrid();
+    });
+  };
+
+  tileAddMore.addEventListener('click', () => {
+    if (state.photos.length < MAX_MORE_PHOTOS) morePhotosInput.click();
+  });
+
+  tileAddMore.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      morePhotosInput.click();
+    }
+  });
+
+  morePhotosInput.addEventListener('change', () => {
+    if (morePhotosInput.files && morePhotosInput.files.length) {
+      processAdditionalPhotos(morePhotosInput.files);
+      morePhotosInput.value = '';
+    }
+  });
+
+  /* ------------------------------------------------------------
+     8. TOAST NOTIFICATION UTILITY
+     ------------------------------------------------------------ */
+  const showToast = (message, isError = false) => {
+    const mount = $('toast-mount');
+    const toast = document.createElement('div');
+    toast.className = `toast-box ${isError ? 'is-err' : ''}`;
+    toast.setAttribute('role', 'status');
+
+    toast.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+      <span>${message}</span>
+    `;
+
+    mount.appendChild(toast);
+
+    setTimeout(() => {
+      toast.classList.add('is-exiting');
+      toast.addEventListener('animationend', () => toast.remove());
+    }, 2800);
+  };
+
+  /* ------------------------------------------------------------
+     9. DRAFT PERSISTENCE (LOCAL STORAGE)
+     ------------------------------------------------------------ */
+  btnSaveDraft.addEventListener('click', () => {
+    const draftPayload = {
+      title:          state.title,
+      location:       state.location,
+      durationDays:   state.durationDays,
+      maxGroupSize:   state.maxGroupSize,
+      meetingPoint:   state.meetingPoint,
+      ageRestriction: state.ageRestriction,
+      coverDataUrl:   state.coverPhoto ? state.coverPhoto.dataUrl : null,
+      photos:         state.photos.map(p => p.dataUrl)
+    };
+
+    try {
+      localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draftPayload));
+      showToast('Draft saved successfully!');
+    } catch (e) {
+      showToast('Could not save draft (local storage full).', true);
+    }
+  });
+
+  const loadSavedDraft = () => {
+    const saved = localStorage.getItem(DRAFT_STORAGE_KEY);
+    if (!saved) return;
+
+    try {
+      const data = JSON.parse(saved);
+
+      if (data.title) {
+        state.title = data.title;
+        titleInput.value = data.title;
+        titleCounter.textContent = `${data.title.length}/40`;
+      }
+      if (data.location) {
+        state.location = data.location;
+        locationInput.value = data.location;
+      }
+      if (data.durationDays) {
+        applyDuration(data.durationDays);
+      }
+      if (data.maxGroupSize) {
+        applyGroupSize(data.maxGroupSize);
+      }
+      if (data.meetingPoint) {
+        state.meetingPoint = data.meetingPoint;
+        meetingInput.value = data.meetingPoint;
+      }
+      if (data.ageRestriction !== undefined) {
+        state.ageRestriction = data.ageRestriction;
+        agePills.forEach(pill => {
+          const pillVal = pill.dataset.age === 'null' ? null : parseInt(pill.dataset.age, 10);
+          const isSelected = (pillVal === data.ageRestriction);
+          pill.classList.toggle('active', isSelected);
+          pill.setAttribute('aria-checked', isSelected ? 'true' : 'false');
+
+          const existingSvg = pill.querySelector('svg');
+          if (existingSvg) existingSvg.remove();
+
+          if (isSelected) {
+            const checkSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            checkSvg.setAttribute('viewBox', '0 0 24 24');
+            checkSvg.setAttribute('fill', 'none');
+            checkSvg.setAttribute('stroke', 'currentColor');
+            checkSvg.setAttribute('stroke-linecap', 'round');
+            checkSvg.setAttribute('stroke-linejoin', 'round');
+            checkSvg.innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>';
+            pill.insertBefore(checkSvg, pill.firstChild);
+          }
+        });
+      }
+      if (data.coverDataUrl) {
+        state.coverPhoto = { file: null, dataUrl: data.coverDataUrl };
+        coverImageNode.src = data.coverDataUrl;
+        coverDropzone.classList.add('has-file');
+      }
+      if (Array.isArray(data.photos) && data.photos.length) {
+        state.photos = data.photos.map(url => ({ file: null, dataUrl: url }));
+        renderPhotoGrid();
+      }
+
+      syncLivePreview();
+      syncChecklistAndTally();
+    } catch (e) {
+      console.warn('[Tribo] Failed to parse saved draft:', e);
+    }
+  };
+
+  /* ------------------------------------------------------------
+     10. WIZARD NEXT BUTTON & SUBMISSION
+     ------------------------------------------------------------ */
+  btnNextStep.addEventListener('click', () => {
+    // Touch all required fields
+    state.touched.title = true;
+    state.touched.location = true;
+    state.touched.meetingPoint = true;
+    state.touched.cover = true;
+
+    const validationFailures = [];
+
+    if (!isValidTitle()) {
+      validationFailures.push({
+        element: titleInput,
+        errorNode: titleErr,
+        message: 'Trip title is required (up to 40 characters).'
+      });
+    }
+
+    if (!isValidLoc()) {
+      validationFailures.push({
+        element: locationInput,
+        errorNode: locationErr,
+        message: 'Location is required.'
+      });
+    }
+
+    if (!isValidMeeting()) {
+      validationFailures.push({
+        element: meetingInput,
+        errorNode: meetingErr,
+        message: 'Meeting point is required.'
+      });
+    }
+
+    if (!isValidCover()) {
+      validationFailures.push({
+        element: coverDropzone,
+        errorNode: coverErr,
+        message: 'Please upload a cover photo (at least 1600 × 900 px).'
+      });
+    }
+
+    // If any validation errors exist
+    if (validationFailures.length > 0) {
+      validationFailures.forEach(item => {
+        setFieldError(item.element === coverDropzone ? null : item.element, item.errorNode, item.message);
+      });
+
+      // Scroll smoothly to first invalid field and set focus
+      const primaryFailure = validationFailures[0];
+      primaryFailure.element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => {
+        primaryFailure.element.focus();
+      }, 350);
+
+      showToast('Please fill in all required fields.', true);
+      return;
+    }
+
+    // If completely valid, construct canonical data payload
+    const submissionPayload = {
+      title:          state.title.trim(),
+      location:       state.location.trim(),
+      durationDays:   state.durationDays,
+      maxGroupSize:   state.maxGroupSize,
+      meetingPoint:   state.meetingPoint.trim(),
+      ageRestriction: state.ageRestriction,
+      coverPhoto:     state.coverPhoto ? state.coverPhoto.dataUrl : null,
+      photos:         state.photos.map(p => p.dataUrl)
+    };
+
+    console.log('[Tribo Expedition] Step 1 Data Payload:', submissionPayload);
+    showToast('Step 1 complete! Advancing to Step 2...');
+
+    // Placeholder alert/transition for Step 2
+    setTimeout(() => {
+      alert('✓ Step 1: Basics completed successfully!\n\nPayload has been logged to the console.\nIn the complete wizard, this now transitions to Step 2 ("Description").');
+    }, 400);
+  });
+
+  /* ------------------------------------------------------------
+     11. INITIALIZATION ON DOM READY
+     ------------------------------------------------------------ */
+  applyDuration(1);
+  applyGroupSize(10);
+  renderPhotoGrid();
+  loadSavedDraft();
+  syncLivePreview();
+  syncChecklistAndTally();
+
+})();
+</script>
+
+</body>
+</html>

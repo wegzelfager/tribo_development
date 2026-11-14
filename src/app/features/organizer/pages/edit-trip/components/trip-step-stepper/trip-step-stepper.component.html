@@ -1,0 +1,26 @@
+<nav class="stepper-section" aria-label="Wizard Steps">
+  <div class="stepper">
+    @for (s of steps; track s; let i = $index) {
+      <div class="step-item"
+           [class.active]="currentStep === i + 1"
+           [class.done]="currentStep > i + 1"
+           [attr.aria-current]="currentStep === i + 1 ? 'step' : null"
+           (click)="onStepClick(i + 1)"
+           [class.clickable]="i + 1 < currentStep">
+        @if (i < steps.length - 1) {
+          <div class="step-line" aria-hidden="true"></div>
+        }
+        <div class="step-circle" aria-hidden="true">
+          @if (currentStep > i + 1) {
+            <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          } @else {
+            {{ i + 1 }}
+          }
+        </div>
+        <span class="step-label">{{ s }}</span>
+      </div>
+    }
+  </div>
+</nav>

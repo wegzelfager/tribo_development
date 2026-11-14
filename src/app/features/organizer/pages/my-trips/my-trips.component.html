@@ -1,0 +1,271 @@
+<div class="page" (click)="closeMenu()">
+
+  <!-- Top bar: Breadcrumb & Actions -->
+  <header class="top-bar">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <span class="crumb-parent">Expedition Management</span>
+      <span class="crumb-separator">/</span>
+      <span class="crumb-current">My Trips</span>
+    </nav>
+
+    <div class="top-actions">
+      <!-- Search pill -->
+      <div class="search-box">
+        <svg class="i search-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path [attr.d]="icons.search" />
+        </svg>
+        <input type="text"
+               placeholder="Search trips"
+               [value]="searchQuery()"
+               (input)="onSearch($event)"
+               aria-label="Search trips" />
+      </div>
+
+      <!-- Notifications button -->
+      <button class="icon-btn" type="button" aria-label="Notifications">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
+          <path [attr.d]="icons.bell" />
+        </svg>
+      </button>
+
+      <!-- New Trip primary gold button -->
+      <button class="btn btn-gold" type="button" (click)="goNewTrip()">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
+          <path [attr.d]="icons.plus" />
+        </svg>
+        <span>New Trip</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Page Title & Subtitle -->
+  <div class="page-title-block">
+    <h1 class="page-title">My Expeditions</h1>
+    <p class="page-subtitle">Manage your trips, track bookings and keep an eye on capacity.</p>
+  </div>
+
+  <!-- KPI Row (4 cards) -->
+  @if (loading()) {
+    <div class="kpi-grid">
+      @for (item of skeletonItems; track item) {
+        <div class="kpi-card skeleton"></div>
+      }
+    </div>
+  } @else {
+    <div class="kpi-grid">
+      <!-- 1: Active Trips -->
+      <div class="kpi-card">
+        <span class="kpi-label">Active trips</span>
+        <span class="kpi-value">{{ stats().activeTrips }}</span>
+        <span class="kpi-caption text-success">
+          <span class="status-dot-sm bg-success"></span>
+          Published
+        </span>
+      </div>
+
+      <!-- 2: Total Bookings -->
+      <div class="kpi-card">
+        <span class="kpi-label">Total bookings</span>
+        <span class="kpi-value">{{ stats().totalBookings }}</span>
+        <span class="kpi-caption text-muted">All time</span>
+      </div>
+
+      <!-- 3: Spots Left -->
+      <div class="kpi-card">
+        <span class="kpi-label">Spots left</span>
+        <span class="kpi-value">{{ stats().spotsLeft }}</span>
+        <span class="kpi-caption text-muted">Across active trips</span>
+      </div>
+
+      <!-- 4: Revenue (Dark Card) -->
+      <div class="kpi-card kpi-card--dark">
+        <span class="kpi-label">Revenue</span>
+        <span class="kpi-value">{{ formatCurrency(revenue()) }}</span>
+        <span class="kpi-caption">From confirmed bookings</span>
+      </div>
+    </div>
+  }
+
+  <!-- Toolbar: Segmented Tabs & Sort -->
+  <div class="toolbar">
+    <div class="tabs-segmented" role="tablist">
+      <button type="button"
+              role="tab"
+              class="tab-btn"
+              [class.active]="activeTab() === 'all'"
+              [attr.aria-selected]="activeTab() === 'all'"
+              (click)="setTab('all')">
+        All · {{ tabCounts().all }}
+      </button>
+      <button type="button"
+              role="tab"
+              class="tab-btn"
+              [class.active]="activeTab() === 'published'"
+              [attr.aria-selected]="activeTab() === 'published'"
+              (click)="setTab('published')">
+        Published · {{ tabCounts().published }}
+      </button>
+      <button type="button"
+              role="tab"
+              class="tab-btn"
+              [class.active]="activeTab() === 'drafts'"
+              [attr.aria-selected]="activeTab() === 'drafts'"
+              (click)="setTab('drafts')">
+        Drafts · {{ tabCounts().drafts }}
+      </button>
+      <button type="button"
+              role="tab"
+              class="tab-btn"
+              [class.active]="activeTab() === 'completed'"
+              [attr.aria-selected]="activeTab() === 'completed'"
+              (click)="setTab('completed')">
+        Completed · {{ tabCounts().completed }}
+      </button>
+    </div>
+
+    <button class="btn-sort" type="button" (click)="toggleSort()">
+      <svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true">
+        <path [attr.d]="icons.sort" />
+      </svg>
+      <span>Sort: {{ sortOrder() === 'newest' ? 'Newest' : 'Oldest' }}</span>
+    </button>
+  </div>
+
+  <!-- Trips Grid -->
+  @if (loading()) {
+    <div class="trips-grid">
+      @for (card of skeletonCards; track card) {
+        <div class="trip-card skeleton-card"></div>
+      }
+    </div>
+  } @else {
+    <div class="trips-grid">
+      @for (trip of filteredTrips(); track trip.id; let i = $index) {
+        <article class="trip-card">
+          <!-- 180px Image Header -->
+          <div class="trip-card-header"
+               (click)="viewTripDetails(trip)"
+               title="Click to view expedition details"
+               [style.background]="trip.coverImage ? 'url(' + trip.coverImage + ') center/cover no-repeat' : gradient(i)">
+            <div class="card-header-overlay"></div>
+
+            <!-- Status badge -->
+            <div class="status-pill"
+                 [style.background]="singleBadge(trip).bg"
+                 [style.color]="singleBadge(trip).color">
+              <span class="status-dot" [style.background]="singleBadge(trip).dotColor"></span>
+              {{ singleBadge(trip).label }}
+            </div>
+
+            <!-- Options menu button -->
+            <div class="menu-wrap" (click)="$event.stopPropagation()">
+              <button class="menu-btn"
+                      type="button"
+                      aria-label="Trip options"
+                      [attr.aria-expanded]="openMenuId() === trip.id"
+                      (click)="toggleMenu(trip.id, $event)">
+                <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
+                  <path [attr.d]="icons.dots" />
+                </svg>
+              </button>
+
+              @if (openMenuId() === trip.id) {
+                <div class="dropdown" role="menu">
+                  <button type="button" class="dropdown-item" role="menuitem" (click)="menuAction('view', trip)">
+                    <svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.eye"/></svg>
+                    <span>View public page</span>
+                  </button>
+                  <button type="button" class="dropdown-item" role="menuitem" (click)="menuAction('edit', trip)">
+                    <svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.edit"/></svg>
+                    <span>Edit trip</span>
+                  </button>
+                  <button type="button" class="dropdown-item" role="menuitem" (click)="menuAction('duplicate', trip)">
+                    <svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.copy"/></svg>
+                    <span>Duplicate</span>
+                  </button>
+                  <div class="dropdown-divider"></div>
+                  <button type="button" class="dropdown-item danger" role="menuitem" (click)="menuAction('delete', trip)">
+                    <svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.trash"/></svg>
+                    <span>Delete</span>
+                  </button>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Card Body -->
+          <div class="trip-card-body">
+            <!-- Location -->
+            @if (trip.location) {
+              <div class="trip-location">
+                <svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true">
+                  <path [attr.d]="icons.pin" />
+                </svg>
+                <span>{{ trip.location }}</span>
+              </div>
+            }
+
+            <!-- Title -->
+            <h3 class="trip-title" (click)="viewTripDetails(trip)" [title]="trip.title">{{ trip.title }}</h3>
+
+            <!-- 1-line description -->
+            <p class="trip-desc" [title]="trip.description || ''">
+              {{ trip.description || 'No description provided' }}
+            </p>
+
+            <!-- Meta Pills: Duration & Price -->
+            <div class="meta-pills">
+              <span class="meta-pill">
+                <svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true">
+                  <path [attr.d]="icons.calendar" />
+                </svg>
+                <span>{{ trip.dateRange }}</span>
+              </span>
+
+              @if (trip.price > 0) {
+                <span class="meta-pill">
+                  <strong>${{ trip.price }}</strong>&nbsp;/ person
+                </span>
+              }
+            </div>
+
+            <!-- Capacity & Progress Bar -->
+            <div class="capacity-block">
+              <div class="capacity-labels">
+                <span class="capacity-title">Bookings</span>
+                <span class="capacity-count"><strong>{{ trip.booked }}</strong> / {{ trip.capacity }} booked</span>
+              </div>
+              <div class="progress-track" role="progressbar"
+                   [attr.aria-valuenow]="progressPct(trip)"
+                   aria-valuemin="0" aria-valuemax="100">
+                <div class="progress-fill" [style.width.%]="progressPct(trip)"></div>
+              </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="card-actions">
+              <button class="btn btn-gold-card" type="button" (click)="manageBookings(trip)">
+                <span>Manage bookings</span>
+              </button>
+              <button class="btn btn-outline-card" type="button" (click)="editTrip(trip)">
+                <span>Edit trip</span>
+              </button>
+            </div>
+          </div>
+        </article>
+      }
+
+      <!-- Dashed Plan Your Next Expedition Card -->
+      <div class="plan-next-card" (click)="goNewTrip()" role="button" tabindex="0" (keydown.enter)="goNewTrip()">
+        <div class="plan-next-icon">
+          <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
+            <path [attr.d]="icons.plus" />
+          </svg>
+        </div>
+        <h3 class="plan-next-title">Plan your next expedition</h3>
+        <p class="plan-next-sub">Create a new trip</p>
+      </div>
+    </div>
+  }
+
+</div>

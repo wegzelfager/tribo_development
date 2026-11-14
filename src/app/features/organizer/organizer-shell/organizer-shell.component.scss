@@ -1,0 +1,333 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  color-scheme: light;
+
+  /* ── Organizer design tokens ─────────────────────── */
+  --o-bg:      #F7F2EA;
+  --o-card:    #FFFFFF;
+  --o-border:  #E8DCCB;
+  --o-ink:     #231C14;
+  --o-muted:   #6B5D4D;
+  --o-accent:  #9A6A3A;
+  --o-chip:    #F1E6D6;
+  --o-ok:      #1F7A4D;
+  --o-ok-bg:   #EBF5EE;
+  --o-shadow:  0 2px 14px rgba(35, 28, 20, 0.05);
+  --o-radius:  22px;
+
+  background: var(--o-bg);
+  color: var(--o-ink);
+  font-family: 'Urbanist', 'Outfit', 'Space Grotesk', system-ui, sans-serif;
+  line-height: 1.4;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+h1, h2, h3, p {
+  margin: 0;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--o-accent);
+  outline-offset: 3px;
+}
+
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--o-bg);
+}
+
+.content {
+  flex: 1;
+  padding-block-end: calc(92px + env(safe-area-inset-bottom, 0px));
+}
+
+.i {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ── Desktop Sidebar (hidden by default on mobile/tablet) ─ */
+.sidebar {
+  display: none;
+}
+
+/* ── Floating bottom nav (visible on mobile/tablet) ───── */
+.bottom-bar {
+  position: fixed;
+  inset-block-end: 0;
+  inset-inline: 0;
+  display: flex;
+  justify-content: center;
+  padding-block-end: calc(14px + env(safe-area-inset-bottom, 0px));
+  padding-block-start: 8px;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  width: calc(100% - 32px);
+  max-width: 440px;
+  background: #FFFFFF;
+  border: 1px solid var(--o-border);
+  border-radius: 100px;
+  padding: 6px 12px;
+  box-shadow: 0 4px 24px rgba(43, 33, 24, 0.10);
+  pointer-events: auto;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 100px;
+  color: var(--o-muted);
+  transition: background 0.2s, color 0.2s, transform 0.1s;
+  font-size: 0.875rem;
+  font-weight: 600;
+
+  &:hover {
+    color: var(--o-ink);
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--o-accent);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
+.tab.active {
+  background: #231C14;
+  color: #FFFFFF;
+
+  svg {
+    stroke: #FFFFFF;
+  }
+}
+
+.tab-label {
+  white-space: nowrap;
+}
+
+/* ── Tablet (768px to 1023px) ────────────────────────── */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .content {
+    padding-block-end: calc(96px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* ── Desktop (1024px and up) ─────────────────────────── */
+@media (min-width: 1024px) {
+  /* Hide bottom bar */
+  .bottom-bar {
+    display: none;
+  }
+
+  /* Show fixed left sidebar */
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: fixed;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: 260px;
+    height: 100vh;
+    background: #FFFFFF;
+    border-inline-end: 1px solid var(--o-border);
+    padding: 36px 20px 24px;
+    z-index: 90;
+    box-shadow: 2px 0 16px rgba(43, 33, 24, 0.02);
+  }
+
+  .sidebar-top {
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+  }
+
+  .sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-inline: 4px;
+  }
+
+  .brand-logo {
+    width: 38px;
+    height: 38px;
+    background: #231C14;
+    color: #FFFFFF;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+
+  .brand-info {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .brand-title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--o-ink);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+
+  .brand-eyebrow {
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--o-muted);
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 18px;
+    border-radius: 100px;
+    color: var(--o-muted);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    transition: background 0.15s, color 0.15s, transform 0.1s;
+
+    &:hover {
+      background: rgba(241, 230, 214, 0.45);
+      color: var(--o-ink);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--o-accent);
+      outline-offset: 2px;
+    }
+
+    &.active {
+      background: #231C14;
+      color: #FFFFFF;
+
+      svg {
+        stroke: #FFFFFF;
+      }
+    }
+  }
+
+  .link-label {
+    white-space: nowrap;
+  }
+
+  .sidebar-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    background: #FAF7F2;
+    border: 1px solid var(--o-border);
+  }
+
+  .sidebar-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1.5px solid var(--o-border);
+    flex-shrink: 0;
+
+    &.fallback {
+      background: var(--o-chip);
+      color: #7A6245;
+      font-weight: 700;
+      font-size: 0.8125rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+
+  .sidebar-user-meta {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .sidebar-user-name {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--o-ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .sidebar-user-role {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--o-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  /* Content area adjustment for sidebar */
+  .content {
+    margin-inline-start: 260px;
+    padding-block-end: 48px;
+    padding-inline: clamp(32px, 3.5vw, 48px);
+  }
+}
+
+/* ── Large Desktop (1440px and up) ───────────────────── */
+@media (min-width: 1440px) {
+  .content {
+    padding-inline: 48px;
+  }
+}

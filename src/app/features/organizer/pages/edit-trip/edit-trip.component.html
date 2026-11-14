@@ -1,0 +1,1070 @@
+<div class="page-wrapper">
+  <div class="container wide-container">
+
+    <!-- ── TOP BREADCRUMB / BACK ── -->
+    <header class="top-nav-bar">
+      <a routerLink="/organizer/trips" class="back-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        <span>Back to My Trips</span>
+      </a>
+      <span class="top-badge">{{ tripId ? 'Edit Mode' : 'New Expedition' }}</span>
+    </header>
+
+    <!-- ── STEPPER NAVIGATION ── -->
+    <app-trip-step-stepper
+      [steps]="steps"
+      [currentStep]="currentStep()"
+      (stepSelect)="onStepSelect($event)"
+    ></app-trip-step-stepper>
+
+    <!-- ── PAGE HEADER ── -->
+    <header class="page-header">
+      <p class="eyebrow">STEP {{ currentStep() }} OF 4</p>
+      <h1 class="page-title">
+        @if (currentStep() === 1) {
+          {{ tripId ? 'Edit trip basics' : "Let's set up the basics" }}
+        } @else if (currentStep() === 2) {
+          {{ tripId ? 'Edit description & highlights' : 'Tell your story & highlights' }}
+        } @else if (currentStep() === 3) {
+          {{ tripId ? 'Edit daily itinerary' : 'Build your daily itinerary' }}
+        } @else {
+          {{ tripId ? 'Edit pricing & inclusions' : 'Set pricing & inclusions' }}
+        }
+      </h1>
+      <p class="page-subtitle">
+        @if (currentStep() === 1) {
+          Tell travelers what the trip is, where it starts and who it's for.
+        } @else if (currentStep() === 2) {
+          Describe the experience, the route, and what makes this expedition unique.
+        } @else if (currentStep() === 3) {
+          Outline each day's plan and timeline stops so travelers know what to expect.
+        } @else {
+          Define your price per person and what is covered in the expedition cost.
+        }
+      </p>
+    </header>
+
+    <!-- ── ERROR BAR ── -->
+    @if (errorMsg()) {
+      <div class="error-bar" role="alert">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <span style="white-space: pre-line;">{{ errorMsg() }}</span>
+      </div>
+    }
+
+    <!-- ── LOADING SPINNER ── -->
+    @if (loading()) {
+      <div class="loading-overlay">
+        <div class="spinner"></div>
+        <p>Loading expedition details…</p>
+      </div>
+    }
+
+    <!-- ── FORM CONTENT ── -->
+    @if (!loading()) {
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate autocomplete="off">
+
+        <!-- ══════════════════════════════════════════════
+             STEP 1: BASICS & MEDIA
+             ══════════════════════════════════════════════ -->
+        @if (currentStep() === 1) {
+          <div class="two-column-layout">
+
+            <!-- LEFT: FORM CARDS (2/3) -->
+            <div class="form-column">
+
+              <!-- CARD 1: THE ESSENTIALS -->
+              <div class="form-card">
+                <div class="card-header">
+                  <div class="card-icon-box" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
+                      <line x1="4" y1="22" x2="4" y2="15"></line>
+                    </svg>
+                  </div>
+                  <div>
+                    <h2 class="card-title">The essentials</h2>
+                    <p class="card-subtitle">Name your trip, pick a place and set how long it lasts.</p>
+                  </div>
+                </div>
+
+                <!-- Trip Title -->
+                <div class="field-group" [class.has-error]="isInvalid('title')">
+                  <div class="label-line">
+                    <label for="trip-title">Trip title</label>
+                    <span class="pill-badge required">Required</span>
+                  </div>
+                  <div class="input-wrapper">
+                    <input
+                      type="text"
+                      id="trip-title"
+                      formControlName="title"
+                      placeholder="e.g. Sahara Desert Adventure"
+                      maxlength="100"
+                      aria-required="true"
+                    />
+                  </div>
+                  <div class="field-hint-line">
+                    <span>Short and vivid. Travelers see this first.</span>
+                    <span class="live-counter">{{ titleCharCount() }}/100</span>
+                  </div>
+                  @if (isInvalid('title')) {
+                    <div class="error-feedback" role="alert">Trip title is required.</div>
+                  }
+                </div>
+
+                <!-- Location & Duration (Side-by-side) -->
+                <div class="field-row-split">
+                  <!-- Location -->
+                  <div class="field-group" [class.has-error]="isInvalid('location')">
+                    <div class="label-line">
+                      <label for="trip-location">Location</label>
+                      <span class="pill-badge required">Required</span>
+                    </div>
+                    <div class="input-wrapper has-icon">
+                      <span class="input-icon-left" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"></path>
+                          <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                      </span>
+                      <input
+                        type="text"
+                        id="trip-location"
+                        formControlName="location"
+                        placeholder="e.g. Marrakech, Morocco"
+                        aria-required="true"
+                      />
+                    </div>
+                    <div class="field-hint-line"><span>City, region or country.</span></div>
+                    @if (isInvalid('location')) {
+                      <div class="error-feedback" role="alert">Location is required.</div>
+                    }
+                  </div>
+
+                  <!-- Duration Stepper -->
+                  <div class="field-group">
+                    <div class="label-line">
+                      <label>Duration</label>
+                    </div>
+                    <div class="stepper-control" role="group" aria-label="Duration in days">
+                      <button
+                        type="button"
+                        class="stepper-btn"
+                        aria-label="Decrease duration"
+                        [disabled]="form.get('durationDays')!.value <= 1"
+                        (click)="decreaseDuration()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                          <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                      </button>
+                      <div class="stepper-center">
+                        <input
+                          type="number"
+                          class="stepper-input-num"
+                          formControlName="durationDays"
+                          min="1"
+                          max="60"
+                          aria-label="Duration in days"
+                        />
+                        <span class="stepper-unit-label">{{ form.get('durationDays')!.value === 1 ? 'day' : 'days' }}</span>
+                      </div>
+                      <button
+                        type="button"
+                        class="stepper-btn"
+                        aria-label="Increase duration"
+                        [disabled]="form.get('durationDays')!.value >= 60"
+                        (click)="increaseDuration()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                          <line x1="12" y1="5" x2="12" y2="19"></line>
+                          <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                      </button>
+                    </div>
+                    <div class="field-hint-line"><span>How many days the trip lasts.</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- CARD 2: GROUP AND MEETING POINT -->
+              <div class="form-card">
+                <div class="card-header">
+                  <div class="card-icon-box" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path>
+                      <circle cx="9" cy="7" r="4"></circle>
+                      <path d="M23 21v-2a4 4 0 00-3-3.87"></path>
+                      <path d="M16 3.13a4 4 0 010 7.75"></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <h2 class="card-title">Group and meeting point</h2>
+                    <p class="card-subtitle">How many people, who can join and where you'll meet.</p>
+                  </div>
+                </div>
+
+                <!-- Group Size & Meeting Point -->
+                <div class="field-row-split equal">
+                  <!-- Max Group Size -->
+                  <div class="field-group">
+                    <div class="label-line">
+                      <label>Max group size</label>
+                    </div>
+                    <div class="stepper-control" role="group" aria-label="Maximum travelers">
+                      <button
+                        type="button"
+                        class="stepper-btn"
+                        aria-label="Decrease travelers"
+                        [disabled]="form.get('maxCapacity')!.value <= 1"
+                        (click)="decreaseCapacity()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                          <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                      </button>
+                      <div class="stepper-center">
+                        <input
+                          type="number"
+                          class="stepper-input-num"
+                          formControlName="maxCapacity"
+                          min="1"
+                          max="50"
+                          aria-label="Max travelers"
+                        />
+                        <span class="stepper-unit-label">travelers</span>
+                      </div>
+                      <button
+                        type="button"
+                        class="stepper-btn"
+                        aria-label="Increase travelers"
+                        [disabled]="form.get('maxCapacity')!.value >= 50"
+                        (click)="increaseCapacity()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                          <line x1="12" y1="5" x2="12" y2="19"></line>
+                          <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                      </button>
+                    </div>
+                    <div class="field-hint-line"><span>Maximum travelers per departure.</span></div>
+                  </div>
+
+                  <!-- Meeting Point -->
+                  <div class="field-group" [class.has-error]="isInvalid('meetingPoint')">
+                    <div class="label-line">
+                      <label for="trip-meeting">Meeting point</label>
+                      <span class="pill-badge required">Required</span>
+                    </div>
+                    <div class="input-wrapper has-icon">
+                      <span class="input-icon-left" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"></path>
+                          <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                      </span>
+                      <input
+                        type="text"
+                        id="trip-meeting"
+                        formControlName="meetingPoint"
+                        placeholder="e.g. Jemaa el-Fna Square"
+                        aria-required="true"
+                      />
+                    </div>
+                    <div class="field-hint-line"><span>A landmark or address travelers can find easily.</span></div>
+                    @if (isInvalid('meetingPoint')) {
+                      <div class="error-feedback" role="alert">Meeting point is required.</div>
+                    }
+                  </div>
+                </div>
+
+                <!-- Age Restriction Chips -->
+                <div class="field-group age-field">
+                  <div class="label-line">
+                    <label>Age restriction</label>
+                    <span class="pill-badge optional">Optional</span>
+                  </div>
+                  <div class="age-chips-wrap" role="radiogroup" aria-label="Age restriction">
+                    @for (opt of ageOptions; track opt.value) {
+                      <button
+                        type="button"
+                        class="age-pill"
+                        [class.active]="selectedAge() === opt.value"
+                        [attr.aria-checked]="selectedAge() === opt.value"
+                        role="radio"
+                        (click)="selectAge(opt.value)">
+                        @if (selectedAge() === opt.value) {
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                          </svg>
+                        }
+                        <span>{{ opt.label }}</span>
+                      </button>
+                    }
+                  </div>
+                  <div class="field-hint-line"><span>Who can join this trip. Select "Any age" if there's no limit.</span></div>
+                </div>
+              </div>
+
+              <!-- CARD 3: PHOTOS -->
+              <div class="form-card">
+                <div class="card-header">
+                  <div class="card-icon-box" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                      <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                      <polyline points="21 15 16 10 5 21"></polyline>
+                    </svg>
+                  </div>
+                  <div>
+                    <h2 class="card-title">Photos</h2>
+                    <p class="card-subtitle">Show travelers what to expect.</p>
+                  </div>
+                </div>
+
+                <!-- Cover Photo Upload -->
+                <div class="field-group" [class.has-error]="coverError">
+                  <div class="label-line">
+                    <label>Cover photo</label>
+                    <span class="pill-badge required" *ngIf="!tripId">Required</span>
+                    <span class="pill-badge optional" *ngIf="tripId">Current cover kept if unchanged</span>
+                  </div>
+
+                  <div
+                    class="dropzone-container"
+                    [class.has-cover]="!!(coverPreview || existingCoverUrl)"
+                    tabindex="0"
+                    role="button"
+                    aria-label="Upload trip cover photo"
+                    (click)="!(coverPreview || existingCoverUrl) && coverInput.click()"
+                    (keydown.enter)="!(coverPreview || existingCoverUrl) && coverInput.click()"
+                    (dragover)="onCoverDragOver($event)"
+                    (drop)="onCoverDrop($event)">
+
+                    <input
+                      #coverInput
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      hidden
+                      (change)="onCoverChange($event)"
+                    />
+
+                    @if (coverPreview || existingCoverUrl) {
+                      <img [src]="coverPreview || existingCoverUrl" alt="Cover photo preview" class="cover-img-preview" />
+                      <div class="dropzone-actions-bar">
+                        <button type="button" class="action-badge-btn replace" (click)="$event.stopPropagation(); coverInput.click()">Replace</button>
+                        <button type="button" class="action-badge-btn remove" (click)="$event.stopPropagation(); removeCover()">Remove</button>
+                      </div>
+                    } @else {
+                      <div class="dropzone-icon-circle" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="16 16 12 12 8 16"></polyline>
+                          <line x1="12" y1="12" x2="12" y2="21"></line>
+                          <path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"></path>
+                        </svg>
+                      </div>
+                      <p class="dropzone-main-text">
+                        Drag a photo here, or <span class="browse-link">browse your files</span>
+                      </p>
+                      <p class="dropzone-sub-text">JPG or PNG · at least 1600 × 900 px · up to 5 MB</p>
+                    }
+                  </div>
+
+                  <div class="info-tip-row" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="12" y1="8" x2="12" y2="12"></line>
+                      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <span>Pick a bright, landscape photo. It's the first thing travelers see in search results.</span>
+                  </div>
+                  @if (coverError) {
+                    <div class="error-feedback" role="alert">Please upload a valid cover photo.</div>
+                  }
+                </div>
+
+                <!-- More Photos (Optional) -->
+                <div class="field-group">
+                  <div class="label-line">
+                    <label>More photos <span class="optional-txt">(optional)</span></label>
+                    <span class="live-counter">{{ imagePreviews.length }} / 10</span>
+                  </div>
+                  <div class="field-hint-line" style="margin-top: 0; margin-bottom: 10px;">
+                    <span>Add the group, the food, the places you'll stop. Up to 10 photos.</span>
+                  </div>
+
+                  <div class="photo-grid">
+                    @if (imagePreviews.length < 10) {
+                      <div
+                        class="photo-cell add-tile"
+                        role="button"
+                        tabindex="0"
+                        aria-label="Add additional photos"
+                        (click)="morePhotosInput.click()"
+                        (keydown.enter)="morePhotosInput.click()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <line x1="12" y1="5" x2="12" y2="19"></line>
+                          <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        <span>Add photos</span>
+                      </div>
+                    }
+
+                    @for (prev of imagePreviews; track prev; let i = $index) {
+                      <div class="photo-cell filled-tile">
+                        <img [src]="prev" alt="Photo {{ i + 1 }}" />
+                        <button type="button" class="photo-remove-btn" (click)="removeImage(i)" aria-label="Remove photo">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                          </svg>
+                        </button>
+                      </div>
+                    }
+
+                    @for (p of emptyPhotoTiles; track p) {
+                      <div class="photo-cell empty-tile">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                          <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                          <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                          <polyline points="21 15 16 10 5 21"></polyline>
+                        </svg>
+                      </div>
+                    }
+
+                    <input
+                      #morePhotosInput
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      multiple
+                      hidden
+                      (change)="onImagesChange($event)"
+                    />
+                  </div>
+                </div>
+
+                <!-- FOOTER ACTIONS BAR -->
+                <footer class="form-footer-bar">
+                  <a routerLink="/organizer/trips" class="btn-secondary">
+                    Cancel
+                  </a>
+                  <div class="footer-right-group">
+                    @if (requiredFieldsLeft > 0) {
+                      <span class="fields-remaining-text" aria-live="polite">
+                        {{ requiredFieldsLeft }} required {{ requiredFieldsLeft === 1 ? 'field' : 'fields' }} left
+                      </span>
+                    } @else {
+                      <span class="fields-remaining-text completed" aria-live="polite">
+                        All required fields done ✓
+                      </span>
+                    }
+                    <button type="button" class="btn-primary" (click)="nextStep()">
+                      <span>Next: Description</span>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                      </svg>
+                    </button>
+                  </div>
+                </footer>
+              </div>
+
+            </div>
+
+            <!-- RIGHT: STICKY LIVE PREVIEW (1/3) -->
+            <app-trip-live-preview
+              [currentStep]="1"
+              [title]="previewTitle"
+              [location]="previewLocation"
+              [durationDays]="previewDuration"
+              [maxCapacity]="previewCapacity"
+              [ageText]="previewAgeText"
+              [coverPreview]="coverPreview"
+              [existingCoverUrl]="existingCoverUrl"
+              [price]="previewPrice"
+              [checklist]="checklist"
+            ></app-trip-live-preview>
+
+          </div>
+        }
+
+        <!-- ══════════════════════════════════════════════
+             STEP 2: DESCRIPTION & HIGHLIGHTS
+             ══════════════════════════════════════════════ -->
+        @if (currentStep() === 2) {
+          <div class="two-column-layout">
+
+            <!-- LEFT: FORM CARDS (2/3) -->
+            <div class="form-column">
+
+              <!-- CARD 1: THE STORY -->
+              <div class="form-card">
+                <div class="card-header">
+                  <div class="card-icon-box" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                      <polyline points="14 2 14 8 20 8"></polyline>
+                      <line x1="16" y1="13" x2="8" y2="13"></line>
+                      <line x1="16" y1="17" x2="8" y2="17"></line>
+                      <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                  </div>
+                  <div>
+                    <h2 class="card-title">The expedition story</h2>
+                    <p class="card-subtitle">Describe the journey, terrain, and what travelers will do.</p>
+                  </div>
+                </div>
+
+                <!-- Description Textarea -->
+                <div class="field-group" [class.has-error]="isInvalid('description')">
+                  <div class="label-line">
+                    <label for="trip-desc">Trip description</label>
+                    <span class="pill-badge required">Required</span>
+                  </div>
+                  <div class="input-wrapper">
+                    <textarea
+                      id="trip-desc"
+                      formControlName="description"
+                      rows="7"
+                      placeholder="Journey deep into Egypt's surreal western landscapes on this immersive 3-day 4x4 overland expedition. Starting from Cairo, our expert convoy navigates the iconic White Desert..."
+                      aria-required="true"
+                    ></textarea>
+                  </div>
+                  <div class="field-hint-line">
+                    <span>Describe the experience, the route, physical difficulty and daily vibe.</span>
+                    <span class="live-counter">{{ descriptionLength }}/1500</span>
+                  </div>
+                  @if (isInvalid('description')) {
+                    <div class="error-feedback" role="alert">Description is required (at least 10 characters).</div>
+                  }
+                </div>
+
+                <div class="info-tip-row" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                  </svg>
+                  <span>Pro Tip: Mention gear requirements, desert temperatures and the best season to join.</span>
+                </div>
+              </div>
+
+              <!-- CARD 2: HIGHLIGHTS -->
+              <div class="form-card">
+                <div class="card-header">
+                  <div class="card-icon-box" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                    </svg>
+                  </div>
+                  <div>
+                    <h2 class="card-title">Key highlights</h2>
+                    <p class="card-subtitle">Quick bullet points travelers can scan at a glance.</p>
+                  </div>
+                </div>
+
+                <!-- Quick Presets -->
+                <div class="field-group">
+                  <div class="label-line">
+                    <label>Quick add popular highlights</label>
+                    <span class="pill-badge optional">1-Click Add</span>
+                  </div>
+                  <div class="preset-pills-row">
+                    @for (preset of presetHighlights; track preset) {
+                      <button type="button" class="preset-pill" (click)="addPresetHighlight(preset)">
+                        <span>+ {{ preset }}</span>
+                      </button>
+                    }
+                  </div>
+                </div>
+
+                <!-- Current Highlights list -->
+                <div class="field-group">
+                  <div class="label-line">
+                    <label>Active Highlights</label>
+                    <span class="live-counter">{{ highlightsCount }} added</span>
+                  </div>
+
+                  @if (highlights.controls.length > 0) {
+                    <div class="tags-chips-list">
+                      @for (h of highlights.controls; track $index; let i = $index) {
+                        <div class="gold-chip">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="chip-icon">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                          </svg>
+                          <span>{{ h.value }}</span>
+                          <button type="button" class="chip-delete-btn" (click)="removeHighlight(i)" aria-label="Remove highlight">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                              <line x1="18" y1="6" x2="6" y2="18"></line>
+                              <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                          </button>
+                        </div>
+                      }
+                    </div>
+                  } @else {
+                    <p class="empty-hint-text">No highlights added yet. Type below or pick from the suggestions above.</p>
+                  }
+
+                  <div class="chip-input-container">
+                    <input
+                      #hlInput
+                      type="text"
+                      placeholder="e.g. Camp under a canopy of 10,000 desert stars..."
+                      (keydown.enter)="addHighlight(hlInput); $event.preventDefault()"
+                    />
+                    <button type="button" class="btn-chip-add" (click)="addHighlight(hlInput)">
+                      <span>+ Add Highlight</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- FOOTER ACTIONS BAR -->
+                <footer class="form-footer-bar">
+                  <button type="button" class="btn-secondary" (click)="prevStep()">
+                    ← Back to Basics
+                  </button>
+                  <div class="footer-right-group">
+                    <span class="fields-remaining-text" [class.completed]="descriptionDone && highlightsDone">
+                      {{ descriptionDone ? 'Description ready ✓' : 'Description required' }}
+                    </span>
+                    <button type="button" class="btn-primary" (click)="nextStep()">
+                      <span>Next: Itinerary</span>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                      </svg>
+                    </button>
+                  </div>
+                </footer>
+              </div>
+
+            </div>
+
+            <!-- RIGHT: STICKY LIVE PREVIEW (1/3) -->
+            <app-trip-live-preview
+              [currentStep]="2"
+              [title]="previewTitle"
+              [location]="previewLocation"
+              [durationDays]="previewDuration"
+              [maxCapacity]="previewCapacity"
+              [ageText]="previewAgeText"
+              [coverPreview]="coverPreview"
+              [existingCoverUrl]="existingCoverUrl"
+              [price]="previewPrice"
+              [checklist]="checklist"
+              [descriptionDone]="descriptionDone"
+              [descriptionLength]="descriptionLength"
+              [highlightsDone]="highlightsDone"
+              [highlightsCount]="highlightsCount"
+            ></app-trip-live-preview>
+
+          </div>
+        }
+
+        <!-- ══════════════════════════════════════════════
+             STEP 3: ITINERARY BUILDER
+             ══════════════════════════════════════════════ -->
+        @if (currentStep() === 3) {
+          <div class="two-column-layout">
+
+            <!-- LEFT: FORM CARDS (2/3) -->
+            <div class="form-column">
+
+              <div class="form-card">
+                <div class="card-header">
+                  <div class="card-icon-box" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+                    </svg>
+                  </div>
+                  <div>
+                    <h2 class="card-title">Day-by-day itinerary</h2>
+                    <p class="card-subtitle">Plan each day of the journey with activities and timeline stops.</p>
+                  </div>
+                </div>
+
+                <!-- Duration Sync Banner -->
+                <div class="duration-sync-banner">
+                  <div class="banner-info">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="banner-icon">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                      <line x1="16" y1="2" x2="16" y2="6"></line>
+                      <line x1="8" y1="2" x2="8" y2="6"></line>
+                      <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    <span>
+                      Duration set to <strong>{{ previewDuration }} {{ previewDuration === 1 ? 'day' : 'days' }}</strong>.
+                      Currently configuring <strong>{{ daysCount }} {{ daysCount === 1 ? 'day' : 'days' }}</strong>.
+                    </span>
+                  </div>
+                  @if (daysCount < previewDuration) {
+                    <button type="button" class="btn-sync-days" (click)="syncDaysWithDuration()">
+                      + Auto-fill to {{ previewDuration }} days
+                    </button>
+                  }
+                </div>
+
+                <!-- Days List -->
+                <div class="itinerary-days-container" [formArrayName]="'itinerary'">
+                  @for (day of itinerary.controls; track $index; let i = $index) {
+                    <div class="day-card-box" [formGroupName]="i">
+                      <div class="day-card-header">
+                        <div class="day-badge-pill">DAY {{ i + 1 }}</div>
+                        @if (itinerary.length > 1) {
+                          <button type="button" class="btn-day-delete" (click)="removeDay(i)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <polyline points="3 6 5 6 21 6"></polyline>
+                              <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
+                            </svg>
+                            <span>Remove Day</span>
+                          </button>
+                        }
+                      </div>
+
+                      <!-- Day Title -->
+                      <div class="field-group" [class.has-error]="isDayInvalid(i, 'dayTitle')">
+                        <div class="label-line">
+                          <label>Day Title</label>
+                          <span class="pill-badge required">Required</span>
+                        </div>
+                        <div class="input-wrapper">
+                          <input
+                            formControlName="dayTitle"
+                            type="text"
+                            placeholder="e.g. Cairo Departure & Desert Entry"
+                          />
+                        </div>
+                        @if (isDayInvalid(i, 'dayTitle')) {
+                          <div class="error-feedback">Day title is required.</div>
+                        }
+                      </div>
+
+                      <!-- Activity Summary -->
+                      <div class="field-group">
+                        <div class="label-line">
+                          <label>Activity Summary</label>
+                          <span class="pill-badge optional">Optional</span>
+                        </div>
+                        <div class="input-wrapper">
+                          <input
+                            formControlName="activitySummary"
+                            type="text"
+                            placeholder="e.g. 8hr Drive · Camp Setup · Sunset Photography"
+                          />
+                        </div>
+                      </div>
+
+                      <!-- Timeline Events -->
+                      <div class="field-group">
+                        <div class="label-line">
+                          <label>Timeline Events</label>
+                          <span class="pill-badge optional">Milestones</span>
+                        </div>
+
+                        <!-- Presets for this day -->
+                        <div class="preset-pills-row mini">
+                          @for (pEv of presetTimelineEvents; track pEv) {
+                            <button type="button" class="preset-pill mini" (click)="addPresetTimelineEvent(i, pEv)">
+                              <span>+ {{ pEv }}</span>
+                            </button>
+                          }
+                        </div>
+
+                        <div class="timeline-chips-list">
+                          @for (ev of getDayEvents(i); track $index; let ei = $index) {
+                            <div class="timeline-chip">
+                              <span class="timeline-dot"></span>
+                              <span class="timeline-txt">{{ ev }}</span>
+                              <button type="button" class="chip-delete-btn" (click)="removeDayEvent(i, ei)" aria-label="Remove event">×</button>
+                            </div>
+                          }
+                        </div>
+
+                        <div class="chip-input-container">
+                          <input
+                            type="text"
+                            [id]="'ev-' + i"
+                            placeholder="e.g. 7:00 AM — 4x4 convoy departs Cairo"
+                            (keydown.enter)="addDayEvent(i, $event); $event.preventDefault()"
+                          />
+                          <button type="button" class="btn-chip-add" (click)="addDayEventByBtn(i)">
+                            <span>+ Add Event</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+
+                <button type="button" class="btn-add-day-outline" (click)="addDay()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                  </svg>
+                  <span>Add Another Day</span>
+                </button>
+
+                <!-- FOOTER ACTIONS BAR -->
+                <footer class="form-footer-bar">
+                  <button type="button" class="btn-secondary" (click)="prevStep()">
+                    ← Back to Description
+                  </button>
+                  <div class="footer-right-group">
+                    <span class="fields-remaining-text" [class.completed]="itineraryDone">
+                      {{ daysCount }} of {{ previewDuration }} days configured
+                    </span>
+                    <button type="button" class="btn-primary" (click)="nextStep()">
+                      <span>Next: Pricing</span>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                      </svg>
+                    </button>
+                  </div>
+                </footer>
+              </div>
+
+            </div>
+
+            <!-- RIGHT: STICKY LIVE PREVIEW (1/3) -->
+            <app-trip-live-preview
+              [currentStep]="3"
+              [title]="previewTitle"
+              [location]="previewLocation"
+              [durationDays]="previewDuration"
+              [maxCapacity]="previewCapacity"
+              [ageText]="previewAgeText"
+              [coverPreview]="coverPreview"
+              [existingCoverUrl]="existingCoverUrl"
+              [price]="previewPrice"
+              [checklist]="checklist"
+              [itineraryDone]="itineraryDone"
+              [daysCount]="daysCount"
+              [eventsCount]="eventsCount"
+            ></app-trip-live-preview>
+
+          </div>
+        }
+
+        <!-- ══════════════════════════════════════════════
+             STEP 4: PRICING & INCLUSIONS
+             ══════════════════════════════════════════════ -->
+        @if (currentStep() === 4) {
+          <div class="two-column-layout">
+
+            <!-- LEFT: FORM CARDS (2/3) -->
+            <div class="form-column">
+
+              <!-- CARD 1: PRICING & VALUE -->
+              <div class="form-card">
+                <div class="card-header">
+                  <div class="card-icon-box" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <line x1="12" y1="1" x2="12" y2="23"></line>
+                      <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <h2 class="card-title">Expedition pricing</h2>
+                    <p class="card-subtitle">Set your per-traveler price and project total group earnings.</p>
+                  </div>
+                </div>
+
+                <!-- Price Per Person -->
+                <div class="field-group" [class.has-error]="isInvalid('pricePerPerson')">
+                  <div class="label-line">
+                    <label for="trip-price">Price Per Person (USD)</label>
+                    <span class="pill-badge required">Required</span>
+                  </div>
+                  <div class="input-wrapper has-icon">
+                    <span class="input-icon-left" aria-hidden="true">
+                      <span style="font-weight: 800; font-size: 1.15rem; color: var(--color-primary, #8B5A2B);">$</span>
+                    </span>
+                    <input
+                      type="number"
+                      id="trip-price"
+                      formControlName="pricePerPerson"
+                      min="0"
+                      step="1"
+                      placeholder="450"
+                      aria-required="true"
+                    />
+                  </div>
+                  <div class="field-hint-line">
+                    <span>Total cost charged to each traveler for the entire expedition.</span>
+                  </div>
+                  @if (isInvalid('pricePerPerson')) {
+                    <div class="error-feedback" role="alert">Please specify a valid price.</div>
+                  }
+                </div>
+
+                <!-- Revenue Projection Widget -->
+                <div class="revenue-projection-card">
+                  <div class="rev-header">
+                    <span class="rev-label">Projected Group Payout</span>
+                    <span class="rev-val">${{ previewPrice * previewCapacity }}</span>
+                  </div>
+                  <p class="rev-formula">
+                    Based on <strong>{{ previewCapacity }} travelers</strong> at <strong>${{ previewPrice }} / person</strong>.
+                  </p>
+                </div>
+              </div>
+
+              <!-- CARD 2: INCLUSIONS & EXCLUSIONS -->
+              <div class="form-card">
+                <div class="card-header">
+                  <div class="card-icon-box" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="9 11 12 14 22 4"></polyline>
+                      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <h2 class="card-title">Inclusions &amp; Exclusions</h2>
+                    <p class="card-subtitle">Transparent items prevent confusion and boost traveler bookings.</p>
+                  </div>
+                </div>
+
+                <!-- What's Included -->
+                <div class="field-group">
+                  <div class="label-line">
+                    <label>What's Included</label>
+                    <span class="pill-badge required">Recommended</span>
+                  </div>
+
+                  <!-- Quick Presets -->
+                  <div class="preset-pills-row">
+                    @for (item of presetIncluded; track item) {
+                      <button type="button" class="preset-pill green" (click)="addPresetIncluded(item)">
+                        <span>+ {{ item }}</span>
+                      </button>
+                    }
+                  </div>
+
+                  @if (includedItems.controls.length > 0) {
+                    <div class="tags-chips-list">
+                      @for (item of includedItems.controls; track $index; let i = $index) {
+                        <div class="included-chip">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="chip-icon">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                          </svg>
+                          <span>{{ item.value }}</span>
+                          <button type="button" class="chip-delete-btn" (click)="removeIncluded(i)" aria-label="Remove item">×</button>
+                        </div>
+                      }
+                    </div>
+                  }
+
+                  <div class="chip-input-container">
+                    <input
+                      #inclInput
+                      type="text"
+                      placeholder="e.g. 4x4 Transport & Fuel, Meals, Certified Desert Guide..."
+                      (keydown.enter)="addIncluded(inclInput); $event.preventDefault()"
+                    />
+                    <button type="button" class="btn-chip-add" (click)="addIncluded(inclInput)">
+                      <span>+ Add Included Item</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- What's Not Included -->
+                <div class="field-group" style="margin-top: 28px;">
+                  <div class="label-line">
+                    <label>Not Included</label>
+                    <span class="pill-badge optional">Optional</span>
+                  </div>
+
+                  <!-- Quick Presets -->
+                  <div class="preset-pills-row">
+                    @for (item of presetExcluded; track item) {
+                      <button type="button" class="preset-pill red" (click)="addPresetExcluded(item)">
+                        <span>+ {{ item }}</span>
+                      </button>
+                    }
+                  </div>
+
+                  @if (excludedItems.controls.length > 0) {
+                    <div class="tags-chips-list">
+                      @for (item of excludedItems.controls; track $index; let i = $index) {
+                        <div class="excluded-chip">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="chip-icon">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                          </svg>
+                          <span>{{ item.value }}</span>
+                          <button type="button" class="chip-delete-btn" (click)="removeExcluded(i)" aria-label="Remove item">×</button>
+                        </div>
+                      }
+                    </div>
+                  }
+
+                  <div class="chip-input-container">
+                    <input
+                      #exclInput
+                      type="text"
+                      placeholder="e.g. Flights, Personal Souvenirs, Travel Insurance..."
+                      (keydown.enter)="addExcluded(exclInput); $event.preventDefault()"
+                    />
+                    <button type="button" class="btn-chip-add" (click)="addExcluded(exclInput)">
+                      <span>+ Add Excluded Item</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- FOOTER ACTIONS BAR -->
+                <footer class="form-footer-bar">
+                  <button type="button" class="btn-secondary" (click)="prevStep()">
+                    ← Back to Itinerary
+                  </button>
+                  <div class="footer-right-group">
+                    <span class="fields-remaining-text completed">
+                      Ready to publish ✓
+                    </span>
+                    <button type="submit" class="btn-primary" [disabled]="submitting()">
+                      @if (submitting()) {
+                        <span class="btn-spinner"></span>
+                        <span>Saving…</span>
+                      } @else {
+                        <span>{{ tripId ? 'Update Expedition' : 'Publish Expedition' }}</span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                      }
+                    </button>
+                  </div>
+                </footer>
+              </div>
+
+            </div>
+
+            <!-- RIGHT: STICKY LIVE PREVIEW (1/3) -->
+            <app-trip-live-preview
+              [currentStep]="4"
+              [title]="previewTitle"
+              [location]="previewLocation"
+              [durationDays]="previewDuration"
+              [maxCapacity]="previewCapacity"
+              [ageText]="previewAgeText"
+              [coverPreview]="coverPreview"
+              [existingCoverUrl]="existingCoverUrl"
+              [price]="previewPrice"
+              [checklist]="checklist"
+              [includedCount]="includedCount"
+              [excludedCount]="excludedCount"
+            ></app-trip-live-preview>
+
+          </div>
+        }
+
+      </form>
+    }
+
+  </div>
+</div>

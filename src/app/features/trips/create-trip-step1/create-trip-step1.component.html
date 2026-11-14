@@ -1,0 +1,464 @@
+<div class="page-wrapper">
+  <div class="container">
+
+    <!-- ── STEPPER NAVIGATION ── -->
+    <app-trip-step-stepper
+      [steps]="steps"
+      [currentStep]="currentStep"
+    ></app-trip-step-stepper>
+
+    <!-- ── PAGE HEADER ── -->
+    <header class="page-header">
+      <p class="eyebrow">STEP 1 OF 4</p>
+      <h1 class="page-title">Let's set up the basics</h1>
+      <p class="page-subtitle">
+        Tell travelers what the trip is, where it starts and who it's for.
+        <a routerLink="/organizer/trips">You can change any of this later.</a>
+      </p>
+    </header>
+
+    <!-- ── ERROR BAR ── -->
+    @if (errorMsg()) {
+      <div class="error-bar" role="alert">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <span>{{ errorMsg() }}</span>
+      </div>
+    }
+
+    <!-- ── 2-COLUMN MAIN CONTENT ── -->
+    <main class="two-column-layout">
+
+      <!-- ═══════════════════════════════════
+           LEFT COLUMN: FORM CARDS (2/3 WIDTH)
+           ═══════════════════════════════════ -->
+      <section class="form-column" aria-label="Trip Basics Form">
+        <form [formGroup]="form" (ngSubmit)="goNext()" novalidate autocomplete="off">
+
+          <!-- ──── CARD 1: THE ESSENTIALS ──── -->
+          <div class="form-card">
+            <div class="card-header">
+              <div class="card-icon-box" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
+                  <line x1="4" y1="22" x2="4" y2="15"></line>
+                </svg>
+              </div>
+              <div>
+                <h2 class="card-title">The essentials</h2>
+                <p class="card-subtitle">Name your trip, pick a place and set how long it lasts.</p>
+              </div>
+            </div>
+
+            <!-- Trip Title -->
+            <div class="field-group" [class.has-error]="isInvalid('title')">
+              <div class="label-line">
+                <label for="trip-title">Trip title</label>
+                <span class="pill-badge required">Required</span>
+              </div>
+              <div class="input-wrapper">
+                <input
+                  type="text"
+                  id="trip-title"
+                  formControlName="title"
+                  placeholder="e.g. Sahara Desert Adventure"
+                  maxlength="40"
+                  aria-required="true"
+                />
+              </div>
+              <div class="field-hint-line">
+                <span>Short and vivid. Travelers see this first.</span>
+                <span class="live-counter">{{ titleCharCount() }}/40</span>
+              </div>
+              @if (isInvalid('title')) {
+                <div class="error-feedback" role="alert">Trip title is required (up to 40 characters).</div>
+              }
+            </div>
+
+            <!-- Location & Duration (Side-by-side) -->
+            <div class="field-row-split">
+              <!-- Location -->
+              <div class="field-group" [class.has-error]="isInvalid('location')">
+                <div class="label-line">
+                  <label for="trip-location">Location</label>
+                  <span class="pill-badge required">Required</span>
+                </div>
+                <div class="input-wrapper has-icon">
+                  <span class="input-icon-left" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"></path>
+                      <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                  </span>
+                  <input
+                    type="text"
+                    id="trip-location"
+                    formControlName="location"
+                    placeholder="e.g. Marrakech, Morocco"
+                    aria-required="true"
+                  />
+                </div>
+                <div class="field-hint-line">
+                  <span>City, region or country.</span>
+                </div>
+                @if (isInvalid('location')) {
+                  <div class="error-feedback" role="alert">Location is required.</div>
+                }
+              </div>
+
+              <!-- Duration Stepper -->
+              <div class="field-group">
+                <div class="label-line">
+                  <label>Duration</label>
+                </div>
+                <div class="stepper-control" role="group" aria-label="Duration in days">
+                  <button
+                    type="button"
+                    class="stepper-btn"
+                    aria-label="Decrease duration"
+                    [disabled]="form.get('durationDays')!.value <= 1"
+                    (click)="decreaseDuration()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                  </button>
+                  <div class="stepper-center">
+                    <input
+                      type="number"
+                      class="stepper-input-num"
+                      formControlName="durationDays"
+                      min="1"
+                      max="60"
+                      aria-label="Duration in days"
+                    />
+                    <span class="stepper-unit-label">{{ form.get('durationDays')!.value === 1 ? 'day' : 'days' }}</span>
+                  </div>
+                  <button
+                    type="button"
+                    class="stepper-btn"
+                    aria-label="Increase duration"
+                    [disabled]="form.get('durationDays')!.value >= 60"
+                    (click)="increaseDuration()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                      <line x1="12" y1="5" x2="12" y2="19"></line>
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                  </button>
+                </div>
+                <div class="field-hint-line">
+                  <span>How many days the trip lasts.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ──── CARD 2: GROUP AND MEETING POINT ──── -->
+          <div class="form-card">
+            <div class="card-header">
+              <div class="card-icon-box" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M23 21v-2a4 4 0 00-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 010 7.75"></path>
+                </svg>
+              </div>
+              <div>
+                <h2 class="card-title">Group and meeting point</h2>
+                <p class="card-subtitle">How many people, who can join and where you'll meet.</p>
+              </div>
+            </div>
+
+            <!-- Group Size & Meeting Point (Side-by-side) -->
+            <div class="field-row-split equal">
+              <!-- Max Group Size -->
+              <div class="field-group">
+                <div class="label-line">
+                  <label>Max group size</label>
+                </div>
+                <div class="stepper-control" role="group" aria-label="Maximum travelers">
+                  <button
+                    type="button"
+                    class="stepper-btn"
+                    aria-label="Decrease travelers"
+                    [disabled]="form.get('maxCapacity')!.value <= 1"
+                    (click)="decreaseCapacity()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                  </button>
+                  <div class="stepper-center">
+                    <input
+                      type="number"
+                      class="stepper-input-num"
+                      formControlName="maxCapacity"
+                      min="1"
+                      max="50"
+                      aria-label="Max travelers"
+                    />
+                    <span class="stepper-unit-label">travelers</span>
+                  </div>
+                  <button
+                    type="button"
+                    class="stepper-btn"
+                    aria-label="Increase travelers"
+                    [disabled]="form.get('maxCapacity')!.value >= 50"
+                    (click)="increaseCapacity()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                      <line x1="12" y1="5" x2="12" y2="19"></line>
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                  </button>
+                </div>
+                <div class="field-hint-line"><span>Maximum travelers per departure.</span></div>
+              </div>
+
+              <!-- Meeting Point -->
+              <div class="field-group" [class.has-error]="isInvalid('meetingPoint')">
+                <div class="label-line">
+                  <label for="trip-meeting">Meeting point</label>
+                  <span class="pill-badge required">Required</span>
+                </div>
+                <div class="input-wrapper has-icon">
+                  <span class="input-icon-left" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"></path>
+                      <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                  </span>
+                  <input
+                    type="text"
+                    id="trip-meeting"
+                    formControlName="meetingPoint"
+                    placeholder="e.g. Jemaa el-Fna Square"
+                    aria-required="true"
+                  />
+                </div>
+                <div class="field-hint-line"><span>A landmark or address travelers can find easily.</span></div>
+                @if (isInvalid('meetingPoint')) {
+                  <div class="error-feedback" role="alert">Meeting point is required.</div>
+                }
+              </div>
+            </div>
+
+            <!-- Age Restriction Chips -->
+            <div class="field-group age-field">
+              <div class="label-line">
+                <label>Age restriction</label>
+                <span class="pill-badge optional">Optional</span>
+              </div>
+              <div class="age-chips-wrap" role="radiogroup" aria-label="Age restriction">
+                @for (opt of ageOptions; track opt.value) {
+                  <button
+                    type="button"
+                    class="age-pill"
+                    [class.active]="selectedAge() === opt.value"
+                    [attr.aria-checked]="selectedAge() === opt.value"
+                    role="radio"
+                    (click)="selectAge(opt.value)">
+                    @if (selectedAge() === opt.value) {
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                      </svg>
+                    }
+                    <span>{{ opt.label }}</span>
+                  </button>
+                }
+              </div>
+              <div class="field-hint-line"><span>Who can join this trip. Leave it on "Any age" if there's no limit.</span></div>
+            </div>
+          </div>
+
+          <!-- ──── CARD 3: PHOTOS ──── -->
+          <div class="form-card">
+            <div class="card-header">
+              <div class="card-icon-box" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                  <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                  <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+              </div>
+              <div>
+                <h2 class="card-title">Photos</h2>
+                <p class="card-subtitle">Show travelers what to expect.</p>
+              </div>
+            </div>
+
+            <!-- Cover Photo Upload -->
+            <div class="field-group" [class.has-error]="coverError">
+              <div class="label-line">
+                <label>Cover photo</label>
+                <span class="pill-badge required">Required</span>
+              </div>
+
+              <div
+                class="dropzone-container"
+                [class.has-cover]="!!coverPreview"
+                tabindex="0"
+                role="button"
+                aria-label="Upload trip cover photo"
+                (click)="!coverPreview && coverInput.click()"
+                (keydown.enter)="!coverPreview && coverInput.click()"
+                (dragover)="onCoverDragOver($event)"
+                (drop)="onCoverDrop($event)">
+
+                <input
+                  #coverInput
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  hidden
+                  (change)="onCoverFileSelected($event)"
+                />
+
+                @if (coverPreview) {
+                  <img [src]="coverPreview" alt="Cover photo preview" class="cover-img-preview" />
+                  <div class="dropzone-actions-bar">
+                    <button type="button" class="action-badge-btn replace" (click)="$event.stopPropagation(); coverInput.click()">Replace</button>
+                    <button type="button" class="action-badge-btn remove" (click)="$event.stopPropagation(); removeCover()">Remove</button>
+                  </div>
+                } @else {
+                  <div class="dropzone-icon-circle" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="16 16 12 12 8 16"></polyline>
+                      <line x1="12" y1="12" x2="12" y2="21"></line>
+                      <path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"></path>
+                    </svg>
+                  </div>
+                  <p class="dropzone-main-text">
+                    Drag a photo here, or <span class="browse-link">browse your files</span>
+                  </p>
+                  <p class="dropzone-sub-text">JPG or PNG · at least 1600 × 900 px · up to 5 MB</p>
+                }
+              </div>
+
+              <div class="info-tip-row" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <span>Pick a bright, landscape photo. It's the first thing travelers see in search results.</span>
+              </div>
+              @if (coverError) {
+                <div class="error-feedback" role="alert">Please upload a valid cover photo.</div>
+              }
+            </div>
+
+            <!-- More Photos (Optional) -->
+            <div class="field-group">
+              <div class="label-line">
+                <label>More photos <span class="optional-txt">(optional)</span></label>
+                <span class="live-counter">{{ imagePreviews.length }} / 10</span>
+              </div>
+              <div class="field-hint-line" style="margin-top: 0; margin-bottom: 10px;">
+                <span>Add the group, the food, the places you'll stop. Up to 10 photos.</span>
+              </div>
+
+              <div class="photo-grid">
+                <!-- Add tile -->
+                @if (imagePreviews.length < 10) {
+                  <div
+                    class="photo-cell add-tile"
+                    role="button"
+                    tabindex="0"
+                    aria-label="Add additional photos"
+                    (click)="morePhotosInput.click()"
+                    (keydown.enter)="morePhotosInput.click()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <line x1="12" y1="5" x2="12" y2="19"></line>
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    <span>Add photos</span>
+                  </div>
+                }
+
+                <!-- Existing previews -->
+                @for (prev of imagePreviews; track prev; let i = $index) {
+                  <div class="photo-cell filled-tile">
+                    <img [src]="prev" alt="Photo {{ i + 1 }}" />
+                    <button type="button" class="photo-remove-btn" (click)="removeImage(i)" aria-label="Remove photo">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
+                    </button>
+                  </div>
+                }
+
+                <!-- Empty placeholders (up to 4) -->
+                @for (p of emptyPhotoTiles; track p) {
+                  <div class="photo-cell empty-tile">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                      <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                      <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                      <polyline points="21 15 16 10 5 21"></polyline>
+                    </svg>
+                  </div>
+                }
+
+                <input
+                  #morePhotosInput
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  multiple
+                  hidden
+                  (change)="onMorePhotosSelected($event)"
+                />
+              </div>
+            </div>
+
+            <!-- ──── FOOTER ACTIONS BAR ──── -->
+            <footer class="form-footer-bar">
+              <button type="button" class="btn-secondary" (click)="saveDraft()">
+                Save as draft
+              </button>
+              <div class="footer-right-group">
+                @if (requiredFieldsLeft > 0) {
+                  <span class="fields-remaining-text" aria-live="polite">
+                    {{ requiredFieldsLeft }} required {{ requiredFieldsLeft === 1 ? 'field' : 'fields' }} left
+                  </span>
+                } @else {
+                  <span class="fields-remaining-text completed" aria-live="polite">
+                    All required fields done ✓
+                  </span>
+                }
+                <button type="submit" class="btn-primary" [disabled]="submitting()">
+                  @if (submitting()) {
+                    <span class="btn-spinner"></span>
+                    <span>Creating…</span>
+                  } @else {
+                    <span>Next: Description</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                      <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                  }
+                </button>
+              </div>
+            </footer>
+          </div>
+
+        </form>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           RIGHT COLUMN: STICKY LIVE PREVIEW (1/3)
+           ═══════════════════════════════════════════ -->
+      <app-trip-live-preview
+        [title]="previewTitle"
+        [location]="previewLocation"
+        [durationDays]="previewDuration"
+        [maxCapacity]="previewCapacity"
+        [ageText]="previewAgeText"
+        [coverPreview]="coverPreview"
+        [checklist]="checklist"
+      ></app-trip-live-preview>
+
+    </main>
+
+  </div>
+</div>

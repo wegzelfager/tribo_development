@@ -4,11 +4,12 @@ import {
   NavigationStart, NavigationEnd, NavigationCancel, NavigationError
 } from '@angular/router';
 import { I18nService } from './core/services/i18n.service';
+import { ToastComponent } from './shared/components/toast/toast.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, ToastComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

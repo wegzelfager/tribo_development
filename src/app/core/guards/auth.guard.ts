@@ -7,26 +7,35 @@ import { catchError, map, of } from 'rxjs';
  * Auth Guard — protects routes that require authentication.
  *
  * Strategy:
- *  1. If the in-memory access token exists → allow navigation.
- *  2. If the token is gone (e.g. page refresh) → try /refresh-token using
- *     the HTTP-only cookie. If it succeeds, the user is still logged in → allow.
- *  3. If refresh also fails → redirect to /auth/login.
+ *  1. If in-memory access token exists → allow navigation.
+ *  2. If there is no stored user session at all → redirect to /auth/login immediately (no unnecessary HTTP ping).
+ *  3. If user has a stored session but token is gone (page refresh) → attempt silent restore via refresh cookie.
+ *  4. If refresh fails → clear session and redirect to /auth/login.
  */
-export const authGuard: CanActivateFn = () => {
+export const authGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router      = inject(Router);
 
-  // Fast path — token already in memory
+  const loginTree = router.createUrlTree(['/auth/login'], {
+    queryParams: { returnUrl: state.url }
+  });
+
+  // Fast path — token already alive in memory
   if (authService.getAccessToken()) {
     return true;
   }
 
+  // If there is no stored user session, do not ping the refresh endpoint
+  if (!authService.getCurrentUser()) {
+    return loginTree;
+  }
+
   // Slow path — try to silently restore the session via the refresh cookie
   return authService.refreshToken().pipe(
-    map(() => true),          // refresh succeeded → user is authenticated
-    catchError(() =>          // refresh failed → no valid session
-      of(router.createUrlTree(['/auth/login']))
-    )
+    map(() => true),
+    catchError(() => {
+      authService.clearSession();
+      return of(loginTree);
+    })
   );
 };
-

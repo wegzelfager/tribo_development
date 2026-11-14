@@ -29,6 +29,35 @@
   --cream:        var(--auth-cream);
   --muted:        var(--auth-muted);
   --dim:          var(--auth-dim);
+
+  /* Trip Creation & Step 1 Design Tokens */
+  --color-bg:            #F9F6F1;
+  --color-card:          #FFFFFF;
+  --color-card-subtle:   #FBF8F5;
+  --color-border:        #EDE6DC;
+  --color-border-hover:  #D8CCC0;
+  --color-border-dash:   #D9CEBF;
+  --color-primary:       #8B5A2B;
+  --color-primary-hover: #754B23;
+  --color-primary-bg:    #EDE3CF;
+  --color-primary-tint:  #F7F3EC;
+  --color-primary-light: #F4ECE1;
+  --color-ink:           #1C1917;
+  --color-label:         #292524;
+  --color-muted:         #78716C;
+  --color-helper:        #8A7F73;
+  --color-error:         #C0462B;
+  --color-error-bg:      #FDF3F0;
+  --color-success:       #3D7A5F;
+  --color-step-active:   #8B5A2B;
+  --color-step-idle:     #D5C9B7;
+  --color-step-text:     #A39482;
+  --radius-card:         16px;
+  --radius-input:        10px;
+  --radius-chip:         9999px;
+  --radius-sm:           8px;
+  --shadow-card:         0 1px 3px rgba(43, 33, 24, 0.04), 0 4px 16px rgba(43, 33, 24, 0.03);
+  --shadow-pop:          0 4px 20px rgba(43, 33, 24, 0.12);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
