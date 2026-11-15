@@ -21,355 +21,606 @@
 
 <!-- ── Main Trip Details ──────────────────────────────────────── -->
 @if (!loading() && !error() && trip(); as t) {
-<div class="detail-page">
 
-  <div class="detail-layout">
+  <!-- ═══════════════════════════════════════════════════════════════
+       DESKTOP & TABLET VIEW (≥ 768px)
+       ═══════════════════════════════════════════════════════════════ -->
+  <div class="desktop-tablet-view">
+    <div class="expedition-container">
 
-    <!-- ── Left Column (≈ 2/3 on desktop, full-width on mobile/tablet) ── -->
-    <main class="main-column">
-
-      <!-- 1. Hero image with circular translucent Back / Favorite / Share -->
-      <div class="hero-wrap">
-        <img class="hero-img" [src]="t.coverImage" [alt]="t.title" />
-        <div class="hero-gradient"></div>
-
-        <div class="hero-controls">
-          <button class="ctrl-btn" type="button" aria-label="Go back" (click)="goBack()">
-            <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.back"/></svg>
+      <!-- 1. Breadcrumb row -->
+      <header class="top-breadcrumb-bar">
+        <nav class="breadcrumb-nav" aria-label="Breadcrumb">
+          <button type="button" class="breadcrumb-link" (click)="goBack()">My Trips</button>
+          <span class="breadcrumb-separator" aria-hidden="true">/</span>
+          <span class="breadcrumb-current" [title]="t.title">{{ t.title }}</span>
+        </nav>
+        <div class="breadcrumb-actions">
+          <button type="button" class="circle-action-btn" aria-label="Save to favourites">
+            <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.heart"/></svg>
           </button>
-          <div class="ctrl-right">
-            <button class="ctrl-btn" type="button" aria-label="Save to favourites">
-              <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.heart"/></svg>
-            </button>
-            <button class="ctrl-btn" type="button" aria-label="Share">
-              <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.share"/></svg>
-            </button>
+          <button type="button" class="circle-action-btn" aria-label="Share expedition">
+            <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.share"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- 2. Hero banner (380px, radius 28px) -->
+      <section class="expedition-hero">
+        <img class="hero-cover-img" [src]="t.coverImage" [alt]="t.title" />
+        <div class="hero-dark-overlay"></div>
+
+        <div class="hero-content-bottom">
+          <!-- Bottom-left: tags, title, location -->
+          <div class="hero-left-info">
+            <div class="hero-tag-pills">
+              <span class="hero-glass-pill">4×4 Safari Required</span>
+              <span class="hero-glass-pill">Intermediate Level</span>
+              @if (t.ageRestriction?.type === 'Custom Limit') {
+                <span class="hero-glass-pill">{{ t.ageRestriction?.minAge }}–{{ t.ageRestriction?.maxAge }} yrs</span>
+              }
+            </div>
+            <h1 class="hero-expedition-title">{{ t.title }}</h1>
+            <div class="hero-location-row">
+              <svg class="i i-sm icon-hero-pin" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.pin"/></svg>
+              <span>{{ t.location }}</span>
+            </div>
           </div>
-        </div>
-      </div>
 
-      <!-- 2. Header card (overlapping on mobile; directly below on desktop) -->
-      <div class="info-card">
-
-        <!-- Tag pills -->
-        <div class="tag-pills">
-          <span class="tag-pill">4x4 Safari Required</span>
-          <span class="tag-pill">Intermediate Level</span>
-          @if (t.ageRestriction?.type === 'Custom Limit') {
-            <span class="tag-pill">{{ t.ageRestriction?.minAge }}–{{ t.ageRestriction?.maxAge }} yrs</span>
-          }
-        </div>
-
-        <!-- Title -->
-        <h1 class="trip-heading">{{ t.title }}</h1>
-
-        <!-- Location + Rating -->
-        <div class="location-row">
-          <svg class="i i-sm icon-pin" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.pin"/></svg>
-          <span class="location-text">{{ t.location }}</span>
-          <span class="rating-row">
-            <svg class="i i-xs icon-star" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.star"/></svg>
-            <span class="rating-val">4.9</span>
-          </span>
-        </div>
-
-        <div class="divider header-divider"></div>
-
-        <!-- Organizer row (shown on mobile/tablet; hidden on desktop where organizer card is in sidebar) -->
-        <div class="organizer-row header-organizer-row">
-          <div class="org-left">
-            <div class="org-avatar">
+          <!-- Bottom-right: Organizer glass card -->
+          <div class="hero-organizer-glass-card">
+            <div class="org-glass-avatar">
               @if (t.organizer.profileImage) {
                 <img [src]="t.organizer.profileImage" [alt]="t.organizer.name" />
               } @else {
                 <span>{{ getInitials(t.organizer.name) }}</span>
               }
             </div>
-            <div class="org-meta">
-              <span class="org-label">Organized by</span>
-              <span class="org-name">{{ t.organizer.name }}</span>
+            <div class="org-glass-info">
+              <span class="org-glass-caption">Organized by</span>
+              <span class="org-glass-name">{{ t.organizer.name }}</span>
+            </div>
+            <div class="org-verified-pill">
+              <svg class="i i-xs" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.check"/></svg>
+              <span>Verified</span>
             </div>
           </div>
-          <div class="verified-badge">
-            <svg class="i i-xs" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.check"/></svg>
-            <span>Verified</span>
-          </div>
         </div>
-      </div>
+      </section>
 
-      <!-- 3. Segmented tab bar (full-width equal thirds across main column) -->
-      <div class="tab-bar-container">
-        <div class="tab-bar" role="tablist">
-          @for (tab of tabs; track tab.id) {
-            <button
-              class="tab-btn"
-              [class.active]="activeTab() === tab.id"
-              type="button"
-              role="tab"
-              [attr.aria-selected]="activeTab() === tab.id"
-              (click)="setTab(tab.id)">
-              {{ tab.label }}
-            </button>
-          }
-        </div>
-      </div>
+      <!-- 3. Layout Grid: Main Column + Right Column (380px) -->
+      <div class="expedition-grid">
 
-      <!-- ── Tab Panels Content ────────────────────────────────── -->
-      <div class="tab-content">
+        <!-- Main Column -->
+        <main class="expedition-main-col">
 
-        <!-- TAB 1: OVERVIEW -->
-        @if (activeTab() === 'overview') {
-          <div class="tab-panel tab-panel--overview" role="tabpanel">
+          <!-- Tabs: Overview | Itinerary | Included -->
+          <nav class="underline-tabs-bar" role="tablist" aria-label="Expedition details tabs">
+            @for (tab of tabs; track tab.id) {
+              <button
+                type="button"
+                role="tab"
+                class="underline-tab-btn"
+                [class.active]="activeTab() === tab.id"
+                [attr.aria-selected]="activeTab() === tab.id"
+                (click)="setTab(tab.id)">
+                {{ tab.label }}
+              </button>
+            }
+          </nav>
 
-            <!-- Info chips (shown on mobile/tablet, hidden on desktop) -->
-            <div class="chip-row">
-              <div class="chip">
-                <svg class="i i-sm icon-gold" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.clock"/></svg>
-                <span>{{ t.durationDays }} {{ t.durationDays === 1 ? 'Day' : 'Days' }}</span>
+          <!-- Tab Panels -->
+          <div class="tab-panels-wrapper">
+
+            <!-- TAB 1: OVERVIEW -->
+            @if (activeTab() === 'overview') {
+              <div class="tab-panel tab-fade-slide" role="tabpanel">
+
+                <!-- (a) Stats card: 4 columns separated by dividers -->
+                <div class="overview-stats-card">
+                  <div class="stat-col">
+                    <div class="stat-icon-wrap">
+                      <svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.clock"/></svg>
+                    </div>
+                    <span class="stat-label">Duration</span>
+                    <span class="stat-value">{{ t.durationDays }} {{ t.durationDays === 1 ? 'Day' : 'Days' }}</span>
+                  </div>
+
+                  <div class="stat-col-divider"></div>
+
+                  <div class="stat-col">
+                    <div class="stat-icon-wrap">
+                      <svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.users"/></svg>
+                    </div>
+                    <span class="stat-label">Group Size</span>
+                    <span class="stat-value">Up to {{ t.maxCapacity }}</span>
+                  </div>
+
+                  <div class="stat-col-divider"></div>
+
+                  <div class="stat-col">
+                    <div class="stat-icon-wrap">
+                      <svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.pin"/></svg>
+                    </div>
+                    <span class="stat-label">Meeting Point</span>
+                    <span class="stat-value">{{ meetup(t) }}</span>
+                  </div>
+
+                  <div class="stat-col-divider"></div>
+
+                  <div class="stat-col">
+                    <div class="stat-icon-wrap">
+                      <svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.pin"/></svg>
+                    </div>
+                    <span class="stat-label">Location</span>
+                    <span class="stat-value">{{ t.location }}</span>
+                  </div>
+                </div>
+
+                <!-- (b) About this expedition card -->
+                <section class="card-section about-card">
+                  <h2 class="card-section-title">About this expedition</h2>
+                  <p class="about-description">{{ t.description }}</p>
+                </section>
+
+                <!-- (c) Expedition highlights card -->
+                @if (t.highlights && t.highlights.length > 0) {
+                  <section class="card-section highlights-card">
+                    <h2 class="card-section-title">Expedition highlights</h2>
+                    <ul class="highlights-grid">
+                      @for (hl of t.highlights; track hl) {
+                        <li class="highlight-item-row">
+                          <span class="highlight-check-badge">
+                            <svg class="i i-xs" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.check"/></svg>
+                          </span>
+                          <span class="highlight-text">{{ hl }}</span>
+                        </li>
+                      }
+                    </ul>
+                  </section>
+                }
+
               </div>
-              <div class="chip">
-                <svg class="i i-sm icon-gold" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.users"/></svg>
-                <span>Max {{ t.maxCapacity }}</span>
-              </div>
-              <div class="chip">
-                <svg class="i i-sm icon-gold" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.pin"/></svg>
-                <span>{{ meetup(t) }}</span>
-              </div>
-            </div>
+            }
 
-            <!-- About this Expedition (clean card on desktop) -->
-            <section class="section section-about">
-              <h2 class="section-title">About this Expedition</h2>
-              <p class="section-body">{{ t.description }}</p>
-            </section>
+            <!-- TAB 2: ITINERARY -->
+            @if (activeTab() === 'itinerary') {
+              <div class="tab-panel tab-fade-slide" role="tabpanel">
+                @if (t.itinerary && t.itinerary.length > 0) {
+                  <div class="itinerary-accordion-list">
+                    @for (day of t.itinerary; track day.dayNumber; let idx = $index) {
+                      <div class="itinerary-day-card" [class.is-open]="expandedDay() === idx">
+                        <button
+                          type="button"
+                          class="itinerary-header-btn"
+                          [attr.aria-expanded]="expandedDay() === idx"
+                          (click)="toggleDay(idx)">
+                          <div class="day-gold-badge">
+                            <span class="day-txt">DAY</span>
+                            <span class="day-num">{{ day.dayNumber }}</span>
+                          </div>
+                          <div class="day-header-meta">
+                            <h3 class="day-title">{{ day.dayTitle }}</h3>
+                            @if (day.activitySummary) {
+                              <p class="day-subtitle">{{ day.activitySummary }}</p>
+                            }
+                          </div>
+                          <svg class="i chevron-rotate" [class.rotate-180]="expandedDay() === idx" viewBox="0 0 24 24" aria-hidden="true">
+                            <path [attr.d]="icons.chevron"/>
+                          </svg>
+                        </button>
 
-            <!-- Expedition Highlights (clean card on desktop, 2-column grid) -->
-            @if (t.highlights && t.highlights.length) {
-              <section class="section section-highlights">
-                <h2 class="section-title">Expedition Highlights</h2>
-                <ul class="highlights-list">
-                  @for (h of t.highlights; track h) {
-                    <li class="highlight-item">
-                      <span class="highlight-check">
+                        @if (expandedDay() === idx) {
+                          <div class="itinerary-body-content">
+                            @if (day.timelineEvents && day.timelineEvents.length > 0) {
+                              <div class="timeline-container">
+                                @for (ev of day.timelineEvents; track ev) {
+                                  <div class="timeline-event-row">
+                                    <div class="timeline-gold-dot"></div>
+                                    <div class="timeline-event-body">
+                                      @if (parseTimelineEvent(ev).time; as tm) {
+                                        <span class="timeline-time">{{ tm }}</span>
+                                      }
+                                      <span class="timeline-desc">{{ parseTimelineEvent(ev).text }}</span>
+                                    </div>
+                                  </div>
+                                }
+                              </div>
+                            } @else {
+                              <p class="empty-state-notice">No schedule added for this day yet.</p>
+                            }
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  <div class="card-section empty-card">
+                    <p class="empty-state-notice">No itinerary added yet.</p>
+                  </div>
+                }
+              </div>
+            }
+
+            <!-- TAB 3: INCLUDED -->
+            @if (activeTab() === 'included') {
+              <div class="tab-panel tab-fade-slide" role="tabpanel">
+                <div class="included-two-cols">
+
+                  <!-- Column 1: What's included -->
+                  <div class="included-col">
+                    <h3 class="col-title col-title-included">
+                      <span class="badge-icon badge-included">
                         <svg class="i i-xs" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.check"/></svg>
                       </span>
-                      <span>{{ h }}</span>
+                      <span>What’s included</span>
+                    </h3>
+                    @if (t.includedItems && t.includedItems.length > 0) {
+                      <ul class="items-list">
+                        @for (item of t.includedItems; track item) {
+                          <li class="item-row item-row-included">
+                            <span class="item-badge item-badge-green">
+                              <svg class="i i-xs" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.check"/></svg>
+                            </span>
+                            <span class="item-text">{{ item }}</span>
+                          </li>
+                        }
+                      </ul>
+                    } @else {
+                      <p class="empty-state-notice">No included items listed.</p>
+                    }
+                  </div>
+
+                  <!-- Column 2: Not included -->
+                  @if (t.excludedItems && t.excludedItems.length > 0) {
+                    <div class="included-col">
+                      <h3 class="col-title col-title-excluded">
+                        <span class="badge-icon badge-excluded">
+                          <svg class="i i-xs" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.cross"/></svg>
+                        </span>
+                        <span>Not included</span>
+                      </h3>
+                      <ul class="items-list">
+                        @for (item of t.excludedItems; track item) {
+                          <li class="item-row item-row-excluded">
+                            <span class="item-badge item-badge-red">
+                              <svg class="i i-xs" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.cross"/></svg>
+                            </span>
+                            <span class="item-text">{{ item }}</span>
+                          </li>
+                        }
+                      </ul>
+                    </div>
+                  }
+
+                </div>
+              </div>
+            }
+
+          </div>
+        </main>
+
+        <!-- Right Column (Sticky 380px) -->
+        <aside class="expedition-right-col">
+          <div class="sticky-side-stack">
+
+            <!-- 1. Booking Card -->
+            <div class="booking-summary-card">
+              <span class="booking-card-caption">TOTAL PER PERSON</span>
+              <div class="booking-price-val">${{ t.pricePerPerson }}</div>
+
+              <div class="booking-rows-group">
+                <div class="booking-meta-row">
+                  <span class="meta-label">Duration</span>
+                  <span class="meta-val">{{ t.durationDays }} {{ t.durationDays === 1 ? 'Day' : 'Days' }}</span>
+                </div>
+                <div class="booking-meta-row">
+                  <span class="meta-label">Group size</span>
+                  <span class="meta-val">Up to {{ t.maxCapacity }}</span>
+                </div>
+                <div class="booking-meta-row">
+                  <span class="meta-label">Location</span>
+                  <span class="meta-val">{{ t.location }}</span>
+                </div>
+                <div class="booking-meta-row">
+                  <span class="meta-label">Meeting point</span>
+                  <span class="meta-val">{{ meetup(t) }}</span>
+                </div>
+              </div>
+
+              <button type="button" class="btn-book-gold" (click)="bookTrip()">
+                Book Expedition Now
+              </button>
+            </div>
+
+            <!-- 2. What's Included Summary Card -->
+            @if (t.includedItems && t.includedItems.length > 0) {
+              <div class="included-summary-card">
+                <div class="inc-summary-header">
+                  <div class="inc-summary-title-wrap">
+                    <span class="summary-check-icon">
+                      <svg class="i i-xs" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.check"/></svg>
+                    </span>
+                    <span class="summary-title">What’s included</span>
+                  </div>
+                  <button type="button" class="btn-see-all-included" (click)="setTab('included')">
+                    <span>See all</span>
+                    <span aria-hidden="true">→</span>
+                  </button>
+                </div>
+
+                <ul class="inc-summary-list">
+                  @for (item of t.includedItems.slice(0, 4); track item) {
+                    <li class="inc-summary-item">
+                      <span class="inc-bullet-badge">
+                        <svg class="i i-xs" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.check"/></svg>
+                      </span>
+                      <span class="inc-summary-text">{{ item }}</span>
                     </li>
                   }
                 </ul>
-              </section>
+              </div>
             }
 
           </div>
-        }
+        </aside>
 
-        <!-- TAB 2: ITINERARY -->
-        @if (activeTab() === 'itinerary') {
-          <div class="tab-panel tab-panel--itinerary" role="tabpanel">
-            @for (day of t.itinerary; track day.dayNumber; let idx = $index) {
-              <div class="day-card" [class.expanded]="expandedDay() === idx">
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       MOBILE VIEW (< 768px)
+       Preserves the exact mobile layout with reviews/ratings removed
+       ═══════════════════════════════════════════════════════════════ -->
+  <div class="mobile-view">
+    <div class="detail-page">
+      <div class="detail-layout">
+        <main class="main-column">
+          <!-- 1. Hero image with circular translucent Back / Favorite / Share -->
+          <div class="hero-wrap">
+            <img class="hero-img" [src]="t.coverImage" [alt]="t.title" />
+            <div class="hero-gradient"></div>
+
+            <div class="hero-controls">
+              <button class="ctrl-btn" type="button" aria-label="Go back" (click)="goBack()">
+                <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.back"/></svg>
+              </button>
+              <div class="ctrl-right">
+                <button class="ctrl-btn" type="button" aria-label="Save to favourites">
+                  <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.heart"/></svg>
+                </button>
+                <button class="ctrl-btn" type="button" aria-label="Share">
+                  <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.share"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Header card -->
+          <div class="info-card">
+            <!-- Tag pills -->
+            <div class="tag-pills">
+              <span class="tag-pill">4x4 Safari Required</span>
+              <span class="tag-pill">Intermediate Level</span>
+              @if (t.ageRestriction?.type === 'Custom Limit') {
+                <span class="tag-pill">{{ t.ageRestriction?.minAge }}–{{ t.ageRestriction?.maxAge }} yrs</span>
+              }
+            </div>
+
+            <!-- Title -->
+            <h1 class="trip-heading">{{ t.title }}</h1>
+
+            <!-- Location (Rating removed) -->
+            <div class="location-row">
+              <svg class="i i-sm icon-pin" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.pin"/></svg>
+              <span class="location-text">{{ t.location }}</span>
+            </div>
+
+            <div class="divider header-divider"></div>
+
+            <!-- Organizer row -->
+            <div class="organizer-row header-organizer-row">
+              <div class="org-left">
+                <div class="org-avatar">
+                  @if (t.organizer.profileImage) {
+                    <img [src]="t.organizer.profileImage" [alt]="t.organizer.name" />
+                  } @else {
+                    <span>{{ getInitials(t.organizer.name) }}</span>
+                  }
+                </div>
+                <div class="org-meta">
+                  <span class="org-label">Organized by</span>
+                  <span class="org-name">{{ t.organizer.name }}</span>
+                </div>
+              </div>
+              <div class="verified-badge">
+                <svg class="i i-xs" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.check"/></svg>
+                <span>Verified</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Segmented tab bar -->
+          <div class="tab-bar-container">
+            <div class="tab-bar" role="tablist">
+              @for (tab of tabs; track tab.id) {
                 <button
-                  class="day-header"
+                  class="tab-btn"
+                  [class.active]="activeTab() === tab.id"
                   type="button"
-                  [attr.aria-expanded]="expandedDay() === idx"
-                  (click)="toggleDay(idx)">
-                  <div class="day-badge">
-                    <span class="day-label">DAY</span>
-                    <span class="day-num">{{ day.dayNumber }}</span>
+                  role="tab"
+                  [attr.aria-selected]="activeTab() === tab.id"
+                  (click)="setTab(tab.id)">
+                  {{ tab.label }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Tab Panels Content -->
+          <div class="tab-content">
+            <!-- TAB 1: OVERVIEW -->
+            @if (activeTab() === 'overview') {
+              <div class="tab-panel tab-panel--overview" role="tabpanel">
+                <div class="chip-row">
+                  <div class="chip">
+                    <svg class="i i-sm icon-gold" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.clock"/></svg>
+                    <span>{{ t.durationDays }} {{ t.durationDays === 1 ? 'Day' : 'Days' }}</span>
                   </div>
-                  <div class="day-meta">
-                    <span class="day-title">{{ day.dayTitle }}</span>
-                    @if (day.activitySummary) {
-                      <span class="day-sub">{{ day.activitySummary }}</span>
+                  <div class="chip">
+                    <svg class="i i-sm icon-gold" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.users"/></svg>
+                    <span>Max {{ t.maxCapacity }}</span>
+                  </div>
+                  <div class="chip">
+                    <svg class="i i-sm icon-gold" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.pin"/></svg>
+                    <span>{{ meetup(t) }}</span>
+                  </div>
+                </div>
+
+                <section class="section section-about">
+                  <h2 class="section-title">About this Expedition</h2>
+                  <p class="section-body">{{ t.description }}</p>
+                </section>
+
+                @if (t.highlights && t.highlights.length) {
+                  <section class="section section-highlights">
+                    <h2 class="section-title">Expedition Highlights</h2>
+                    <ul class="highlights-list">
+                      @for (h of t.highlights; track h) {
+                        <li class="highlight-item">
+                          <span class="highlight-check">
+                            <svg class="i i-xs" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.check"/></svg>
+                          </span>
+                          <span>{{ h }}</span>
+                        </li>
+                      }
+                    </ul>
+                  </section>
+                }
+              </div>
+            }
+
+            <!-- TAB 2: ITINERARY -->
+            @if (activeTab() === 'itinerary') {
+              <div class="tab-panel tab-panel--itinerary" role="tabpanel">
+                @for (day of t.itinerary; track day.dayNumber; let idx = $index) {
+                  <div class="day-card" [class.expanded]="expandedDay() === idx">
+                    <button
+                      class="day-header"
+                      type="button"
+                      [attr.aria-expanded]="expandedDay() === idx"
+                      (click)="toggleDay(idx)">
+                      <div class="day-badge">
+                        <span class="day-label">DAY</span>
+                        <span class="day-num">{{ day.dayNumber }}</span>
+                      </div>
+                      <div class="day-meta">
+                        <span class="day-title">{{ day.dayTitle }}</span>
+                        @if (day.activitySummary) {
+                          <span class="day-sub">{{ day.activitySummary }}</span>
+                        }
+                      </div>
+                      <svg class="i i-sm chevron-icon" [class.open]="expandedDay() === idx"
+                           viewBox="0 0 24 24" aria-hidden="true">
+                        <path [attr.d]="icons.chevron"/>
+                      </svg>
+                    </button>
+
+                    @if (expandedDay() === idx) {
+                      <div class="day-body">
+                        @if (day.timelineEvents && day.timelineEvents.length) {
+                          <div class="timeline">
+                            @for (ev of day.timelineEvents; track ev) {
+                              <div class="timeline-item">
+                                <div class="tl-dot"></div>
+                                <div class="tl-content">
+                                  @if (parseTimelineEvent(ev).time; as tm) {
+                                    <span class="tl-time">{{ tm }}</span>
+                                  }
+                                  <span class="tl-text">{{ parseTimelineEvent(ev).text }}</span>
+                                </div>
+                              </div>
+                            }
+                          </div>
+                        } @else {
+                          <p class="empty-state-notice">No schedule added for this day yet.</p>
+                        }
+                      </div>
                     }
                   </div>
-                  <svg class="i i-sm chevron-icon" [class.open]="expandedDay() === idx"
-                       viewBox="0 0 24 24" aria-hidden="true">
-                    <path [attr.d]="icons.chevron"/>
-                  </svg>
-                </button>
+                }
 
-                @if (expandedDay() === idx && day.timelineEvents && day.timelineEvents.length) {
-                  <div class="day-body">
-                    <div class="timeline">
-                      @for (ev of day.timelineEvents; track ev) {
-                        <div class="timeline-item">
-                          <div class="tl-dot"></div>
-                          <div class="tl-content">
-                            @if (parseTimelineEvent(ev).time; as tm) {
-                              <span class="tl-time">{{ tm }}</span>
-                            }
-                            <span class="tl-text">{{ parseTimelineEvent(ev).text }}</span>
-                          </div>
-                        </div>
+                @if (!t.itinerary || t.itinerary.length === 0) {
+                  <p class="empty-hint">No itinerary provided yet.</p>
+                }
+              </div>
+            }
+
+            <!-- TAB 3: INCLUDED -->
+            @if (activeTab() === 'included') {
+              <div class="tab-panel tab-panel--included" role="tabpanel">
+                <div class="incl-section">
+                  <h3 class="incl-heading incl-heading--green">
+                    <span class="incl-heading-icon incl-heading-icon--green">
+                      <svg class="i i-xs" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.check"/></svg>
+                    </span>
+                    <span>What's Included</span>
+                  </h3>
+                  <ul class="incl-list">
+                    @for (item of t.includedItems; track item) {
+                      <li class="incl-item incl-item--green">
+                        <span class="incl-item-badge incl-item-badge--green">
+                          <svg class="i i-xs" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.check"/></svg>
+                        </span>
+                        <span class="incl-item-text">{{ item }}</span>
+                      </li>
+                    }
+                  </ul>
+                </div>
+
+                @if (t.excludedItems && t.excludedItems.length) {
+                  <div class="incl-section">
+                    <h3 class="incl-heading incl-heading--red">
+                      <span class="incl-heading-icon incl-heading-icon--red">
+                        <svg class="i i-xs" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.cross"/></svg>
+                      </span>
+                      <span>Not Included</span>
+                    </h3>
+                    <ul class="incl-list">
+                      @for (item of t.excludedItems; track item) {
+                        <li class="incl-item incl-item--red">
+                          <span class="incl-item-badge incl-item-badge--red">
+                            <svg class="i i-xs" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.cross"/></svg>
+                          </span>
+                          <span class="incl-item-text">{{ item }}</span>
+                        </li>
                       }
-                    </div>
+                    </ul>
                   </div>
                 }
               </div>
             }
-
-            @if (!t.itinerary || t.itinerary.length === 0) {
-              <p class="empty-hint">No itinerary provided yet.</p>
-            }
           </div>
-        }
-
-        <!-- TAB 3: INCLUDED (side-by-side 2 columns on desktop) -->
-        @if (activeTab() === 'included') {
-          <div class="tab-panel tab-panel--included" role="tabpanel">
-
-            <!-- What's Included -->
-            <div class="incl-section">
-              <h3 class="incl-heading incl-heading--green">
-                <span class="incl-heading-icon incl-heading-icon--green">
-                  <svg class="i i-xs" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.check"/></svg>
-                </span>
-                <span>What's Included</span>
-              </h3>
-              <ul class="incl-list">
-                @for (item of t.includedItems; track item) {
-                  <li class="incl-item incl-item--green">
-                    <span class="incl-item-badge incl-item-badge--green">
-                      <svg class="i i-xs" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.check"/></svg>
-                    </span>
-                    <span class="incl-item-text">{{ item }}</span>
-                  </li>
-                }
-              </ul>
-            </div>
-
-            <!-- Not Included -->
-            <div class="incl-section">
-              <h3 class="incl-heading incl-heading--red">
-                <span class="incl-heading-icon incl-heading-icon--red">
-                  <svg class="i i-xs" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.cross"/></svg>
-                </span>
-                <span>Not Included</span>
-              </h3>
-              <ul class="incl-list">
-                @for (item of t.excludedItems; track item) {
-                  <li class="incl-item incl-item--red">
-                    <span class="incl-item-badge incl-item-badge--red">
-                      <svg class="i i-xs" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.cross"/></svg>
-                    </span>
-                    <span class="incl-item-text">{{ item }}</span>
-                  </li>
-                }
-              </ul>
-            </div>
-
-          </div>
-        }
+        </main>
       </div>
 
-    </main>
-
-    <!-- ── Right Column: Sticky Stack on Desktop ── -->
-    <aside class="desktop-sidebar">
-      <div class="sidebar-sticky-stack">
-
-        <!-- 1. Booking Card -->
-        <div class="side-card side-booking-card">
-          <div class="sidebar-price-header">
-            <span class="sidebar-price-label">Total per person</span>
-            <div class="sidebar-price-row">
-              <span class="sidebar-price-val">${{ t.pricePerPerson }}</span>
-            </div>
-          </div>
-
-          <div class="sidebar-quick-facts">
-            <div class="quick-fact-item">
-              <span class="fact-label">Duration</span>
-              <span class="fact-val">{{ t.durationDays }} {{ t.durationDays === 1 ? 'Day' : 'Days' }}</span>
-            </div>
-            <div class="quick-fact-item">
-              <span class="fact-label">Group Size</span>
-              <span class="fact-val">Up to {{ t.maxCapacity }} travellers</span>
-            </div>
-            <div class="quick-fact-item">
-              <span class="fact-label">Location</span>
-              <span class="fact-val">{{ t.location }}</span>
-            </div>
-            <div class="quick-fact-item">
-              <span class="fact-label">Meeting Point</span>
-              <span class="fact-val">{{ meetup(t) }}</span>
-            </div>
-          </div>
-
-          <button class="btn-book btn-book--sidebar" type="button" (click)="bookTrip()">
-            Book Expedition Now
-          </button>
-        </div>
-
-        <!-- 2. Organizer Card -->
-        <div class="side-card side-organizer-card">
-          <div class="side-org-header">
-            <div class="org-avatar">
-              @if (t.organizer.profileImage) {
-                <img [src]="t.organizer.profileImage" [alt]="t.organizer.name" />
-              } @else {
-                <span>{{ getInitials(t.organizer.name) }}</span>
-              }
-            </div>
-            <div class="org-meta">
-              <span class="org-label">Organized by</span>
-              <span class="org-name">{{ t.organizer.name }}</span>
-            </div>
-          </div>
-          <div class="verified-badge">
-            <svg class="i i-xs" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.check"/></svg>
-            <span>Verified Organizer</span>
-          </div>
-        </div>
-
-        <!-- 3. What's Included Summary Card -->
-        @if (t.includedItems && t.includedItems.length > 0) {
-          <div class="side-card side-included-card">
-            <div class="side-included-header">
-              <div class="side-included-title-wrap">
-                <span class="side-check-circle">
-                  <svg class="i i-xs" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.check"/></svg>
-                </span>
-                <span class="side-included-title">What's Included</span>
-              </div>
-              <button type="button" class="side-see-all-btn" (click)="setTab('included')">
-                <span>See all</span>
-                <svg class="i i-xs" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.arrow"/></svg>
-              </button>
-            </div>
-            <ul class="side-included-list">
-              @for (item of t.includedItems.slice(0, 4); track item) {
-                <li class="side-included-item">
-                  <svg class="i i-xs icon-check-green" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.check"/></svg>
-                  <span>{{ item }}</span>
-                </li>
-              }
-            </ul>
-          </div>
-        }
-
-      </div>
-    </aside>
-
-  </div>
-
-  <!-- Spacer to prevent bottom bar overlap on mobile/tablet -->
-  <div class="bottom-spacer"></div>
-
-</div>
-
-<!-- 4. Sticky Bottom Bar (mobile & tablet only < 1024px) -->
-<div class="bottom-bar">
-  <div class="bottom-bar-inner">
-    <div class="price-info">
-      <span class="price-label">Total per person</span>
-      <span class="price-value">${{ t.pricePerPerson }}</span>
+      <!-- Spacer to prevent bottom bar overlap on mobile -->
+      <div class="bottom-spacer"></div>
     </div>
-    <button class="btn-book" type="button" (click)="bookTrip()">
-      Book Expedition Now
-    </button>
+
+    <!-- Sticky Bottom Bar (mobile only) -->
+    <div class="bottom-bar">
+      <div class="bottom-bar-inner">
+        <div class="price-info">
+          <span class="price-label">Total per person</span>
+          <span class="price-value">${{ t.pricePerPerson }}</span>
+        </div>
+        <button class="btn-book" type="button" (click)="bookTrip()">
+          Book Expedition Now
+        </button>
+      </div>
+    </div>
   </div>
-</div>
 
 }

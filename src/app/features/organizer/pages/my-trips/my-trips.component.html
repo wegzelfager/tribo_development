@@ -21,12 +21,8 @@
                aria-label="Search trips" />
       </div>
 
-      <!-- Notifications button -->
-      <button class="icon-btn" type="button" aria-label="Notifications">
-        <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
-          <path [attr.d]="icons.bell" />
-        </svg>
-      </button>
+      <!-- Notifications bell (shared component) -->
+      <app-notification-bell />
 
       <!-- New Trip primary gold button -->
       <button class="btn btn-gold" type="button" (click)="goNewTrip()">

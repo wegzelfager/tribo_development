@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  OnInit,
   computed,
   inject,
   signal,
@@ -9,6 +10,8 @@ import { Router } from '@angular/router';
 import { OrganizerStats, OrganizerTrip, TripStatus } from '../../models/organizer.models';
 import { Trip, TripApprovalStatus } from '../../../../core/models/trip.model';
 import { injectMyTripsQuery, injectDeleteTripMutation } from '../../../../core/queries/trip.queries';
+import { NotificationBellComponent } from '../../../../shared/components/notification-bell/notification-bell.component';
+import { SocketService } from '../../../../core/services/socket.service';
 
 const ICONS = {
   bell:     'M6 16.5V11a6 6 0 1112 0v5.5l1.5 2h-15zM10 21h4',
@@ -65,12 +68,17 @@ export type FilterTab = 'all' | 'published' | 'drafts' | 'completed';
   selector: 'app-my-trips',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [],
+  imports: [NotificationBellComponent],
   templateUrl: './my-trips.component.html',
   styleUrl: './my-trips.component.scss',
 })
-export class MyTripsComponent {
-  private readonly router = inject(Router);
+export class MyTripsComponent implements OnInit {
+  private readonly router         = inject(Router);
+  private readonly socketService  = inject(SocketService);
+
+  ngOnInit(): void {
+    this.socketService.connect();
+  }
 
   protected readonly icons          = ICONS;
   protected readonly gradients      = GRADIENTS;
