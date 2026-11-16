@@ -8,6 +8,8 @@ export type NotificationType =
   | 'organizer_rejected'
   | 'user_verified'
   | 'user_unverified'
+  | 'account_blocked'
+  | 'account_unblocked'
   | 'system';
 
 export interface AppNotification {

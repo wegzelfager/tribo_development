@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
 
 export interface ChecklistStatus {
   titleDone: boolean;
@@ -11,7 +12,7 @@ export interface ChecklistStatus {
 @Component({
   selector: 'app-trip-live-preview',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './trip-live-preview.component.html',
   styleUrl: './trip-live-preview.component.scss',

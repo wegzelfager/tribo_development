@@ -7,11 +7,13 @@ import {
   signal,
 } from '@angular/core';
 import { Router } from '@angular/router';
+import { TranslatePipe } from '@ngx-translate/core';
 import { OrganizerStats, OrganizerTrip, TripStatus } from '../../models/organizer.models';
 import { Trip, TripApprovalStatus } from '../../../../core/models/trip.model';
 import { injectMyTripsQuery, injectDeleteTripMutation } from '../../../../core/queries/trip.queries';
 import { NotificationBellComponent } from '../../../../shared/components/notification-bell/notification-bell.component';
 import { SocketService } from '../../../../core/services/socket.service';
+import { I18nService } from '../../../../core/services/i18n.service';
 
 const ICONS = {
   bell:     'M6 16.5V11a6 6 0 1112 0v5.5l1.5 2h-15zM10 21h4',
@@ -68,13 +70,20 @@ export type FilterTab = 'all' | 'published' | 'drafts' | 'completed';
   selector: 'app-my-trips',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NotificationBellComponent],
+  imports: [NotificationBellComponent, TranslatePipe],
   templateUrl: './my-trips.component.html',
   styleUrl: './my-trips.component.scss',
 })
 export class MyTripsComponent implements OnInit {
   private readonly router         = inject(Router);
   private readonly socketService  = inject(SocketService);
+  private readonly i18n           = inject(I18nService);
+
+  protected readonly isArabic     = computed(() => this.i18n.isRtl);
+
+  protected toggleLang(): void {
+    this.i18n.toggle();
+  }
 
   ngOnInit(): void {
     this.socketService.connect();
@@ -160,24 +169,21 @@ export class MyTripsComponent implements OnInit {
   }
 
   /** Single clean status badge */
-  protected singleBadge(trip: OrganizerTrip): { label: string; dotColor: string; bg: string; color: string } {
+  protected singleBadge(trip: OrganizerTrip): { key: string; dotColor: string; bg: string; color: string } {
     const raw = this.rawTrips().find(r => r._id === trip.id);
     if (raw?.approvalStatus === 'pending') {
-      return { label: 'Pending Review', dotColor: '#C89D66', bg: 'rgba(255, 255, 255, 0.96)', color: '#8A5D24' };
+      return { key: 'organizer.my_trips.status_pending', dotColor: '#C89D66', bg: 'rgba(255, 255, 255, 0.96)', color: '#8A5D24' };
     }
     if (raw?.approvalStatus === 'rejected') {
-      return { label: 'Rejected', dotColor: '#B84A39', bg: 'rgba(255, 255, 255, 0.96)', color: '#B84A39' };
+      return { key: 'organizer.my_trips.status_rejected', dotColor: '#B84A39', bg: 'rgba(255, 255, 255, 0.96)', color: '#B84A39' };
     }
     if (trip.status === 'Completed') {
-      return { label: 'Completed', dotColor: '#4A7C59', bg: 'rgba(255, 255, 255, 0.96)', color: '#2B2118' };
-    }
-    if (trip.status === 'Full') {
-      return { label: 'Full', dotColor: '#C69C6D', bg: 'rgba(255, 255, 255, 0.96)', color: '#2B2118' };
+      return { key: 'organizer.my_trips.status_completed', dotColor: '#4A7C59', bg: 'rgba(255, 255, 255, 0.96)', color: '#2B2118' };
     }
     if (trip.status === 'Draft') {
-      return { label: 'Draft', dotColor: '#8A7F73', bg: 'rgba(255, 255, 255, 0.96)', color: '#6A5F53' };
+      return { key: 'organizer.my_trips.status_draft', dotColor: '#8A7F73', bg: 'rgba(255, 255, 255, 0.96)', color: '#6A5F53' };
     }
-    return { label: 'Published', dotColor: '#4A7C59', bg: 'rgba(255, 255, 255, 0.96)', color: '#2B2118' };
+    return { key: 'organizer.my_trips.status_published', dotColor: '#4A7C59', bg: 'rgba(255, 255, 255, 0.96)', color: '#2B2118' };
   }
 
   private computeStats(trips: OrganizerTrip[]): OrganizerStats {

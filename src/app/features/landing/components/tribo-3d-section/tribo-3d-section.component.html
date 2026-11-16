@@ -16,6 +16,9 @@
       <!-- Three.js canvas injected here by the component -->
       <div class="t3d-canvas-wrap" #canvasWrap aria-hidden="true"></div>
 
+      <!-- Bottom fade gradient to hide runway end & blend seamlessly into CTA -->
+      <div class="t3d-bottom-fade" aria-hidden="true"></div>
+
       <!-- Ghost word (huge faint typemark behind the model) -->
       <div class="t3d-ghost" #ghostEl aria-hidden="true">
         <span #ghostT></span>
@@ -41,12 +44,17 @@
 
   <!-- Closing CTA — "Revolutionizing group travel." -->
   <section class="t3d-cta" [attr.aria-label]="'t3d.cta_section_label' | translate">
-    <h2 class="t3d-cta__headline">{{ 't3d.cta_headline_line1' | translate }}<br>{{ 't3d.cta_headline_line2' | translate }}</h2>
+    <div class="t3d-cta__badge">TRIBO EXPEDITIONS</div>
+    <h2 class="t3d-cta__headline">
+      <span>{{ 't3d.cta_headline_line1' | translate }}</span><br>
+      <span class="t3d-cta__gold-text">{{ 't3d.cta_headline_line2' | translate }}</span>
+    </h2>
     <a href="#hero-cta-book"
        class="t3d-cta__btn"
        id="t3d-book-btn"
        [attr.aria-label]="'t3d.cta_btn_aria' | translate">
-      {{ 't3d.cta_btn' | translate }}
+      <span>{{ 't3d.cta_btn' | translate }}</span>
+      <span class="t3d-cta__btn-arrow" aria-hidden="true">→</span>
     </a>
   </section>
 

@@ -189,6 +189,31 @@ input {
   }
 }
 
+.btn-lang-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #FFFFFF;
+  border: 1px solid #E8DCCB;
+  color: #6B5D4D;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  transition: all 0.15s;
+
+  &:hover {
+    background: #FAF7F2;
+    border-color: #9A6A3A;
+    color: #9A6A3A;
+  }
+
+  .i {
+    width: 14px;
+    height: 14px;
+  }
+}
+
 .btn-gold {
   display: inline-flex;
   align-items: center;
@@ -456,7 +481,7 @@ input {
 .status-pill {
   position: absolute;
   top: 14px;
-  left: 14px;
+  inset-inline-start: 14px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -480,7 +505,7 @@ input {
 .menu-wrap {
   position: absolute;
   top: 14px;
-  right: 14px;
+  inset-inline-end: 14px;
   z-index: 10;
 }
 
@@ -509,7 +534,7 @@ input {
 .dropdown {
   position: absolute;
   top: calc(100% + 6px);
-  right: 0;
+  inset-inline-end: 0;
   min-width: 170px;
   background: #FFFFFF;
   border: 1px solid #E8DCCB;

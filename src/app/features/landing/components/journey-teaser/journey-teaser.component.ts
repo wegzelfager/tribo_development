@@ -277,31 +277,12 @@ export class JourneyTeaserComponent implements AfterViewInit, OnDestroy {
       // and fades out (opacity = 1 - progress * 1.3)
       const opacity = Math.max(0, 1 - progress * 1.3);
 
-      // Writes ONE transform/opacity pair directly on content wrapper
+      // Writes ONE transform/opacity pair directly on content wrapper as a unified block
       inner.style.transform = `translate3d(0, ${driftY.toFixed(2)}px, 0)`;
       inner.style.opacity = `${opacity.toFixed(3)}`;
-
-      // Desktop only (>= 768px): subtle line speed separation. Skipped completely on mobile!
-      if (window.innerWidth >= 768) {
-        const speeds = [0, 0.04, 0.08, 0.12];
-        const lines = [this.line0, this.line1, this.line2, this.line3];
-        for (let i = 0; i < lines.length; i++) {
-          const line = lines[i]?.nativeElement;
-          if (line) {
-            line.style.transform = `translate3d(0, ${(scrolled * speeds[i]).toFixed(2)}px, 0)`;
-          }
-        }
-      }
     } else if (scrolled === 0) {
       inner.style.transform = '';
       inner.style.opacity = '';
-      if (window.innerWidth >= 768) {
-        const lines = [this.line0, this.line1, this.line2, this.line3];
-        for (let i = 0; i < lines.length; i++) {
-          const line = lines[i]?.nativeElement;
-          if (line) line.style.transform = '';
-        }
-      }
     }
   }
 
@@ -315,6 +296,13 @@ export class JourneyTeaserComponent implements AfterViewInit, OnDestroy {
     const H = section.clientHeight;
     if (!W || !H) return;
 
+    // Clear any lingering individual line transforms to prevent subtitle collision
+    const lines = [this.line0, this.line1, this.line2, this.line3];
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i]?.nativeElement;
+      if (line) line.style.transform = '';
+    }
+
     // Cache metrics so scroll drift loop NEVER reads DOM layout
     this.cachedSectionTop = section.offsetTop;
     this.cachedSectionHeight = H;
@@ -324,34 +312,37 @@ export class JourneyTeaserComponent implements AfterViewInit, OnDestroy {
     const padRight = Math.max(16, parseFloat(computedInner.paddingRight) || 16);
     const avail = Math.max(0, W - padLeft - padRight);
 
-    if (H < 480) {
+    const isMobile = W < 768;
+
+    if (H < 520) {
       section.setAttribute('data-short', '');
     } else {
       section.removeAttribute('data-short');
     }
 
-    // Measure widest line ("SURPRISED?") at probe font-size 100px
+    // Measure widest line at probe font-size 100px
     h1.style.setProperty('--fs', '100px');
-    const lines = h1.querySelectorAll<HTMLElement>('.teaser__headline-line');
+    const lineEls = h1.querySelectorAll<HTMLElement>('.teaser__headline-line');
     let maxLineWidth = 0;
-    lines.forEach((line) => {
+    lineEls.forEach((line) => {
       const w = line.getBoundingClientRect().width;
       if (w > maxLineWidth) maxLineWidth = w;
     });
 
     if (!maxLineWidth) return;
 
-    // Reduced factor to 0.96 with at least 16px side padding so it never touches screen edge
-    const targetWidth = avail * 0.96;
+    // Width target: 88% on mobile for elegant edge margins; 94% on desktop
+    const targetRatio = isMobile ? 0.88 : 0.94;
+    const targetWidth = avail * targetRatio;
     let fs = (targetWidth / maxLineWidth) * 100;
 
-    // Vertical budget clamp: ensure 4 stacked lines fit comfortably on short landscape viewports
-    const reserve = Math.min(260, H * 0.38);
-    const maxVerticalFs = (H - reserve) / (4 * 0.96);
-    fs = Math.min(fs, Math.max(26, maxVerticalFs));
+    // Vertical budget clamp: ensure 4 stacked lines + eyebrow + subtitle fit comfortably without colliding
+    const reserve = isMobile ? Math.max(260, H * 0.42) : Math.min(260, H * 0.36);
+    const maxVerticalFs = (H - reserve) / (4 * 1.05);
+    fs = Math.min(fs, Math.max(20, maxVerticalFs));
 
-    // Clamp: 26px to 170px
-    fs = Math.max(26, Math.min(170, fs));
+    // Clamp: 20px to 150px
+    fs = Math.max(20, Math.min(150, fs));
 
     h1.style.setProperty('--fs', `${fs.toFixed(2)}px`);
   }

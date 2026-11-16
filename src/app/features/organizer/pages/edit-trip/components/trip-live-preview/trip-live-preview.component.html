@@ -2,8 +2,8 @@
 
   <!-- Top Labels -->
   <div class="sidebar-header-line">
-    <span class="live-preview-tag">LIVE PREVIEW</span>
-    <span class="live-updates-hint">Updates as you type</span>
+    <span class="live-preview-tag">{{ 'organizer.edit_trip.preview_tag' | translate }}</span>
+    <span class="live-updates-hint">{{ 'organizer.edit_trip.preview_updates' | translate }}</span>
   </div>
 
   <!-- Trip Search Result Preview Card (ALWAYS VISIBLE & UPDATED) -->
@@ -17,13 +17,13 @@
           <circle cx="8.5" cy="8.5" r="1.5"></circle>
           <polyline points="21 15 16 10 5 21"></polyline>
         </svg>
-        <span class="preview-placeholder-text">Your cover photo</span>
+        <span class="preview-placeholder-text">{{ 'organizer.edit_trip.preview_cover_placeholder' | translate }}</span>
       }
     </div>
 
     <div class="preview-details-body">
       <h3 class="preview-trip-title" [class.is-empty]="!title">
-        {{ title || 'Your trip title' }}
+        {{ title || ('organizer.edit_trip.preview_trip_title' | translate) }}
       </h3>
 
       <div class="preview-location-line">
@@ -31,7 +31,7 @@
           <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"></path>
           <circle cx="12" cy="10" r="3"></circle>
         </svg>
-        <span>{{ location || 'Location' }}</span>
+        <span>{{ location || ('organizer.edit_trip.preview_location' | translate) }}</span>
       </div>
 
       <!-- Chips -->
@@ -41,7 +41,7 @@
             <circle cx="12" cy="12" r="10"></circle>
             <polyline points="12 6 12 12 16 14"></polyline>
           </svg>
-          <span>{{ durationDays }} {{ durationDays === 1 ? 'day' : 'days' }}</span>
+          <span>{{ durationDays }} {{ (durationDays === 1 ? 'organizer.edit_trip.unit_day' : 'organizer.edit_trip.unit_days') | translate }}</span>
         </span>
 
         <span class="preview-tag-chip">
@@ -49,7 +49,7 @@
             <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path>
             <circle cx="9" cy="7" r="4"></circle>
           </svg>
-          <span>Up to {{ maxCapacity }}</span>
+          <span>{{ 'organizer.edit_trip.preview_up_to' | translate }} {{ maxCapacity }}</span>
         </span>
 
         <span class="preview-tag-chip">
@@ -57,107 +57,107 @@
             <circle cx="12" cy="12" r="10"></circle>
             <path d="M12 7v5l3 3"></path>
           </svg>
-          <span>{{ ageText }}</span>
+          <span>{{ ageText === 'All ages' ? ('organizer.edit_trip.preview_age_all' | translate) : ageText }}</span>
         </span>
       </div>
 
       <div class="preview-divider-line"></div>
 
       <div class="preview-price-footer">
-        <span class="label-txt">Price</span>
+        <span class="label-txt">{{ 'organizer.edit_trip.preview_price_label' | translate }}</span>
         <span class="val-txt" [style.color]="price > 0 ? 'var(--color-primary, #8B5A2B)' : ''" [style.font-weight]="price > 0 ? '800' : ''">
-          {{ price > 0 ? ('$' + price + ' / person') : 'Set in step 4' }}
+          {{ price > 0 ? ('$' + price + ' ' + ('organizer.edit_trip.preview_per_person' | translate)) : ('organizer.edit_trip.preview_price_step4' | translate) }}
         </span>
       </div>
     </div>
   </article>
 
-  <p class="preview-caption-note">This is how travelers will see your trip in search results.</p>
+  <p class="preview-caption-note">{{ 'organizer.edit_trip.preview_caption' | translate }}</p>
 
   <!-- DYNAMIC CONTEXTUAL CHECKLIST / SUMMARY PANEL ACCORDING TO STEP -->
   @if (currentStep === 1) {
     <section class="checklist-panel" aria-label="Step 1 Requirements">
       <div class="checklist-top">
-        <h4 class="checklist-title-txt">Step 1 Checklist</h4>
+        <h4 class="checklist-title-txt">{{ 'organizer.edit_trip.checklist_step1_title' | translate }}</h4>
         <span class="checklist-tally" [class.completed]="isAllDone" aria-live="polite">
-          {{ doneCount }} of 4 done
+          {{ doneCount }} {{ 'organizer.edit_trip.checklist_of' | translate }} 4 {{ 'organizer.edit_trip.checklist_done_of' | translate }}
         </span>
       </div>
       <ul class="checklist-rows">
         <li class="checklist-row-item" [class.is-valid]="checklist.titleDone">
           <span class="check-marker" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
-          <span>Trip title</span>
+          <span>{{ 'organizer.edit_trip.checklist_title_item' | translate }}</span>
         </li>
         <li class="checklist-row-item" [class.is-valid]="checklist.locationDone">
           <span class="check-marker" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
-          <span>Location & duration</span>
+          <span>{{ 'organizer.edit_trip.checklist_location_item' | translate }}</span>
         </li>
         <li class="checklist-row-item" [class.is-valid]="checklist.meetingDone">
           <span class="check-marker" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
-          <span>Group size & meeting point</span>
+          <span>{{ 'organizer.edit_trip.checklist_meeting_item' | translate }}</span>
         </li>
         <li class="checklist-row-item" [class.is-valid]="checklist.coverDone">
           <span class="check-marker" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
-          <span>Cover photo</span>
+          <span>{{ 'organizer.edit_trip.checklist_cover_item' | translate }}</span>
         </li>
       </ul>
     </section>
   } @else if (currentStep === 2) {
     <section class="checklist-panel" aria-label="Step 2 Checklist">
       <div class="checklist-top">
-        <h4 class="checklist-title-txt">Step 2 Checklist</h4>
+        <h4 class="checklist-title-txt">{{ 'organizer.edit_trip.checklist_step2_title' | translate }}</h4>
         <span class="checklist-tally" [class.completed]="descriptionDone && highlightsDone">
-          {{ (descriptionDone ? 1 : 0) + (highlightsDone ? 1 : 0) }} of 2 done
+          {{ (descriptionDone ? 1 : 0) + (highlightsDone ? 1 : 0) }} {{ 'organizer.edit_trip.checklist_of' | translate }} 2 {{ 'organizer.edit_trip.checklist_done_of' | translate }}
         </span>
       </div>
       <ul class="checklist-rows">
         <li class="checklist-row-item" [class.is-valid]="descriptionDone">
           <span class="check-marker" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
-          <span>About description ({{ descriptionLength }} chars)</span>
+          <span>{{ 'organizer.edit_trip.checklist_desc_chars' | translate: { count: descriptionLength } }}</span>
         </li>
         <li class="checklist-row-item" [class.is-valid]="highlightsDone">
           <span class="check-marker" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
-          <span>{{ highlightsCount }} key {{ highlightsCount === 1 ? 'highlight' : 'highlights' }} added</span>
+          <span>{{ 'organizer.edit_trip.checklist_highlights_added' | translate: { count: highlightsCount } }}</span>
         </li>
       </ul>
     </section>
   } @else if (currentStep === 3) {
     <section class="checklist-panel" aria-label="Step 3 Checklist">
       <div class="checklist-top">
-        <h4 class="checklist-title-txt">Itinerary Plan</h4>
+        <h4 class="checklist-title-txt">{{ 'organizer.edit_trip.checklist_step3_title' | translate }}</h4>
         <span class="checklist-tally" [class.completed]="itineraryDone">
-          {{ daysCount }} of {{ durationDays }} days
+          {{ daysCount }} {{ 'organizer.edit_trip.checklist_of' | translate }} {{ durationDays }} {{ (durationDays === 1 ? 'organizer.edit_trip.unit_day' : 'organizer.edit_trip.unit_days') | translate }}
         </span>
       </div>
       <ul class="checklist-rows">
         <li class="checklist-row-item" [class.is-valid]="itineraryDone">
           <span class="check-marker" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
-          <span>{{ daysCount }} {{ daysCount === 1 ? 'day' : 'days' }} configured</span>
+          <span>{{ 'organizer.edit_trip.checklist_days_configured' | translate: { count: daysCount } }}</span>
         </li>
         <li class="checklist-row-item" [class.is-valid]="eventsCount > 0">
           <span class="check-marker" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
-          <span>{{ eventsCount }} timeline {{ eventsCount === 1 ? 'event' : 'events' }}</span>
+          <span>{{ 'organizer.edit_trip.checklist_timeline_events' | translate: { count: eventsCount } }}</span>
         </li>
       </ul>
     </section>
   } @else {
     <section class="checklist-panel" aria-label="Step 4 Summary">
       <div class="checklist-top">
-        <h4 class="checklist-title-txt">Expedition Financials</h4>
-        <span class="checklist-tally completed">Final Step</span>
+        <h4 class="checklist-title-txt">{{ 'organizer.edit_trip.checklist_step4_title' | translate }}</h4>
+        <span class="checklist-tally completed">{{ 'organizer.edit_trip.checklist_final_step' | translate }}</span>
       </div>
       <ul class="checklist-rows">
         <li class="checklist-row-item" [class.is-valid]="price > 0">
           <span class="check-marker" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
-          <span>Price: ${{ price }} per person</span>
+          <span>{{ 'organizer.edit_trip.checklist_price_person' | translate: { price: price } }}</span>
         </li>
         <li class="checklist-row-item is-valid">
           <span class="check-marker" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
-          <span>Potential group: ${{ price * maxCapacity }}</span>
+          <span>{{ 'organizer.edit_trip.checklist_potential_group' | translate: { total: (price * maxCapacity) } }}</span>
         </li>
         <li class="checklist-row-item" [class.is-valid]="includedCount > 0">
           <span class="check-marker" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
-          <span>{{ includedCount }} included / {{ excludedCount }} excluded</span>
+          <span>{{ 'organizer.edit_trip.checklist_inclusions_ratio' | translate: { included: includedCount, excluded: excludedCount } }}</span>
         </li>
       </ul>
     </section>

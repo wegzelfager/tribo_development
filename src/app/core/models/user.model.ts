@@ -16,6 +16,7 @@ export class UserModel {
     isVerified: false,
   };
   isVerified: boolean = false;
+  isBlocked: boolean = false;
   refreshToken?: string;
   createdAt?: string;
   updatedAt?: string;

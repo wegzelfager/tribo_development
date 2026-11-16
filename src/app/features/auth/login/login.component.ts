@@ -193,12 +193,27 @@ export class LoginComponent implements AfterViewInit, OnDestroy {
           this.errorMsg = 'Signed in successfully.';
           this.errorOk  = true;
           setTimeout(() => {
+            const role = this.authService.getCurrentUser()?.role?.toLowerCase();
             const returnUrl = this.route.snapshot.queryParams['returnUrl'];
-            if (returnUrl) {
-              this.router.navigateByUrl(returnUrl);
+
+            if (role === 'admin') {
+              if (returnUrl && returnUrl.startsWith('/admin')) {
+                this.router.navigateByUrl(returnUrl);
+              } else {
+                this.router.navigate(['/admin']);
+              }
+            } else if (role === 'organizer') {
+              if (returnUrl && returnUrl.startsWith('/organizer')) {
+                this.router.navigateByUrl(returnUrl);
+              } else {
+                this.router.navigate(['/organizer']);
+              }
             } else {
-              const role = this.authService.getCurrentUser()?.role?.toLowerCase();
-              this.router.navigate([role === 'organizer' ? '/organizer' : '/home']);
+              if (returnUrl && !returnUrl.startsWith('/admin') && !returnUrl.startsWith('/organizer')) {
+                this.router.navigateByUrl(returnUrl);
+              } else {
+                this.router.navigate(['/home']);
+              }
             }
           }, 1500);
         });

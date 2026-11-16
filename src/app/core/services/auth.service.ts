@@ -212,6 +212,8 @@ export class AuthService {
     } else {
       if (error.status === 0) {
         errorMessage = 'Cannot connect to the backend server. Please ensure it is running.';
+      } else if (error.error?.message) {
+        errorMessage = error.error.message;
       } else if (error.status === 401) {
         errorMessage = 'Invalid credentials. Please try again.';
       } else if (error.status === 403) {
@@ -219,7 +221,7 @@ export class AuthService {
       } else if (error.status === 409) {
         errorMessage = 'Email already exists. Please use a different email.';
       } else {
-        errorMessage = error.error?.message || `Server error: ${error.statusText}`;
+        errorMessage = `Server error: ${error.statusText}`;
       }
     }
 

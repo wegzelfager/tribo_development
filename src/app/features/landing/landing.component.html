@@ -327,48 +327,10 @@
   <!-- HORIZON SHOWCASE -->
   <app-horizon-showcase></app-horizon-showcase>
  
-  <!-- VALUE -->
-  <section class="value" #valueSection id="advantages" [attr.aria-label]="'value.section_label' | translate">
-    <div class="value__header">
-      <p class="value__eyebrow">{{ 'value.eyebrow' | translate }}</p>
-      <h2 class="value__title">{{ 'value.title_connect' | translate }} <em>{{ 'value.title_travelers' | translate }}</em>,<br/>{{ 'value.title_empower' | translate }}</h2>
-    </div>
-    <div class="value__grid">
-      <div class="value__cell value__cell--highlight" #valueCell>
-        <div class="value__icon" aria-hidden="true">⚡</div>
-        <h3 class="value__cell-title">{{ 'value.cell1_title' | translate }}</h3>
-        <p class="value__cell-desc">{{ 'value.cell1_desc' | translate }}</p>
-        <p class="value__stat">{{ 'value.cell1_stat' | translate }}</p>
-      </div>
-      <div class="value__cell" #valueCell>
-        <div class="value__icon" aria-hidden="true">🌍</div>
-        <h3 class="value__cell-title">{{ 'value.cell2_title' | translate }}</h3>
-        <p class="value__cell-desc">{{ 'value.cell2_desc' | translate }}</p>
-        <p class="value__stat">{{ 'value.cell2_stat' | translate }}</p>
-      </div>
-      <div class="value__cell" #valueCell>
-        <div class="value__icon" aria-hidden="true">✓</div>
-        <h3 class="value__cell-title">{{ 'value.cell3_title' | translate }}</h3>
-        <p class="value__cell-desc">{{ 'value.cell3_desc' | translate }}</p>
-      </div>
-      <div class="value__cell value__cell--wide" #valueCell>
-        <div class="value__icon" aria-hidden="true">🤖</div>
-        <h3 class="value__cell-title">{{ 'value.cell4_title' | translate }}</h3>
-        <p class="value__cell-desc">{{ 'value.cell4_desc' | translate }}</p>
-        <p class="value__stat">{{ 'value.cell4_stat' | translate }}</p>
-      </div>
-      <div class="value__cell" #valueCell>
-        <div class="value__icon" aria-hidden="true">💬</div>
-        <h3 class="value__cell-title">{{ 'value.cell5_title' | translate }}</h3>
-        <p class="value__cell-desc">{{ 'value.cell5_desc' | translate }}</p>
-        <p class="value__stat">{{ 'value.cell5_stat' | translate }}</p>
-      </div>
-    </div>
-  </section>
  
   <!-- TEASER + 3D STORY -->
   <app-journey-teaser></app-journey-teaser>
-  @defer (on viewport) {
+  @defer (on idle; prefetch on idle) {
     <app-tribo-3d-section></app-tribo-3d-section>
   } @placeholder {
     <div class="t3d-placeholder" style="min-height: 100vh; background: #07090E;"></div>

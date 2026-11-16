@@ -4,7 +4,7 @@ import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
 
-type AppRole = 'Organizer' | 'Traveler';
+type AppRole = 'Organizer' | 'Traveler' | 'Admin';
 
 const ROLE_CLAIM_KEYS = [
   'role',
@@ -59,6 +59,7 @@ function normaliseRole(raw: string): AppRole | null {
   const lower = raw.trim().toLowerCase();
   if (lower === 'organizer') return 'Organizer';
   if (lower === 'traveler' || lower === 'traveller') return 'Traveler';
+  if (lower === 'admin') return 'Admin';
   return null;
 }
 
@@ -88,6 +89,13 @@ export function roleGuard(requiredRole: AppRole): CanActivateFn {
           return true;
         }
         return router.createUrlTree(['/organizer']);
+      }
+
+      if (role === 'Admin') {
+        if (state.url.startsWith('/admin')) {
+          return true;
+        }
+        return router.createUrlTree(['/admin']);
       }
 
 

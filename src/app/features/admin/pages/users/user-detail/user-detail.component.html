@@ -1,0 +1,118 @@
+<div class="user-detail-page">
+
+  <!-- Back -->
+  <button class="back-btn" (click)="goBack()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="m15 18-6-6 6-6"/>
+    </svg>
+    Back to Users
+  </button>
+
+  <!-- Loading -->
+  <div class="state-box" *ngIf="isLoading()">
+    <div class="spinner"></div>
+    <p>Loading user…</p>
+  </div>
+
+  <!-- Error -->
+  <div class="state-box state-box--error" *ngIf="isError() && !isLoading()">
+    <p>⚠️ Failed to load user. Please go back and try again.</p>
+  </div>
+
+  <!-- Content -->
+  <ng-container *ngIf="user() as u">
+    <div class="detail-grid">
+
+      <!-- Profile Card -->
+      <div class="card profile-card">
+        <div class="profile-top">
+          <img *ngIf="u.profileImage" [src]="u.profileImage" [alt]="u.name" class="profile-avatar" />
+          <div *ngIf="!u.profileImage" class="profile-avatar avatar--initials">
+            {{ u.name[0].toUpperCase() }}
+          </div>
+          <div>
+            <h2 class="profile-name">{{ u.name }}</h2>
+            <p class="profile-email">{{ u.email }}</p>
+            <div class="badge-row">
+              <span [class]="roleBadgeClass(u.role)">{{ u.role }}</span>
+              <span class="status-badge status-badge--green" *ngIf="u.isVerified">✓ Verified</span>
+              <span class="status-badge" *ngIf="!u.isVerified">Unverified</span>
+              <span class="status-badge status-badge--red" *ngIf="u.isBlocked">Blocked</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="profile-meta">
+          <div class="meta-item">
+            <span class="meta-label">Age</span>
+            <span class="meta-value">{{ u.age || '—' }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Joined</span>
+            <span class="meta-value">{{ u.createdAt | date: 'longDate' }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Last Updated</span>
+            <span class="meta-value">{{ u.updatedAt | date: 'longDate' }}</span>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-row">
+          <button
+            class="action-btn"
+            [class.action-btn--danger]="!u.isBlocked"
+            [class.action-btn--success]="u.isBlocked"
+            [disabled]="blockMutation.isPending()"
+            (click)="toggleBlock()"
+          >
+            <span *ngIf="blockMutation.isPending() && !u.isBlocked">Blocking…</span>
+            <span *ngIf="blockMutation.isPending() && u.isBlocked">Unblocking…</span>
+            <span *ngIf="!blockMutation.isPending()">{{ u.isBlocked ? '✓ Unblock User' : 'Block User' }}</span>
+          </button>
+
+          <button
+            class="action-btn"
+            [class.action-btn--primary]="!u.isVerified"
+            [class.action-btn--muted]="u.isVerified"
+            [disabled]="verifyMutation.isPending()"
+            (click)="toggleVerify()"
+          >
+            <span *ngIf="verifyMutation.isPending() && !u.isVerified">Verifying…</span>
+            <span *ngIf="verifyMutation.isPending() && u.isVerified">Revoking…</span>
+            <span *ngIf="!verifyMutation.isPending()">{{ u.isVerified ? 'Revoke Verification' : 'Verify User' }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ID Card Section -->
+      <div class="card id-card-card">
+        <div class="card-header">
+          <h3 class="card-title">National ID Card</h3>
+          <span class="status-badge" [class.status-badge--green]="idCardVerified()" [class.status-badge--muted]="!idCardVerified()">
+            {{ idCardVerified() ? '✓ ID Verified' : 'ID Not Verified' }}
+          </span>
+        </div>
+
+        <div class="id-images" *ngIf="idCardFront() || idCardBack(); else noIdCard">
+          <div class="id-image-wrapper" *ngIf="idCardFront()">
+            <span class="id-label">Front</span>
+            <img [src]="idCardFront()!" alt="ID Front" class="id-image" />
+          </div>
+          <div class="id-image-wrapper" *ngIf="idCardBack()">
+            <span class="id-label">Back</span>
+            <img [src]="idCardBack()!" alt="ID Back" class="id-image" />
+          </div>
+        </div>
+
+        <ng-template #noIdCard>
+          <div class="no-id">
+            <p>No ID card uploaded yet.</p>
+          </div>
+        </ng-template>
+      </div>
+
+    </div>
+  </ng-container>
+
+</div>

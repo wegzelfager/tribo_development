@@ -8,9 +8,9 @@
           <line x1="19" y1="12" x2="5" y2="12"></line>
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
-        <span>Back to My Trips</span>
+        <span>{{ 'organizer.edit_trip.back_link' | translate }}</span>
       </a>
-      <span class="top-badge">{{ tripId ? 'Edit Mode' : 'New Expedition' }}</span>
+      <span class="top-badge">{{ (tripId ? 'organizer.edit_trip.edit_mode' : 'organizer.edit_trip.new_expedition') | translate }}</span>
     </header>
 
     <!-- ── STEPPER NAVIGATION ── -->
@@ -22,27 +22,27 @@
 
     <!-- ── PAGE HEADER ── -->
     <header class="page-header">
-      <p class="eyebrow">STEP {{ currentStep() }} OF 4</p>
+      <p class="eyebrow">{{ 'organizer.edit_trip.step_of' | translate: { current: currentStep() } }}</p>
       <h1 class="page-title">
         @if (currentStep() === 1) {
-          {{ tripId ? 'Edit trip basics' : "Let's set up the basics" }}
+          {{ (tripId ? 'organizer.edit_trip.step1_title_edit' : 'organizer.edit_trip.step1_title_new') | translate }}
         } @else if (currentStep() === 2) {
-          {{ tripId ? 'Edit description & highlights' : 'Tell your story & highlights' }}
+          {{ (tripId ? 'organizer.edit_trip.step2_title_edit' : 'organizer.edit_trip.step2_title_new') | translate }}
         } @else if (currentStep() === 3) {
-          {{ tripId ? 'Edit daily itinerary' : 'Build your daily itinerary' }}
+          {{ (tripId ? 'organizer.edit_trip.step3_title_edit' : 'organizer.edit_trip.step3_title_new') | translate }}
         } @else {
-          {{ tripId ? 'Edit pricing & inclusions' : 'Set pricing & inclusions' }}
+          {{ (tripId ? 'organizer.edit_trip.step4_title_edit' : 'organizer.edit_trip.step4_title_new') | translate }}
         }
       </h1>
       <p class="page-subtitle">
         @if (currentStep() === 1) {
-          Tell travelers what the trip is, where it starts and who it's for.
+          {{ 'organizer.edit_trip.step1_sub' | translate }}
         } @else if (currentStep() === 2) {
-          Describe the experience, the route, and what makes this expedition unique.
+          {{ 'organizer.edit_trip.step2_sub' | translate }}
         } @else if (currentStep() === 3) {
-          Outline each day's plan and timeline stops so travelers know what to expect.
+          {{ 'organizer.edit_trip.step3_sub' | translate }}
         } @else {
-          Define your price per person and what is covered in the expedition cost.
+          {{ 'organizer.edit_trip.step4_sub' | translate }}
         }
       </p>
     </header>
@@ -63,7 +63,7 @@
     @if (loading()) {
       <div class="loading-overlay">
         <div class="spinner"></div>
-        <p>Loading expedition details…</p>
+        <p>{{ 'organizer.edit_trip.submitting' | translate }}</p>
       </div>
     }
 
@@ -90,33 +90,33 @@
                     </svg>
                   </div>
                   <div>
-                    <h2 class="card-title">The essentials</h2>
-                    <p class="card-subtitle">Name your trip, pick a place and set how long it lasts.</p>
+                    <h2 class="card-title">{{ 'organizer.edit_trip.essentials_title' | translate }}</h2>
+                    <p class="card-subtitle">{{ 'organizer.edit_trip.essentials_sub' | translate }}</p>
                   </div>
                 </div>
 
                 <!-- Trip Title -->
                 <div class="field-group" [class.has-error]="isInvalid('title')">
                   <div class="label-line">
-                    <label for="trip-title">Trip title</label>
-                    <span class="pill-badge required">Required</span>
+                    <label for="trip-title">{{ 'organizer.edit_trip.trip_title_label' | translate }}</label>
+                    <span class="pill-badge required">{{ 'organizer.edit_trip.required' | translate }}</span>
                   </div>
                   <div class="input-wrapper">
                     <input
                       type="text"
                       id="trip-title"
                       formControlName="title"
-                      placeholder="e.g. Sahara Desert Adventure"
+                      [placeholder]="'organizer.edit_trip.trip_title_placeholder' | translate"
                       maxlength="100"
                       aria-required="true"
                     />
                   </div>
                   <div class="field-hint-line">
-                    <span>Short and vivid. Travelers see this first.</span>
+                    <span>{{ 'organizer.edit_trip.trip_title_hint' | translate }}</span>
                     <span class="live-counter">{{ titleCharCount() }}/100</span>
                   </div>
                   @if (isInvalid('title')) {
-                    <div class="error-feedback" role="alert">Trip title is required.</div>
+                    <div class="error-feedback" role="alert">{{ 'organizer.edit_trip.trip_title_error' | translate }}</div>
                   }
                 </div>
 
@@ -125,8 +125,8 @@
                   <!-- Location -->
                   <div class="field-group" [class.has-error]="isInvalid('location')">
                     <div class="label-line">
-                      <label for="trip-location">Location</label>
-                      <span class="pill-badge required">Required</span>
+                      <label for="trip-location">{{ 'organizer.edit_trip.location_label' | translate }}</label>
+                      <span class="pill-badge required">{{ 'organizer.edit_trip.required' | translate }}</span>
                     </div>
                     <div class="input-wrapper has-icon">
                       <span class="input-icon-left" aria-hidden="true">
@@ -139,20 +139,20 @@
                         type="text"
                         id="trip-location"
                         formControlName="location"
-                        placeholder="e.g. Marrakech, Morocco"
+                        [placeholder]="'organizer.edit_trip.location_placeholder' | translate"
                         aria-required="true"
                       />
                     </div>
-                    <div class="field-hint-line"><span>City, region or country.</span></div>
+                    <div class="field-hint-line"><span>{{ 'organizer.edit_trip.location_hint' | translate }}</span></div>
                     @if (isInvalid('location')) {
-                      <div class="error-feedback" role="alert">Location is required.</div>
+                      <div class="error-feedback" role="alert">{{ 'organizer.edit_trip.location_error' | translate }}</div>
                     }
                   </div>
 
                   <!-- Duration Stepper -->
                   <div class="field-group">
                     <div class="label-line">
-                      <label>Duration</label>
+                      <label>{{ 'organizer.edit_trip.duration_label' | translate }}</label>
                     </div>
                     <div class="stepper-control" role="group" aria-label="Duration in days">
                       <button
@@ -174,7 +174,7 @@
                           max="60"
                           aria-label="Duration in days"
                         />
-                        <span class="stepper-unit-label">{{ form.get('durationDays')!.value === 1 ? 'day' : 'days' }}</span>
+                        <span class="stepper-unit-label">{{ form.get('durationDays')!.value === 1 ? ('organizer.edit_trip.unit_day' | translate) : ('organizer.edit_trip.unit_days' | translate) }}</span>
                       </div>
                       <button
                         type="button"
@@ -188,7 +188,7 @@
                         </svg>
                       </button>
                     </div>
-                    <div class="field-hint-line"><span>How many days the trip lasts.</span></div>
+                    <div class="field-hint-line"><span>{{ 'organizer.edit_trip.duration_hint' | translate }}</span></div>
                   </div>
                 </div>
               </div>
@@ -205,8 +205,8 @@
                     </svg>
                   </div>
                   <div>
-                    <h2 class="card-title">Group and meeting point</h2>
-                    <p class="card-subtitle">How many people, who can join and where you'll meet.</p>
+                    <h2 class="card-title">{{ 'organizer.edit_trip.group_meeting_title' | translate }}</h2>
+                    <p class="card-subtitle">{{ 'organizer.edit_trip.group_meeting_sub' | translate }}</p>
                   </div>
                 </div>
 
@@ -215,7 +215,7 @@
                   <!-- Max Group Size -->
                   <div class="field-group">
                     <div class="label-line">
-                      <label>Max group size</label>
+                      <label>{{ 'organizer.edit_trip.max_group_size_label' | translate }}</label>
                     </div>
                     <div class="stepper-control" role="group" aria-label="Maximum travelers">
                       <button
@@ -237,7 +237,7 @@
                           max="50"
                           aria-label="Max travelers"
                         />
-                        <span class="stepper-unit-label">travelers</span>
+                        <span class="stepper-unit-label">{{ 'organizer.edit_trip.unit_travelers' | translate }}</span>
                       </div>
                       <button
                         type="button"
@@ -251,14 +251,14 @@
                         </svg>
                       </button>
                     </div>
-                    <div class="field-hint-line"><span>Maximum travelers per departure.</span></div>
+                    <div class="field-hint-line"><span>{{ 'organizer.edit_trip.max_group_size_hint' | translate }}</span></div>
                   </div>
 
                   <!-- Meeting Point -->
                   <div class="field-group" [class.has-error]="isInvalid('meetingPoint')">
                     <div class="label-line">
-                      <label for="trip-meeting">Meeting point</label>
-                      <span class="pill-badge required">Required</span>
+                      <label for="trip-meeting">{{ 'organizer.edit_trip.meeting_point_label' | translate }}</label>
+                      <span class="pill-badge required">{{ 'organizer.edit_trip.required' | translate }}</span>
                     </div>
                     <div class="input-wrapper has-icon">
                       <span class="input-icon-left" aria-hidden="true">
@@ -271,13 +271,13 @@
                         type="text"
                         id="trip-meeting"
                         formControlName="meetingPoint"
-                        placeholder="e.g. Jemaa el-Fna Square"
+                        [placeholder]="'organizer.edit_trip.meeting_point_placeholder' | translate"
                         aria-required="true"
                       />
                     </div>
-                    <div class="field-hint-line"><span>A landmark or address travelers can find easily.</span></div>
+                    <div class="field-hint-line"><span>{{ 'organizer.edit_trip.meeting_point_hint' | translate }}</span></div>
                     @if (isInvalid('meetingPoint')) {
-                      <div class="error-feedback" role="alert">Meeting point is required.</div>
+                      <div class="error-feedback" role="alert">{{ 'organizer.edit_trip.meeting_point_error' | translate }}</div>
                     }
                   </div>
                 </div>
@@ -285,8 +285,8 @@
                 <!-- Age Restriction Chips -->
                 <div class="field-group age-field">
                   <div class="label-line">
-                    <label>Age restriction</label>
-                    <span class="pill-badge optional">Optional</span>
+                    <label>{{ 'organizer.edit_trip.target_age_label' | translate }}</label>
+                    <span class="pill-badge optional">{{ 'organizer.edit_trip.optional' | translate }}</span>
                   </div>
                   <div class="age-chips-wrap" role="radiogroup" aria-label="Age restriction">
                     @for (opt of ageOptions; track opt.value) {
@@ -302,11 +302,11 @@
                             <polyline points="20 6 9 17 4 12"></polyline>
                           </svg>
                         }
-                        <span>{{ opt.label }}</span>
+                        <span>{{ opt.value === 'any' ? ('organizer.edit_trip.preview_age_all' | translate) : opt.label }}</span>
                       </button>
                     }
                   </div>
-                  <div class="field-hint-line"><span>Who can join this trip. Select "Any age" if there's no limit.</span></div>
+                  <div class="field-hint-line"><span>{{ 'organizer.edit_trip.target_age_hint' | translate }}</span></div>
                 </div>
               </div>
 
@@ -321,17 +321,17 @@
                     </svg>
                   </div>
                   <div>
-                    <h2 class="card-title">Photos</h2>
-                    <p class="card-subtitle">Show travelers what to expect.</p>
+                    <h2 class="card-title">{{ 'organizer.edit_trip.media_title' | translate }}</h2>
+                    <p class="card-subtitle">{{ 'organizer.edit_trip.media_sub' | translate }}</p>
                   </div>
                 </div>
 
                 <!-- Cover Photo Upload -->
                 <div class="field-group" [class.has-error]="coverError">
                   <div class="label-line">
-                    <label>Cover photo</label>
-                    <span class="pill-badge required" *ngIf="!tripId">Required</span>
-                    <span class="pill-badge optional" *ngIf="tripId">Current cover kept if unchanged</span>
+                    <label>{{ 'organizer.edit_trip.cover_photo_label' | translate }}</label>
+                    <span class="pill-badge required" *ngIf="!tripId">{{ 'organizer.edit_trip.required' | translate }}</span>
+                    <span class="pill-badge optional" *ngIf="tripId">{{ 'organizer.edit_trip.optional' | translate }}</span>
                   </div>
 
                   <div
@@ -368,9 +368,9 @@
                         </svg>
                       </div>
                       <p class="dropzone-main-text">
-                        Drag a photo here, or <span class="browse-link">browse your files</span>
+                        <span>{{ 'organizer.edit_trip.cover_photo_desc' | translate }}</span>
                       </p>
-                      <p class="dropzone-sub-text">JPG or PNG · at least 1600 × 900 px · up to 5 MB</p>
+                      <p class="dropzone-sub-text">JPG, PNG · 1600 × 900 px · 5 MB</p>
                     }
                   </div>
 
@@ -380,21 +380,21 @@
                       <line x1="12" y1="8" x2="12" y2="12"></line>
                       <line x1="12" y1="16" x2="12.01" y2="16"></line>
                     </svg>
-                    <span>Pick a bright, landscape photo. It's the first thing travelers see in search results.</span>
+                    <span>{{ 'organizer.edit_trip.cover_photo_desc' | translate }}</span>
                   </div>
                   @if (coverError) {
-                    <div class="error-feedback" role="alert">Please upload a valid cover photo.</div>
+                    <div class="error-feedback" role="alert">{{ 'organizer.edit_trip.cover_photo_error' | translate }}</div>
                   }
                 </div>
 
                 <!-- More Photos (Optional) -->
                 <div class="field-group">
                   <div class="label-line">
-                    <label>More photos <span class="optional-txt">(optional)</span></label>
+                    <label>{{ 'organizer.edit_trip.more_photos_label' | translate }} <span class="optional-txt">{{ 'organizer.edit_trip.optional' | translate }}</span></label>
                     <span class="live-counter">{{ imagePreviews.length }} / 10</span>
                   </div>
                   <div class="field-hint-line" style="margin-top: 0; margin-bottom: 10px;">
-                    <span>Add the group, the food, the places you'll stop. Up to 10 photos.</span>
+                    <span>{{ 'organizer.edit_trip.more_photos_hint' | translate }}</span>
                   </div>
 
                   <div class="photo-grid">
@@ -410,7 +410,7 @@
                           <line x1="12" y1="5" x2="12" y2="19"></line>
                           <line x1="5" y1="12" x2="19" y2="12"></line>
                         </svg>
-                        <span>Add photos</span>
+                        <span>{{ 'organizer.edit_trip.add_photos' | translate }}</span>
                       </div>
                     }
 
@@ -450,20 +450,20 @@
                 <!-- FOOTER ACTIONS BAR -->
                 <footer class="form-footer-bar">
                   <a routerLink="/organizer/trips" class="btn-secondary">
-                    Cancel
+                    {{ 'organizer.edit_trip.cancel' | translate }}
                   </a>
                   <div class="footer-right-group">
                     @if (requiredFieldsLeft > 0) {
                       <span class="fields-remaining-text" aria-live="polite">
-                        {{ requiredFieldsLeft }} required {{ requiredFieldsLeft === 1 ? 'field' : 'fields' }} left
+                        {{ 'organizer.edit_trip.required_fields_left' | translate: { count: requiredFieldsLeft } }}
                       </span>
                     } @else {
                       <span class="fields-remaining-text completed" aria-live="polite">
-                        All required fields done ✓
+                        {{ 'organizer.edit_trip.all_required_done' | translate }}
                       </span>
                     }
                     <button type="button" class="btn-primary" (click)="nextStep()">
-                      <span>Next: Description</span>
+                      <span>{{ 'organizer.edit_trip.next_description' | translate }}</span>
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                         <polyline points="12 5 19 12 12 19"></polyline>
@@ -514,32 +514,32 @@
                     </svg>
                   </div>
                   <div>
-                    <h2 class="card-title">The expedition story</h2>
-                    <p class="card-subtitle">Describe the journey, terrain, and what travelers will do.</p>
+                    <h2 class="card-title">{{ 'organizer.edit_trip.step2_story_title' | translate }}</h2>
+                    <p class="card-subtitle">{{ 'organizer.edit_trip.step2_story_sub' | translate }}</p>
                   </div>
                 </div>
 
                 <!-- Description Textarea -->
                 <div class="field-group" [class.has-error]="isInvalid('description')">
                   <div class="label-line">
-                    <label for="trip-desc">Trip description</label>
-                    <span class="pill-badge required">Required</span>
+                    <label for="trip-desc">{{ 'organizer.edit_trip.step2_desc_label' | translate }}</label>
+                    <span class="pill-badge required">{{ 'organizer.edit_trip.required' | translate }}</span>
                   </div>
                   <div class="input-wrapper">
                     <textarea
                       id="trip-desc"
                       formControlName="description"
                       rows="7"
-                      placeholder="Journey deep into Egypt's surreal western landscapes on this immersive 3-day 4x4 overland expedition. Starting from Cairo, our expert convoy navigates the iconic White Desert..."
+                      [placeholder]="'organizer.edit_trip.step2_desc_placeholder' | translate"
                       aria-required="true"
                     ></textarea>
                   </div>
                   <div class="field-hint-line">
-                    <span>Describe the experience, the route, physical difficulty and daily vibe.</span>
+                    <span>{{ 'organizer.edit_trip.step2_desc_hint' | translate }}</span>
                     <span class="live-counter">{{ descriptionLength }}/1500</span>
                   </div>
                   @if (isInvalid('description')) {
-                    <div class="error-feedback" role="alert">Description is required (at least 10 characters).</div>
+                    <div class="error-feedback" role="alert">{{ 'organizer.edit_trip.step2_desc_error' | translate }}</div>
                   }
                 </div>
 
@@ -549,7 +549,7 @@
                     <line x1="12" y1="8" x2="12" y2="12"></line>
                     <line x1="12" y1="16" x2="12.01" y2="16"></line>
                   </svg>
-                  <span>Pro Tip: Mention gear requirements, desert temperatures and the best season to join.</span>
+                  <span>{{ 'organizer.edit_trip.step2_story_sub' | translate }}</span>
                 </div>
               </div>
 
@@ -562,16 +562,16 @@
                     </svg>
                   </div>
                   <div>
-                    <h2 class="card-title">Key highlights</h2>
-                    <p class="card-subtitle">Quick bullet points travelers can scan at a glance.</p>
+                    <h2 class="card-title">{{ 'organizer.edit_trip.step2_highlights_title' | translate }}</h2>
+                    <p class="card-subtitle">{{ 'organizer.edit_trip.step2_highlights_sub' | translate }}</p>
                   </div>
                 </div>
 
                 <!-- Quick Presets -->
                 <div class="field-group">
                   <div class="label-line">
-                    <label>Quick add popular highlights</label>
-                    <span class="pill-badge optional">1-Click Add</span>
+                    <label>{{ 'organizer.edit_trip.step2_highlights_title' | translate }}</label>
+                    <span class="pill-badge optional">{{ 'organizer.edit_trip.optional' | translate }}</span>
                   </div>
                   <div class="preset-pills-row">
                     @for (preset of presetHighlights; track preset) {
@@ -585,8 +585,8 @@
                 <!-- Current Highlights list -->
                 <div class="field-group">
                   <div class="label-line">
-                    <label>Active Highlights</label>
-                    <span class="live-counter">{{ highlightsCount }} added</span>
+                    <label>{{ 'organizer.edit_trip.step2_highlights_title' | translate }}</label>
+                    <span class="live-counter">{{ highlightsCount }}</span>
                   </div>
 
                   @if (highlights.controls.length > 0) {
@@ -607,18 +607,18 @@
                       }
                     </div>
                   } @else {
-                    <p class="empty-hint-text">No highlights added yet. Type below or pick from the suggestions above.</p>
+                    <p class="empty-hint-text">{{ 'organizer.edit_trip.step2_highlights_sub' | translate }}</p>
                   }
 
                   <div class="chip-input-container">
                     <input
                       #hlInput
                       type="text"
-                      placeholder="e.g. Camp under a canopy of 10,000 desert stars..."
+                      [placeholder]="'organizer.edit_trip.step2_highlight_placeholder' | translate"
                       (keydown.enter)="addHighlight(hlInput); $event.preventDefault()"
                     />
                     <button type="button" class="btn-chip-add" (click)="addHighlight(hlInput)">
-                      <span>+ Add Highlight</span>
+                      <span>{{ 'organizer.edit_trip.step2_add_highlight' | translate }}</span>
                     </button>
                   </div>
                 </div>
@@ -626,14 +626,14 @@
                 <!-- FOOTER ACTIONS BAR -->
                 <footer class="form-footer-bar">
                   <button type="button" class="btn-secondary" (click)="prevStep()">
-                    ← Back to Basics
+                    {{ 'organizer.edit_trip.back_to_basics' | translate }}
                   </button>
                   <div class="footer-right-group">
                     <span class="fields-remaining-text" [class.completed]="descriptionDone && highlightsDone">
-                      {{ descriptionDone ? 'Description ready ✓' : 'Description required' }}
+                      {{ descriptionDone ? ('organizer.edit_trip.all_required_done' | translate) : ('organizer.edit_trip.step2_desc_error' | translate) }}
                     </span>
                     <button type="button" class="btn-primary" (click)="nextStep()">
-                      <span>Next: Itinerary</span>
+                      <span>{{ 'organizer.edit_trip.next_itinerary' | translate }}</span>
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                         <polyline points="12 5 19 12 12 19"></polyline>
@@ -684,8 +684,8 @@
                     </svg>
                   </div>
                   <div>
-                    <h2 class="card-title">Day-by-day itinerary</h2>
-                    <p class="card-subtitle">Plan each day of the journey with activities and timeline stops.</p>
+                    <h2 class="card-title">{{ 'organizer.edit_trip.step3_plan_title' | translate }}</h2>
+                    <p class="card-subtitle">{{ 'organizer.edit_trip.step3_plan_sub' | translate }}</p>
                   </div>
                 </div>
 
@@ -699,13 +699,13 @@
                       <line x1="3" y1="10" x2="21" y2="10"></line>
                     </svg>
                     <span>
-                      Duration set to <strong>{{ previewDuration }} {{ previewDuration === 1 ? 'day' : 'days' }}</strong>.
-                      Currently configuring <strong>{{ daysCount }} {{ daysCount === 1 ? 'day' : 'days' }}</strong>.
+                      {{ 'organizer.edit_trip.duration_label' | translate }}: <strong>{{ previewDuration }} {{ previewDuration === 1 ? ('organizer.edit_trip.unit_day' | translate) : ('organizer.edit_trip.unit_days' | translate) }}</strong>.
+                      (<strong>{{ daysCount }} {{ daysCount === 1 ? ('organizer.edit_trip.unit_day' | translate) : ('organizer.edit_trip.unit_days' | translate) }}</strong>)
                     </span>
                   </div>
                   @if (daysCount < previewDuration) {
                     <button type="button" class="btn-sync-days" (click)="syncDaysWithDuration()">
-                      + Auto-fill to {{ previewDuration }} days
+                      + {{ previewDuration }} {{ 'organizer.edit_trip.unit_days' | translate }}
                     </button>
                   }
                 </div>
@@ -715,14 +715,14 @@
                   @for (day of itinerary.controls; track $index; let i = $index) {
                     <div class="day-card-box" [formGroupName]="i">
                       <div class="day-card-header">
-                        <div class="day-badge-pill">DAY {{ i + 1 }}</div>
+                        <div class="day-badge-pill">{{ 'organizer.edit_trip.preview_day' | translate }} {{ i + 1 }}</div>
                         @if (itinerary.length > 1) {
                           <button type="button" class="btn-day-delete" (click)="removeDay(i)">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                               <polyline points="3 6 5 6 21 6"></polyline>
                               <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
                             </svg>
-                            <span>Remove Day</span>
+                            <span>{{ 'organizer.edit_trip.step3_remove_day' | translate }}</span>
                           </button>
                         }
                       </div>
@@ -730,32 +730,32 @@
                       <!-- Day Title -->
                       <div class="field-group" [class.has-error]="isDayInvalid(i, 'dayTitle')">
                         <div class="label-line">
-                          <label>Day Title</label>
-                          <span class="pill-badge required">Required</span>
+                          <label>{{ 'organizer.edit_trip.step3_day_title_label' | translate }}</label>
+                          <span class="pill-badge required">{{ 'organizer.edit_trip.required' | translate }}</span>
                         </div>
                         <div class="input-wrapper">
                           <input
                             formControlName="dayTitle"
                             type="text"
-                            placeholder="e.g. Cairo Departure & Desert Entry"
+                            [placeholder]="'organizer.edit_trip.step3_day_title_placeholder' | translate"
                           />
                         </div>
                         @if (isDayInvalid(i, 'dayTitle')) {
-                          <div class="error-feedback">Day title is required.</div>
+                          <div class="error-feedback">{{ 'organizer.edit_trip.step3_day_title_label' | translate }} مطلوب</div>
                         }
                       </div>
 
                       <!-- Activity Summary -->
                       <div class="field-group">
                         <div class="label-line">
-                          <label>Activity Summary</label>
-                          <span class="pill-badge optional">Optional</span>
+                          <label>{{ 'organizer.edit_trip.step3_day_desc_label' | translate }}</label>
+                          <span class="pill-badge optional">{{ 'organizer.edit_trip.optional' | translate }}</span>
                         </div>
                         <div class="input-wrapper">
                           <input
                             formControlName="activitySummary"
                             type="text"
-                            placeholder="e.g. 8hr Drive · Camp Setup · Sunset Photography"
+                            [placeholder]="'organizer.edit_trip.step3_day_desc_placeholder' | translate"
                           />
                         </div>
                       </div>
@@ -763,8 +763,8 @@
                       <!-- Timeline Events -->
                       <div class="field-group">
                         <div class="label-line">
-                          <label>Timeline Events</label>
-                          <span class="pill-badge optional">Milestones</span>
+                          <label>{{ 'organizer.edit_trip.step3_stops_title' | translate }}</label>
+                          <span class="pill-badge optional">{{ 'organizer.edit_trip.optional' | translate }}</span>
                         </div>
 
                         <!-- Presets for this day -->
@@ -790,11 +790,11 @@
                           <input
                             type="text"
                             [id]="'ev-' + i"
-                            placeholder="e.g. 7:00 AM — 4x4 convoy departs Cairo"
+                            [placeholder]="'organizer.edit_trip.step3_add_stop' | translate"
                             (keydown.enter)="addDayEvent(i, $event); $event.preventDefault()"
                           />
                           <button type="button" class="btn-chip-add" (click)="addDayEventByBtn(i)">
-                            <span>+ Add Event</span>
+                            <span>{{ 'organizer.edit_trip.step3_add_stop' | translate }}</span>
                           </button>
                         </div>
                       </div>
@@ -807,20 +807,20 @@
                     <line x1="12" y1="5" x2="12" y2="19"></line>
                     <line x1="5" y1="12" x2="19" y2="12"></line>
                   </svg>
-                  <span>Add Another Day</span>
+                  <span>{{ 'organizer.edit_trip.step3_add_day' | translate }}</span>
                 </button>
 
                 <!-- FOOTER ACTIONS BAR -->
                 <footer class="form-footer-bar">
                   <button type="button" class="btn-secondary" (click)="prevStep()">
-                    ← Back to Description
+                    {{ 'organizer.edit_trip.back_to_description' | translate }}
                   </button>
                   <div class="footer-right-group">
                     <span class="fields-remaining-text" [class.completed]="itineraryDone">
-                      {{ daysCount }} of {{ previewDuration }} days configured
+                      {{ daysCount }} / {{ previewDuration }} {{ 'organizer.edit_trip.unit_days' | translate }}
                     </span>
                     <button type="button" class="btn-primary" (click)="nextStep()">
-                      <span>Next: Pricing</span>
+                      <span>{{ 'organizer.edit_trip.next_pricing' | translate }}</span>
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                         <polyline points="12 5 19 12 12 19"></polyline>

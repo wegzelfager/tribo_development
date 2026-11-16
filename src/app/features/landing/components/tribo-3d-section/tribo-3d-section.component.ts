@@ -407,27 +407,27 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
 
     const span    = this.scrollSpanCache;
     const scrollY = window.scrollY;
-    const lead    = this.getLeadBeats() / N;
+
+    // Only clamp while strictly inside the sticky 3D journey zone
+    // Never clamp on leavePastEnd / leavePastStart so transitioning to CTA is 100% lag-free
+    const inStickyZone = scrollY >= this.wrapTopCache && scrollY <= this.wrapTopCache + span;
+    if (!inStickyZone) return;
+
+    const lead         = this.getLeadBeats() / N;
     const tolerancePx  = lead * span;
     const planeScroll  = this.wrapTopCache + this.cur * span;
     const minAllowed   = planeScroll - tolerancePx;
     const maxAllowed   = planeScroll + tolerancePx;
 
-    const inStickyZone  = scrollY >= this.wrapTopCache && scrollY <= this.wrapTopCache + span;
-    const leavePastEnd  = scrollY > this.wrapTopCache + span && this.cur < 0.99;
-    const leavePastStart= scrollY < this.wrapTopCache && this.cur > 0.01;
+    let clampedY = scrollY;
+    if      (scrollY < minAllowed) clampedY = minAllowed;
+    else if (scrollY > maxAllowed) clampedY = maxAllowed;
 
-    if (inStickyZone || leavePastEnd || leavePastStart) {
-      let clampedY = scrollY;
-      if      (scrollY < minAllowed) clampedY = minAllowed;
-      else if (scrollY > maxAllowed) clampedY = maxAllowed;
-
-      if (Math.abs(clampedY - scrollY) > 1) {
-        this.isClamping = true;
-        this.smoothScroll.scrollTo(clampedY, { immediate: true });
-        window.scrollTo({ top: clampedY, behavior: 'instant' });
-        this.isClamping = false;
-      }
+    if (Math.abs(clampedY - scrollY) > 1) {
+      this.isClamping = true;
+      this.smoothScroll.scrollTo(clampedY, { immediate: true });
+      window.scrollTo({ top: clampedY, behavior: 'instant' });
+      this.isClamping = false;
     }
   }
 
@@ -435,6 +435,11 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
     if (this.isClamping || this.navTargetProgress !== null) return;
     this.checkScrollLeash();
     this.tgt = this.getScrollProgress();
+    if (window.scrollY > this.wrapTopCache + this.scrollSpanCache) {
+      this.tgt = 1;
+    } else if (window.scrollY < this.wrapTopCache) {
+      this.tgt = 0;
+    }
   };
 
   private initScrollAndResize(): void {
@@ -1058,6 +1063,9 @@ export class Tribo3dSectionComponent implements AfterViewInit, OnDestroy {
       const step = (this.tgt - this.cur) * (1 - Math.exp(-dt * 6));
       const maxStep = MAX_SPEED * dt;
       this.cur += Math.max(-maxStep, Math.min(maxStep, step));
+      if (window.scrollY > this.wrapTopCache + this.scrollSpanCache && this.cur > 0.98) {
+        this.cur = 1;
+      }
     }
 
     this.playheadMoving = Math.abs(this.cur - prevCur) > 1e-5;

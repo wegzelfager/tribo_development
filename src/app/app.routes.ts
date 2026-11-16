@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { roleGuard } from './core/guards/role.guard';
+import { adminGuard } from './core/guards/admin.guard';
 
 export const routes: Routes = [
   {
@@ -18,6 +19,12 @@ export const routes: Routes = [
     canActivate: [roleGuard('Organizer')],
     loadChildren: () =>
       import('./features/organizer/organizer.routes').then(m => m.ORGANIZER_ROUTES)
+  },
+  {
+    path: 'admin',
+    canActivate: [adminGuard],
+    loadChildren: () =>
+      import('./features/admin/admin.routes').then(m => m.ADMIN_ROUTES)
   },
   {
     path: 'login',

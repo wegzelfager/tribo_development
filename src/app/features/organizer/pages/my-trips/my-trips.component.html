@@ -3,9 +3,9 @@
   <!-- Top bar: Breadcrumb & Actions -->
   <header class="top-bar">
     <nav class="breadcrumb" aria-label="Breadcrumb">
-      <span class="crumb-parent">Expedition Management</span>
-      <span class="crumb-separator">/</span>
-      <span class="crumb-current">My Trips</span>
+      <span class="crumb-parent">{{ 'organizer.topbar.breadcrumb_parent' | translate }}</span>
+      <span class="crumb-separator">{{ 'organizer.topbar.breadcrumb_separator' | translate }}</span>
+      <span class="crumb-current">{{ 'organizer.topbar.breadcrumb_current' | translate }}</span>
     </nav>
 
     <div class="top-actions">
@@ -15,29 +15,41 @@
           <path [attr.d]="icons.search" />
         </svg>
         <input type="text"
-               placeholder="Search trips"
+               [placeholder]="'organizer.topbar.search_placeholder' | translate"
                [value]="searchQuery()"
                (input)="onSearch($event)"
-               aria-label="Search trips" />
+               [attr.aria-label]="'organizer.topbar.search_aria' | translate" />
       </div>
 
       <!-- Notifications bell (shared component) -->
       <app-notification-bell />
+
+      <!-- Language Toggle Button -->
+      <button class="btn btn-lang-toggle"
+              type="button"
+              (click)="toggleLang()"
+              [title]="'organizer.shell.lang_switch_label' | translate">
+        <svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.8"/>
+          <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" fill="none" stroke="currentColor" stroke-width="1.8"/>
+        </svg>
+        <span>{{ isArabic() ? 'EN' : 'عربي' }}</span>
+      </button>
 
       <!-- New Trip primary gold button -->
       <button class="btn btn-gold" type="button" (click)="goNewTrip()">
         <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
           <path [attr.d]="icons.plus" />
         </svg>
-        <span>New Trip</span>
+        <span>{{ 'organizer.topbar.new_trip' | translate }}</span>
       </button>
     </div>
   </header>
 
   <!-- Page Title & Subtitle -->
   <div class="page-title-block">
-    <h1 class="page-title">My Expeditions</h1>
-    <p class="page-subtitle">Manage your trips, track bookings and keep an eye on capacity.</p>
+    <h1 class="page-title">{{ 'organizer.my_trips.page_title' | translate }}</h1>
+    <p class="page-subtitle">{{ 'organizer.my_trips.page_subtitle' | translate }}</p>
   </div>
 
   <!-- KPI Row (4 cards) -->
@@ -51,33 +63,33 @@
     <div class="kpi-grid">
       <!-- 1: Active Trips -->
       <div class="kpi-card">
-        <span class="kpi-label">Active trips</span>
+        <span class="kpi-label">{{ 'organizer.my_trips.kpi_active_trips' | translate }}</span>
         <span class="kpi-value">{{ stats().activeTrips }}</span>
         <span class="kpi-caption text-success">
           <span class="status-dot-sm bg-success"></span>
-          Published
+          {{ 'organizer.my_trips.kpi_published' | translate }}
         </span>
       </div>
 
       <!-- 2: Total Bookings -->
       <div class="kpi-card">
-        <span class="kpi-label">Total bookings</span>
+        <span class="kpi-label">{{ 'organizer.my_trips.kpi_total_bookings' | translate }}</span>
         <span class="kpi-value">{{ stats().totalBookings }}</span>
-        <span class="kpi-caption text-muted">All time</span>
+        <span class="kpi-caption text-muted">{{ 'organizer.my_trips.kpi_all_time' | translate }}</span>
       </div>
 
       <!-- 3: Spots Left -->
       <div class="kpi-card">
-        <span class="kpi-label">Spots left</span>
+        <span class="kpi-label">{{ 'organizer.my_trips.kpi_spots_left' | translate }}</span>
         <span class="kpi-value">{{ stats().spotsLeft }}</span>
-        <span class="kpi-caption text-muted">Across active trips</span>
+        <span class="kpi-caption text-muted">{{ 'organizer.my_trips.kpi_across_active' | translate }}</span>
       </div>
 
       <!-- 4: Revenue (Dark Card) -->
       <div class="kpi-card kpi-card--dark">
-        <span class="kpi-label">Revenue</span>
+        <span class="kpi-label">{{ 'organizer.my_trips.kpi_revenue' | translate }}</span>
         <span class="kpi-value">{{ formatCurrency(revenue()) }}</span>
-        <span class="kpi-caption">From confirmed bookings</span>
+        <span class="kpi-caption">{{ 'organizer.my_trips.kpi_from_confirmed' | translate }}</span>
       </div>
     </div>
   }
@@ -91,7 +103,7 @@
               [class.active]="activeTab() === 'all'"
               [attr.aria-selected]="activeTab() === 'all'"
               (click)="setTab('all')">
-        All · {{ tabCounts().all }}
+        {{ 'organizer.my_trips.tab_all' | translate }} · {{ tabCounts().all }}
       </button>
       <button type="button"
               role="tab"
@@ -99,7 +111,7 @@
               [class.active]="activeTab() === 'published'"
               [attr.aria-selected]="activeTab() === 'published'"
               (click)="setTab('published')">
-        Published · {{ tabCounts().published }}
+        {{ 'organizer.my_trips.tab_published' | translate }} · {{ tabCounts().published }}
       </button>
       <button type="button"
               role="tab"
@@ -107,7 +119,7 @@
               [class.active]="activeTab() === 'drafts'"
               [attr.aria-selected]="activeTab() === 'drafts'"
               (click)="setTab('drafts')">
-        Drafts · {{ tabCounts().drafts }}
+        {{ 'organizer.my_trips.tab_drafts' | translate }} · {{ tabCounts().drafts }}
       </button>
       <button type="button"
               role="tab"
@@ -115,7 +127,7 @@
               [class.active]="activeTab() === 'completed'"
               [attr.aria-selected]="activeTab() === 'completed'"
               (click)="setTab('completed')">
-        Completed · {{ tabCounts().completed }}
+        {{ 'organizer.my_trips.tab_completed' | translate }} · {{ tabCounts().completed }}
       </button>
     </div>
 
@@ -123,7 +135,7 @@
       <svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true">
         <path [attr.d]="icons.sort" />
       </svg>
-      <span>Sort: {{ sortOrder() === 'newest' ? 'Newest' : 'Oldest' }}</span>
+      <span>{{ (sortOrder() === 'newest' ? 'organizer.my_trips.sort_newest' : 'organizer.my_trips.sort_oldest') | translate }}</span>
     </button>
   </div>
 
@@ -141,7 +153,7 @@
           <!-- 180px Image Header -->
           <div class="trip-card-header"
                (click)="viewTripDetails(trip)"
-               title="Click to view expedition details"
+               [title]="'organizer.my_trips.card_click_details' | translate"
                [style.background]="trip.coverImage ? 'url(' + trip.coverImage + ') center/cover no-repeat' : gradient(i)">
             <div class="card-header-overlay"></div>
 
@@ -150,7 +162,7 @@
                  [style.background]="singleBadge(trip).bg"
                  [style.color]="singleBadge(trip).color">
               <span class="status-dot" [style.background]="singleBadge(trip).dotColor"></span>
-              {{ singleBadge(trip).label }}
+              {{ singleBadge(trip).key | translate }}
             </div>
 
             <!-- Options menu button -->
@@ -169,20 +181,20 @@
                 <div class="dropdown" role="menu">
                   <button type="button" class="dropdown-item" role="menuitem" (click)="menuAction('view', trip)">
                     <svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.eye"/></svg>
-                    <span>View public page</span>
+                    <span>{{ 'organizer.my_trips.menu_view' | translate }}</span>
                   </button>
                   <button type="button" class="dropdown-item" role="menuitem" (click)="menuAction('edit', trip)">
                     <svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.edit"/></svg>
-                    <span>Edit trip</span>
+                    <span>{{ 'organizer.my_trips.menu_edit' | translate }}</span>
                   </button>
                   <button type="button" class="dropdown-item" role="menuitem" (click)="menuAction('duplicate', trip)">
                     <svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.copy"/></svg>
-                    <span>Duplicate</span>
+                    <span>{{ 'organizer.my_trips.menu_duplicate' | translate }}</span>
                   </button>
                   <div class="dropdown-divider"></div>
                   <button type="button" class="dropdown-item danger" role="menuitem" (click)="menuAction('delete', trip)">
                     <svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.trash"/></svg>
-                    <span>Delete</span>
+                    <span>{{ 'organizer.my_trips.menu_delete' | translate }}</span>
                   </button>
                 </div>
               }
@@ -206,7 +218,7 @@
 
             <!-- 1-line description -->
             <p class="trip-desc" [title]="trip.description || ''">
-              {{ trip.description || 'No description provided' }}
+              {{ trip.description || ('organizer.my_trips.no_desc' | translate) }}
             </p>
 
             <!-- Meta Pills: Duration & Price -->
@@ -220,7 +232,7 @@
 
               @if (trip.price > 0) {
                 <span class="meta-pill">
-                  <strong>${{ trip.price }}</strong>&nbsp;/ person
+                  <strong>${{ trip.price }}</strong>&nbsp;{{ 'organizer.my_trips.per_person' | translate }}
                 </span>
               }
             </div>
@@ -228,8 +240,8 @@
             <!-- Capacity & Progress Bar -->
             <div class="capacity-block">
               <div class="capacity-labels">
-                <span class="capacity-title">Bookings</span>
-                <span class="capacity-count"><strong>{{ trip.booked }}</strong> / {{ trip.capacity }} booked</span>
+                <span class="capacity-title">{{ 'organizer.my_trips.bookings_title' | translate }}</span>
+                <span class="capacity-count"><strong>{{ trip.booked }}</strong> / {{ trip.capacity }} {{ 'organizer.my_trips.booked_count' | translate }}</span>
               </div>
               <div class="progress-track" role="progressbar"
                    [attr.aria-valuenow]="progressPct(trip)"
@@ -241,10 +253,10 @@
             <!-- Action buttons -->
             <div class="card-actions">
               <button class="btn btn-gold-card" type="button" (click)="manageBookings(trip)">
-                <span>Manage bookings</span>
+                <span>{{ 'organizer.my_trips.btn_manage_bookings' | translate }}</span>
               </button>
               <button class="btn btn-outline-card" type="button" (click)="editTrip(trip)">
-                <span>Edit trip</span>
+                <span>{{ 'organizer.my_trips.btn_edit_trip' | translate }}</span>
               </button>
             </div>
           </div>
@@ -258,8 +270,8 @@
             <path [attr.d]="icons.plus" />
           </svg>
         </div>
-        <h3 class="plan-next-title">Plan your next expedition</h3>
-        <p class="plan-next-sub">Create a new trip</p>
+        <h3 class="plan-next-title">{{ 'organizer.my_trips.plan_next_title' | translate }}</h3>
+        <p class="plan-next-sub">{{ 'organizer.my_trips.plan_next_sub' | translate }}</p>
       </div>
     </div>
   }

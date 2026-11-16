@@ -2,6 +2,10 @@
 // Top color matches var(--dark-luxury, #1A1615); bottom color matches var(--t3d-bg, #0D1B4B)
 // Hardware-accelerated transforms & opacity only, zero blur/mix-blend-mode overhead
 
+:host {
+  display: block;
+}
+
 .teaser {
   contain: layout paint;
   container-type: inline-size;
@@ -343,8 +347,53 @@
   }
 }
 
-// ── MOBILE ENTRANCE TUNING (max-width: 768px: .08s stagger, no sweep, static glow) ──
+// ── MOBILE RESPONSIVE TUNING (max-width: 768px) ──
 @media (max-width: 768px) {
+  .teaser {
+    min-height: 100svh;
+
+    &__inner {
+      padding-inline: 18px;
+      padding-block: clamp(36px, 6vh, 52px) clamp(56px, 8vh, 80px);
+      gap: clamp(14px, 2.5vh, 22px);
+    }
+
+    &__eyebrow {
+      gap: 10px;
+    }
+
+    &__eyebrow-line {
+      width: clamp(16px, 4vw, 28px);
+    }
+
+    &__headline {
+      line-height: 1.04;
+      width: 100%;
+    }
+
+    &__headline-line {
+      white-space: nowrap;
+      text-align: center;
+    }
+
+    &__sub {
+      font-size: clamp(13px, 3.4vw, 16px);
+      line-height: 1.55;
+      max-width: min(34ch, 92vw);
+      gap: 0.25em;
+    }
+
+    &__scroll {
+      bottom: max(16px, env(safe-area-inset-bottom, 16px));
+    }
+  }
+
+  @media (max-height: 640px) {
+    .teaser__scroll {
+      display: none;
+    }
+  }
+
   .teaser.is-animating {
     .teaser__glow {
       // Disable infinite breathing on mobile to save GPU battery & maintain 60fps

@@ -140,6 +140,18 @@ a {
   }
 }
 
+.tab.lang-tab {
+  background: var(--o-chip);
+  color: var(--o-accent);
+  padding: 6px 12px;
+  font-weight: 700;
+
+  &:hover {
+    background: var(--o-accent);
+    color: #FFFFFF;
+  }
+}
+
 .tab-label {
   white-space: nowrap;
 }
@@ -188,8 +200,34 @@ a {
   .sidebar-brand {
     display: flex;
     align-items: center;
-    gap: 14px;
+    justify-content: space-between;
+    gap: 12px;
     padding-inline: 4px;
+  }
+
+  .brand-main {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .sidebar-lang-btn {
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: #C49A6C;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+
+    &:hover {
+      background: rgba(196, 154, 108, 0.2);
+      border-color: #C49A6C;
+      color: #FFFFFF;
+    }
   }
 
   .brand-logo {

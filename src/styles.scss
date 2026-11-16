@@ -179,6 +179,30 @@ body.lang-ar .teaser__headline {
   line-height: 1.1;
 }
 
+/* Organizer Arabic typography overrides */
+body.lang-ar app-organizer-shell,
+body.lang-ar app-my-trips,
+body.lang-ar app-profile,
+body.lang-ar app-edit-trip {
+  font-family: 'Cairo', 'Urbanist', sans-serif !important;
+
+  .brand-eyebrow,
+  .sidebar-user-role,
+  .crumb-parent,
+  .crumb-current,
+  .kpi-label,
+  .tab-btn,
+  .btn,
+  .trip-title,
+  .profile-name,
+  .stat-lbl,
+  .info-label {
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+    font-family: 'Cairo', sans-serif !important;
+  }
+}
+
 /* RTL flex/grid logical corrections */
 [dir="rtl"] .nav__links,
 [dir="rtl"] .footer__links {

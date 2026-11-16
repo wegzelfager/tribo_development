@@ -2,8 +2,8 @@
 
   <!-- Header -->
   <header class="page-header">
-    <h1 class="page-title">Profile</h1>
-    <button class="icon-btn" type="button" aria-label="Settings">
+    <h1 class="page-title">{{ 'organizer.profile.title' | translate }}</h1>
+    <button class="icon-btn" type="button" [attr.aria-label]="'organizer.profile.settings' | translate">
       <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.settings"/></svg>
     </button>
   </header>
@@ -40,13 +40,13 @@
             <div class="name-block">
               <h2 class="profile-name">{{ p.name }}</h2>
               <div class="chips-row">
-                <span class="chip">Organizer</span>
-                <span class="since">Since {{ p.since }}</span>
+                <span class="chip">{{ 'organizer.profile.role' | translate }}</span>
+                <span class="since">{{ 'organizer.profile.since' | translate }} {{ p.since }}</span>
               </div>
               @if (p.isVerified) {
                 <div class="verified-chip">
                   <svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.check"/></svg>
-                  <span>Verified License</span>
+                  <span>{{ 'organizer.profile.verified_license' | translate }}</span>
                 </div>
               }
             </div>
@@ -54,12 +54,12 @@
             <div class="stats-divider-row">
               <div class="stat-col">
                 <span class="stat-val">{{ p.tripsHosted }}</span>
-                <span class="stat-lbl">Trips Hosted</span>
+                <span class="stat-lbl">{{ 'organizer.profile.trips_hosted' | translate }}</span>
               </div>
               <div class="divider"></div>
               <div class="stat-col">
                 <span class="stat-val">{{ p.reviews }}</span>
-                <span class="stat-lbl">Reviews</span>
+                <span class="stat-lbl">{{ 'organizer.profile.reviews' | translate }}</span>
               </div>
               <div class="divider"></div>
               <div class="stat-col">
@@ -67,7 +67,7 @@
                   <svg class="i i-sm star-icon" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.star"/></svg>
                   <span>{{ p.rating }}</span>
                 </span>
-                <span class="stat-lbl">Rating</span>
+                <span class="stat-lbl">{{ 'organizer.profile.rating' | translate }}</span>
               </div>
             </div>
           </div>
@@ -79,7 +79,7 @@
                 <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.mail"/></svg>
               </div>
               <div class="info-text">
-                <span class="info-label">Business email</span>
+                <span class="info-label">{{ 'organizer.profile.business_email' | translate }}</span>
                 <span class="info-val">{{ p.email }}</span>
               </div>
             </div>
@@ -89,15 +89,15 @@
                 <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.phone"/></svg>
               </div>
               <div class="info-text">
-                <span class="info-label">Business phone</span>
+                <span class="info-label">{{ 'organizer.profile.business_phone' | translate }}</span>
                 <span class="info-val">{{ p.phone }}</span>
               </div>
             </div>
           </div>
 
           <!-- Edit Profile button -->
-          <button class="edit-btn" type="button" aria-label="Edit organizer profile">
-            <span>Edit Organizer Profile</span>
+          <button class="edit-btn" type="button" [attr.aria-label]="'organizer.profile.edit_organizer_profile' | translate">
+            <span>{{ 'organizer.profile.edit_organizer_profile' | translate }}</span>
             <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.edit"/></svg>
           </button>
         </div>
@@ -106,9 +106,9 @@
         <div class="profile-col-right">
 
           <!-- Revenue card -->
-          <div class="revenue-card" aria-label="Lifetime revenue">
+          <div class="revenue-card" [attr.aria-label]="'organizer.profile.lifetime_revenue' | translate">
             <div class="revenue-left">
-              <span class="revenue-label">Lifetime revenue</span>
+              <span class="revenue-label">{{ 'organizer.profile.lifetime_revenue' | translate }}</span>
               <span class="revenue-val">{{ p.lifetimeRevenue }}</span>
               <div class="trend-pill">
                 <svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.trendUp"/></svg>
@@ -144,7 +144,7 @@
               @if (p.isVerified) {
                 <div class="verified-chip verified-chip--sm">
                   <svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.check"/></svg>
-                  <span>Verified</span>
+                  <span>{{ 'organizer.profile.verified' | translate }}</span>
                 </div>
               }
             </div>

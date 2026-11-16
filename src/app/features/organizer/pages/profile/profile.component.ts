@@ -6,6 +6,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { OrganizerService } from '../../services/organizer.service';
 import { OrganizerProfile } from '../../models/organizer.models';
 
@@ -25,7 +26,7 @@ const ICONS = {
   selector: 'app-profile',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [],
+  imports: [TranslatePipe],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
 })

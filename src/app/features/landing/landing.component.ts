@@ -1,6 +1,6 @@
 import {
   Component, AfterViewInit, OnDestroy,
-  ElementRef, ViewChild, ViewChildren, QueryList,
+  ElementRef, ViewChild,
   PLATFORM_ID, Inject, NgZone, ChangeDetectionStrategy
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
@@ -59,8 +59,6 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
   @ViewChild('card2')           card2!: ElementRef<HTMLDivElement>;
   @ViewChild('card3')           card3!: ElementRef<HTMLDivElement>;
   @ViewChild('seamFade')        seamFade?: ElementRef<HTMLDivElement>;
-  @ViewChild('valueSection')    valueSection!: ElementRef<HTMLElement>;
-  @ViewChildren('valueCell')    valueCells!: QueryList<ElementRef<HTMLDivElement>>;
  
   @ViewChild('ascentSection')   ascentSection?: ElementRef<HTMLElement>;
   @ViewChild('phase1Layer')     phase1Layer?: ElementRef<HTMLDivElement>;
@@ -179,7 +177,6 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
         }
       );
  
-      this.initValueAnim();
  
       const idle: (cb: () => void) => void =
         (window as any).requestIdleCallback ?? ((cb: () => void) => setTimeout(cb, 600));
@@ -386,19 +383,8 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     tl.to(wrap, { autoAlpha: 0, duration: 0.01, ease: 'none' }, HIDE_WRAP_AT);
  
     threshold = 0.52 / tl.duration();
- 
-    // refreshPriority -1: this trigger measures the value section, which sits AFTER the pinned
-    // sections. Nav goes light on the dark value section, and dark again when scrolling back up.
-    if (this.valueSection) {
-      this.ST.create({
-        trigger: this.valueSection.nativeElement,
-        start: 'top 64px',
-        refreshPriority: -1,
-        onEnter: () => this.setNavDark(false),
-      });
-    }
   }
- 
+
   // ─── 650ER ASCENT SECTION ──────────────────────────────────────────────────
   private buildAscent(isMobile: boolean): void {
     const gsap = this.gsap;
@@ -701,23 +687,7 @@ export class LandingComponent implements AfterViewInit, OnDestroy {
     render(0, true);
   }
  
-  private initValueAnim(): void {
-    const gsap = this.gsap;
-    const cells = this.valueCells.toArray().map(r => r.nativeElement);
-    this.ST.create({
-      trigger: this.valueSection.nativeElement,
-      start: 'top 80%',
-      once: true,
-      refreshPriority: -1, // refresh after the pinned sections above it (see buildHero)
-      onEnter: () => {
-        cells.forEach(c => c.style.willChange = 'opacity, transform');
-        gsap.to(cells, {
-          opacity: 1, y: 0, stagger: 0.1, duration: 0.8, ease: 'power3.out',
-          onComplete: () => cells.forEach(c => c.style.willChange = 'auto')
-        });
-      }
-    });
-  }
+  
  
   ngOnDestroy(): void {
     this.destroyed = true;

@@ -1,0 +1,161 @@
+<div class="users-list-page">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Users Management</h1>
+      <p class="page-subtitle" *ngIf="pagination()">
+        {{ pagination()!.totalDocs }} users total
+      </p>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-bar">
+    <div class="search-wrapper">
+      <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Search by name or email…"
+        [value]="searchQuery()"
+        (input)="onSearch($any($event.target).value)"
+      />
+    </div>
+
+    <select class="filter-select" [value]="roleFilter()" (change)="onRoleChange($any($event.target).value)">
+      <option value="">All Roles</option>
+      <option value="traveller">Traveller</option>
+      <option value="organizer">Organizer</option>
+      <option value="admin">Admin</option>
+    </select>
+
+    <select class="filter-select" [value]="verifiedFilter()" (change)="onVerifiedChange($any($event.target).value)">
+      <option value="">All Statuses</option>
+      <option value="true">Verified</option>
+      <option value="false">Unverified</option>
+    </select>
+  </div>
+
+  <!-- Loading -->
+  <div class="state-box" *ngIf="isLoading()">
+    <div class="spinner"></div>
+    <p>Loading users…</p>
+  </div>
+
+  <!-- Error -->
+  <div class="state-box state-box--error" *ngIf="isError() && !isLoading()">
+    <p>⚠️ Failed to load users. Please try again.</p>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrapper" *ngIf="!isLoading() && !isError()">
+    <table class="users-table" *ngIf="users().length > 0; else emptyState">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Role</th>
+          <th>Joined</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let user of users()"
+          class="user-row"
+          (click)="viewUser(user._id)"
+        >
+          <!-- User Info -->
+          <td class="user-cell">
+            <img
+              *ngIf="user.profileImage"
+              [src]="user.profileImage"
+              [alt]="user.name"
+              class="avatar"
+            />
+            <div *ngIf="!user.profileImage" class="avatar avatar--initials">
+              {{ user.name[0].toUpperCase() }}
+            </div>
+            <div class="user-info">
+              <span class="user-name">{{ user.name }}</span>
+              <span class="user-email">{{ user.email }}</span>
+            </div>
+          </td>
+
+          <!-- Role -->
+          <td><span [class]="roleBadgeClass(user.role)">{{ user.role }}</span></td>
+
+          <!-- Joined -->
+          <td class="date-cell">{{ user.createdAt | date: 'mediumDate' }}</td>
+
+          <!-- Status Badges -->
+          <td class="status-cell">
+            <span class="status-badge" [class.status-badge--green]="user.isVerified" [class.status-badge--muted]="!user.isVerified">
+              {{ user.isVerified ? '✓ Verified' : 'Unverified' }}
+            </span>
+            <span class="status-badge status-badge--red" *ngIf="user.isBlocked">
+              Blocked
+            </span>
+          </td>
+
+          <!-- Actions -->
+          <td class="actions-cell" (click)="$event.stopPropagation()">
+            <button
+              class="action-btn"
+              [class.action-btn--danger]="!user.isBlocked"
+              [class.action-btn--success]="user.isBlocked"
+              [disabled]="blockMutation.isPending()"
+              (click)="toggleBlock($event, user._id)"
+              [title]="user.isBlocked ? 'Unblock user' : 'Block user'"
+            >
+              {{ user.isBlocked ? 'Unblock' : 'Block' }}
+            </button>
+
+            <button
+              class="action-btn"
+              [class.action-btn--muted]="user.isVerified"
+              [class.action-btn--primary]="!user.isVerified"
+              [disabled]="verifyMutation.isPending()"
+              (click)="toggleVerify($event, user._id)"
+              [title]="user.isVerified ? 'Revoke verification' : 'Verify user'"
+            >
+              {{ user.isVerified ? 'Revoke' : 'Verify' }}
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <ng-template #emptyState>
+      <div class="empty-state">
+        <p>No users found matching your filters.</p>
+      </div>
+    </ng-template>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination" *ngIf="!isLoading() && totalPages() > 1">
+    <button
+      class="page-btn"
+      [disabled]="currentPage() === 1"
+      (click)="goToPage(currentPage() - 1)"
+    >‹ Prev</button>
+
+    <button
+      *ngFor="let p of pagesArray()"
+      class="page-btn"
+      [class.page-btn--active]="p === currentPage()"
+      (click)="goToPage(p)"
+    >{{ p }}</button>
+
+    <button
+      class="page-btn"
+      [disabled]="currentPage() === totalPages()"
+      (click)="goToPage(currentPage() + 1)"
+    >Next ›</button>
+  </div>
+
+</div>

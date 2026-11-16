@@ -1,0 +1,276 @@
+$brown: #8B5A2B;
+$gold: #C89D66;
+$sand: #FAF7F2;
+$border: #EDE6DC;
+$dark: #1C1917;
+$text-muted: #78716C;
+
+.user-detail-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 900px;
+}
+
+/* ── Back Button ── */
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: 1.5px solid $border;
+  border-radius: 10px;
+  background: #fff;
+  color: $dark;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: all 0.15s;
+
+  &:hover { border-color: $brown; color: $brown; }
+}
+
+/* ── Loading / Error ── */
+.state-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 48px;
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid $border;
+  color: $text-muted;
+
+  &--error { color: #ef4444; }
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid $border;
+  border-top-color: $brown;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Grid ── */
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+
+  @media (max-width: 700px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Cards ── */
+.card {
+  background: #fff;
+  border: 1px solid $border;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── Profile Card ── */
+.profile-top {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.profile-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 3px solid $border;
+
+  &.avatar--initials {
+    background: $brown;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+}
+
+.profile-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: $dark;
+  margin: 0 0 4px;
+}
+
+.profile-email {
+  font-size: 0.85rem;
+  color: $text-muted;
+  margin: 0 0 10px;
+}
+
+.badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* ── Badges ── */
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+
+  &--organizer { background: #FEF3C7; color: #92400E; }
+  &--traveller { background: #E0F2FE; color: #0369A1; }
+  &--admin     { background: #FCE7F3; color: #9D174D; }
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: $border;
+  color: $text-muted;
+
+  &--green { background: #DCFCE7; color: #166534; }
+  &--muted { background: $border; color: $text-muted; }
+  &--red   { background: #FEE2E2; color: #991B1B; }
+}
+
+/* ── Meta Info ── */
+.profile-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 4px;
+  border-top: 1px solid $border;
+}
+
+.meta-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.88rem;
+}
+
+.meta-label {
+  color: $text-muted;
+  font-weight: 500;
+}
+
+.meta-value {
+  color: $dark;
+  font-weight: 600;
+}
+
+/* ── Action Buttons ── */
+.action-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 1.5px solid $border;
+  background: #fff;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  min-width: 120px;
+
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  &--danger {
+    border-color: #FCA5A5;
+    color: #DC2626;
+    &:hover:not(:disabled) { background: #FEE2E2; }
+  }
+
+  &--success {
+    border-color: #86EFAC;
+    color: #16A34A;
+    &:hover:not(:disabled) { background: #DCFCE7; }
+  }
+
+  &--primary {
+    border-color: $gold;
+    color: $brown;
+    background: #FFFBEB;
+    &:hover:not(:disabled) { background: #FEF3C7; }
+  }
+
+  &--muted {
+    border-color: $border;
+    color: $text-muted;
+    &:hover:not(:disabled) { background: $sand; }
+  }
+}
+
+/* ── ID Card ── */
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.card-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: $dark;
+  margin: 0;
+}
+
+.id-images {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.id-image-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.id-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: $text-muted;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.id-image {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid $border;
+  object-fit: cover;
+  max-height: 180px;
+}
+
+.no-id {
+  padding: 24px;
+  text-align: center;
+  color: $text-muted;
+  font-size: 0.88rem;
+}

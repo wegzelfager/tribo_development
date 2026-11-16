@@ -15,6 +15,7 @@ import {
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { TripService } from '../../../../core/services/trip.service';
 import { Trip, TripFormData } from '../../../../core/models/trip.model';
 import { TripStepStepperComponent } from './components/trip-step-stepper/trip-step-stepper.component';
@@ -33,6 +34,7 @@ type AgeOption = 'any' | '12' | '16' | '18' | '21';
     CommonModule,
     ReactiveFormsModule,
     RouterLink,
+    TranslatePipe,
     TripStepStepperComponent,
     TripLivePreviewComponent,
   ],
