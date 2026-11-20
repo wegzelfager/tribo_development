@@ -1,6 +1,7 @@
 export type NotificationType =
   | 'trip_accepted'
   | 'trip_rejected'
+  | 'trip_pending'
   | 'booking_new'
   | 'trip_created'
   | 'trip_cancelled'
