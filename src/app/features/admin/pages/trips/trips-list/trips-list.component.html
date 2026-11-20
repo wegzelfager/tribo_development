@@ -1,0 +1,279 @@
+<div class="trips-list-page">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Trips Moderation</h1>
+      <p class="page-subtitle" *ngIf="pagination()">
+        {{ pagination()!.totalDocs }} trips found
+      </p>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-bar">
+    <div class="search-wrapper">
+      <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Search trips by title or location…"
+        [value]="searchQuery()"
+        (input)="onSearch($any($event.target).value)"
+      />
+    </div>
+
+    <!-- Approval Status Filter -->
+    <select class="filter-select" [value]="approvalFilter()" (change)="onApprovalChange($any($event.target).value)">
+      <option value="">All Approvals</option>
+      <option value="pending">Pending Review</option>
+      <option value="approved">Approved</option>
+      <option value="rejected">Rejected</option>
+    </select>
+
+    <!-- Trip Lifecycle Status Filter -->
+    <select class="filter-select" [value]="statusFilter()" (change)="onStatusChange($any($event.target).value)">
+      <option value="">All Statuses</option>
+      <option value="upcoming">Upcoming</option>
+      <option value="ongoing">Ongoing</option>
+      <option value="completed">Completed</option>
+      <option value="cancelled">Cancelled</option>
+    </select>
+  </div>
+
+  <!-- Loading State -->
+  <div class="state-box" *ngIf="isLoading()">
+    <div class="spinner"></div>
+    <p>Loading trips…</p>
+  </div>
+
+  <!-- Error State -->
+  <div class="state-box state-box--error" *ngIf="isError() && !isLoading()">
+    <p>⚠️ Failed to load trips. Please try again.</p>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrapper" *ngIf="!isLoading() && !isError()">
+    <table class="trips-table" *ngIf="trips().length > 0; else emptyState">
+      <thead>
+        <tr>
+          <th>Trip</th>
+          <th>Organizer</th>
+          <th>Duration & Capacity</th>
+          <th>Price</th>
+          <th>Trip Status</th>
+          <th>Approval</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let trip of trips()"
+          class="trip-row"
+          (click)="viewTrip(trip)"
+        >
+          <!-- Trip Cover & Info -->
+          <td class="trip-cell">
+            <img
+              *ngIf="trip.coverImage"
+              [src]="trip.coverImage"
+              [alt]="trip.title"
+              class="trip-thumb"
+            />
+            <div *ngIf="!trip.coverImage" class="trip-thumb trip-thumb--placeholder">
+              🏕️
+            </div>
+            <div class="trip-info">
+              <span class="trip-title" [title]="trip.title">{{ trip.title }}</span>
+              <span class="trip-location">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                {{ trip.location }}
+              </span>
+            </div>
+          </td>
+
+          <!-- Organizer Info -->
+          <td class="organizer-cell">
+            <div class="organizer-box" *ngIf="trip.organizer">
+              <img
+                *ngIf="trip.organizer.profileImage"
+                [src]="trip.organizer.profileImage"
+                [alt]="trip.organizer.name"
+                class="organizer-avatar"
+              />
+              <div *ngIf="!trip.organizer.profileImage" class="organizer-avatar organizer-avatar--initials">
+                {{ (trip.organizer.name || 'O')[0].toUpperCase() }}
+              </div>
+              <div class="organizer-meta">
+                <span class="organizer-name">{{ trip.organizer.name || 'Unknown' }}</span>
+                <span class="organizer-email" *ngIf="trip.organizer.email">{{ trip.organizer.email }}</span>
+              </div>
+            </div>
+            <span *ngIf="!trip.organizer" class="text-muted">—</span>
+          </td>
+
+          <!-- Duration & Capacity -->
+          <td class="details-cell">
+            <span class="detail-item">{{ trip.durationDays }} {{ trip.durationDays === 1 ? 'day' : 'days' }}</span>
+            <span class="detail-item detail-item--sub">Max {{ trip.maxCapacity }} guests</span>
+          </td>
+
+          <!-- Price -->
+          <td class="price-cell">
+            <span class="price-amount">${{ trip.pricePerPerson }}</span>
+            <span class="price-label">/ person</span>
+          </td>
+
+          <!-- Trip Status -->
+          <td>
+            <span [class]="tripStatusBadgeClass(trip.status)">
+              {{ trip.status }}
+            </span>
+          </td>
+
+          <!-- Approval Status Badge -->
+          <td>
+            <span [class]="approvalBadgeClass(trip.approvalStatus)">
+              <span class="dot"></span>
+              {{ trip.approvalStatus }}
+            </span>
+          </td>
+
+          <!-- Moderation Actions -->
+          <td class="actions-cell" (click)="$event.stopPropagation()">
+            <!-- Approve Button -->
+            <button
+              *ngIf="trip.approvalStatus !== 'approved'"
+              class="action-btn action-btn--approve"
+              [disabled]="reviewMutation.isPending()"
+              (click)="onApprove($event, trip)"
+              title="Approve this expedition"
+            >
+              ✓ Approve
+            </button>
+
+            <!-- Reject Button -->
+            <button
+              *ngIf="trip.approvalStatus !== 'rejected'"
+              class="action-btn action-btn--reject"
+              [disabled]="reviewMutation.isPending()"
+              (click)="openRejectModal($event, trip)"
+              title="Reject this expedition with a reason"
+            >
+              ✕ Reject
+            </button>
+
+            <!-- Set Pending Button -->
+            <button
+              *ngIf="trip.approvalStatus !== 'pending'"
+              class="action-btn action-btn--pending"
+              [disabled]="reviewMutation.isPending()"
+              (click)="onSetPending($event, trip)"
+              title="Reset status back to pending"
+            >
+              ↺ Reset
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <ng-template #emptyState>
+      <div class="empty-state">
+        <p>No trips found matching your filters.</p>
+      </div>
+    </ng-template>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination" *ngIf="!isLoading() && totalPages() > 1">
+    <button
+      class="page-btn"
+      [disabled]="currentPage() === 1"
+      (click)="goToPage(currentPage() - 1)"
+    >‹ Prev</button>
+
+    <button
+      *ngFor="let p of pagesArray()"
+      class="page-btn"
+      [class.page-btn--active]="p === currentPage()"
+      (click)="goToPage(p)"
+    >{{ p }}</button>
+
+    <button
+      class="page-btn"
+      [disabled]="currentPage() === totalPages()"
+      (click)="goToPage(currentPage() + 1)"
+    >Next ›</button>
+  </div>
+
+</div>
+
+<!-- ── Rejection Reason Modal ── -->
+<div class="modal-backdrop" *ngIf="rejectModalOpen()" (click)="closeRejectModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-icon-badge">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="15" y1="9" x2="9" y2="15"></line>
+          <line x1="9" y1="9" x2="15" y2="15"></line>
+        </svg>
+      </div>
+      <div>
+        <h2 class="modal-title">Reject Expedition</h2>
+        <p class="modal-subtitle">
+          Provide a clear reason for the organizer so they know what to fix.
+        </p>
+      </div>
+    </div>
+
+    <div class="modal-body" *ngIf="selectedTripForReject() as trip">
+      <div class="trip-preview-banner">
+        <span class="preview-label">Target Trip:</span>
+        <strong class="preview-name">{{ trip.title }}</strong>
+      </div>
+
+      <div class="input-group">
+        <label for="reject-reason" class="input-label">
+          Rejection Reason / Note to Organizer <span class="required-star">*</span>
+        </label>
+        <textarea
+          id="reject-reason"
+          class="reason-textarea"
+          rows="4"
+          placeholder="e.g. Please upload higher-resolution cover photos and clarify included items in the pricing description."
+          [value]="rejectReason()"
+          (input)="rejectReason.set($any($event.target).value)"
+        ></textarea>
+        <span class="error-msg" *ngIf="rejectError()">{{ rejectError() }}</span>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button
+        type="button"
+        class="btn-modal btn-modal--cancel"
+        [disabled]="reviewMutation.isPending()"
+        (click)="closeRejectModal()"
+      >
+        Cancel
+      </button>
+
+      <button
+        type="button"
+        class="btn-modal btn-modal--confirm"
+        [disabled]="reviewMutation.isPending() || !rejectReason().trim()"
+        (click)="confirmReject()"
+      >
+        <span *ngIf="reviewMutation.isPending()">Rejecting…</span>
+        <span *ngIf="!reviewMutation.isPending()">Confirm Rejection</span>
+      </button>
+    </div>
+  </div>
+</div>

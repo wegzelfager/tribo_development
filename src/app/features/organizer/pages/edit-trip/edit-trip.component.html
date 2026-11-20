@@ -10,7 +10,17 @@
         </svg>
         <span>{{ 'organizer.edit_trip.back_link' | translate }}</span>
       </a>
-      <span class="top-badge">{{ (tripId ? 'organizer.edit_trip.edit_mode' : 'organizer.edit_trip.new_expedition') | translate }}</span>
+      <div class="top-nav-actions">
+        <button
+          type="button"
+          class="top-lang-btn"
+          (click)="toggleLang()"
+          [title]="'organizer.shell.lang_switch_label' | translate"
+        >
+          {{ isArabic() ? 'English' : 'العربية' }}
+        </button>
+        <span class="top-badge">{{ (tripId ? 'organizer.edit_trip.edit_mode' : 'organizer.edit_trip.new_expedition') | translate }}</span>
+      </div>
     </header>
 
     <!-- ── STEPPER NAVIGATION ── -->

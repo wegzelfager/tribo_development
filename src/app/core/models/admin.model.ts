@@ -58,3 +58,31 @@ export interface AdminUserFilterParams {
   startDate?: string;
   endDate?: string;
 }
+
+export interface AdminTripFilterParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: string;
+  approvalStatus?: 'pending' | 'approved' | 'rejected' | '' | 'all';
+}
+
+export interface AdminTripsListResponse {
+  status: 'success' | 'fail';
+  message: string;
+  data: {
+    trips: import('./trip.model').Trip[];
+    pagination: AdminPagination;
+  };
+}
+
+export interface AdminReviewTripDto {
+  approvalStatus: 'pending' | 'approved' | 'rejected';
+  message?: string;
+}
+
+export interface AdminReviewTripResponse {
+  status: 'success' | 'fail';
+  message: string;
+  data: import('./trip.model').Trip;
+}

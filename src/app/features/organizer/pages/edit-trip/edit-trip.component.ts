@@ -3,6 +3,7 @@ import {
   ChangeDetectorRef,
   Component,
   OnInit,
+  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -17,6 +18,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { TripService } from '../../../../core/services/trip.service';
+import { I18nService } from '../../../../core/services/i18n.service';
 import { Trip, TripFormData } from '../../../../core/models/trip.model';
 import { TripStepStepperComponent } from './components/trip-step-stepper/trip-step-stepper.component';
 import {
@@ -47,8 +49,20 @@ export class EditTripComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly tripService = inject(TripService);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly i18n = inject(I18nService);
 
-  protected readonly steps = ['Basics', 'Description', 'Itinerary', 'Pricing'];
+  protected readonly isArabic = computed(() => this.i18n.isRtl);
+
+  protected toggleLang(): void {
+    this.i18n.toggle();
+  }
+
+  protected readonly steps = [
+    'organizer.edit_trip.step_basics',
+    'organizer.edit_trip.step_desc',
+    'organizer.edit_trip.step_itinerary',
+    'organizer.edit_trip.step_pricing',
+  ];
 
   protected tripId: string | null = null;
   protected currentStep = signal(1);

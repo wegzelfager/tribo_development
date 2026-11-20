@@ -25,6 +25,13 @@ export const ADMIN_ROUTES: Routes = [
             m => m.UserDetailComponent
           ),
       },
+      {
+        path: 'trips',
+        loadComponent: () =>
+          import('./pages/trips/trips-list/trips-list.component').then(
+            m => m.TripsListComponent
+          ),
+      },
     ],
   },
 ];

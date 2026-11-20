@@ -1,0 +1,641 @@
+$brown: #8B5A2B;
+$gold: #C89D66;
+$sand: #FAF7F2;
+$border: #EDE6DC;
+$dark: #1C1917;
+$text-muted: #78716C;
+
+.trips-list-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 1300px;
+}
+
+/* ── Header ── */
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.page-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: $dark;
+  margin: 0;
+}
+
+.page-subtitle {
+  color: $text-muted;
+  font-size: 0.88rem;
+  margin: 4px 0 0;
+}
+
+/* ── Filters ── */
+.filters-bar {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.search-wrapper {
+  position: relative;
+  flex: 1;
+  min-width: 240px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: $text-muted;
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px 12px 10px 38px;
+  border: 1.5px solid $border;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 0.9rem;
+  color: $dark;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+
+  &:focus { border-color: $brown; }
+  &::placeholder { color: $text-muted; }
+}
+
+.filter-select {
+  padding: 10px 14px;
+  border: 1.5px solid $border;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 0.88rem;
+  color: $dark;
+  outline: none;
+  cursor: pointer;
+  min-width: 150px;
+  transition: border-color 0.15s;
+
+  &:focus { border-color: $brown; }
+}
+
+/* ── Loading / Error ── */
+.state-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 48px;
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid $border;
+  color: $text-muted;
+
+  &--error { color: #ef4444; }
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid $border;
+  border-top-color: $brown;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Table ── */
+.table-wrapper {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid $border;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.trips-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+
+  thead tr {
+    background: $sand;
+    border-bottom: 1.5px solid $border;
+  }
+
+  th {
+    padding: 13px 18px;
+    text-align: left;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: $text-muted;
+    white-space: nowrap;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid $border;
+    transition: background 0.12s ease;
+
+    &:last-child { border-bottom: none; }
+    &:hover { background: #fdfbf8; }
+  }
+
+  td {
+    padding: 14px 18px;
+    vertical-align: middle;
+  }
+}
+
+.trip-row {
+  cursor: pointer;
+}
+
+/* ── Trip Cell ── */
+.trip-cell {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 220px;
+}
+
+.trip-thumb {
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid $border;
+
+  &--placeholder {
+    background: $sand;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+  }
+}
+
+.trip-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  max-width: 240px;
+}
+
+.trip-title {
+  font-weight: 600;
+  color: $dark;
+  font-size: 0.92rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.trip-location {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.78rem;
+  color: $text-muted;
+}
+
+/* ── Organizer Cell ── */
+.organizer-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.organizer-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+
+  &--initials {
+    background: #eed8bc;
+    color: $brown;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.82rem;
+  }
+}
+
+.organizer-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.organizer-name {
+  font-weight: 600;
+  color: $dark;
+  font-size: 0.85rem;
+}
+
+.organizer-email {
+  font-size: 0.74rem;
+  color: $text-muted;
+}
+
+/* ── Details Cell ── */
+.details-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.detail-item {
+  font-weight: 600;
+  color: $dark;
+  font-size: 0.84rem;
+
+  &--sub {
+    font-weight: 400;
+    font-size: 0.76rem;
+    color: $text-muted;
+  }
+}
+
+/* ── Price Cell ── */
+.price-cell {
+  white-space: nowrap;
+}
+
+.price-amount {
+  font-weight: 700;
+  color: $brown;
+  font-size: 0.95rem;
+}
+
+.price-label {
+  font-size: 0.76rem;
+  color: $text-muted;
+  margin-left: 2px;
+}
+
+/* ── Trip Status Pill ── */
+.pill-status {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  text-transform: capitalize;
+
+  &--upcoming {
+    background: #F0F5F4;
+    color: #2D6A4F;
+    border: 1px solid #CDE2DA;
+  }
+
+  &--ongoing {
+    background: #FEF3C7;
+    color: #92400E;
+    border: 1px solid #FDE68A;
+  }
+
+  &--completed {
+    background: #F3F4F6;
+    color: #4B5563;
+    border: 1px solid #E5E7EB;
+  }
+
+  &--cancelled {
+    background: #FEE2E2;
+    color: #991B1B;
+    border: 1px solid #FECACA;
+  }
+}
+
+/* ── Approval Status Badge ── */
+.badge-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: capitalize;
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+
+  &--approved {
+    background: #ECFDF5;
+    color: #065F46;
+    border: 1px solid #A7F3D0;
+    .dot { background: #10B981; }
+  }
+
+  &--rejected {
+    background: #FEF2F2;
+    color: #991B1B;
+    border: 1px solid #FECACA;
+    .dot { background: #EF4444; }
+  }
+
+  &--pending {
+    background: #FFFBEB;
+    color: #92400E;
+    border: 1px solid #FDE68A;
+    .dot { background: #F59E0B; }
+  }
+}
+
+/* ── Actions Cell ── */
+.actions-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.action-btn {
+  padding: 6px 11px;
+  border-radius: 7px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &--approve {
+    background: #ECFDF5;
+    color: #065F46;
+    border-color: #A7F3D0;
+
+    &:hover:not(:disabled) {
+      background: #D1FAE5;
+      border-color: #34D399;
+    }
+  }
+
+  &--reject {
+    background: #FEF2F2;
+    color: #991B1B;
+    border-color: #FECACA;
+
+    &:hover:not(:disabled) {
+      background: #FEE2E2;
+      border-color: #F87171;
+    }
+  }
+
+  &--pending {
+    background: #F9F6F1;
+    color: #78716C;
+    border-color: $border;
+
+    &:hover:not(:disabled) {
+      background: #EDE6DC;
+      color: $dark;
+    }
+  }
+}
+
+/* ── Empty State ── */
+.empty-state {
+  padding: 48px;
+  text-align: center;
+  color: $text-muted;
+}
+
+/* ── Pagination ── */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.page-btn {
+  padding: 7px 13px;
+  border-radius: 8px;
+  border: 1.5px solid $border;
+  background: #fff;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: $dark;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover:not(:disabled) {
+    border-color: $brown;
+    color: $brown;
+  }
+
+  &--active {
+    background: $brown;
+    border-color: $brown;
+    color: #fff !important;
+    font-weight: 700;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+/* ── Modal Dialog ── */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(28, 25, 23, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-card {
+  background: #fff;
+  border-radius: 18px;
+  width: 100%;
+  max-width: 520px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  border: 1px solid $border;
+  overflow: hidden;
+  animation: scaleUp 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleUp {
+  from { transform: scale(0.96); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.modal-header {
+  padding: 24px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  border-bottom: 1px solid $border;
+  background: $sand;
+}
+
+.modal-icon-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #FEF2F2;
+  color: #DC2626;
+  border: 1px solid #FECACA;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.modal-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: $dark;
+  margin: 0;
+}
+
+.modal-subtitle {
+  font-size: 0.82rem;
+  color: $text-muted;
+  margin: 4px 0 0;
+}
+
+.modal-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.trip-preview-banner {
+  padding: 10px 14px;
+  border-radius: 9px;
+  background: #F9F6F1;
+  border: 1px solid $border;
+  font-size: 0.85rem;
+  display: flex;
+  gap: 6px;
+}
+
+.preview-label {
+  color: $text-muted;
+}
+
+.preview-name {
+  color: $dark;
+  font-weight: 600;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.input-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: $dark;
+}
+
+.required-star {
+  color: #DC2626;
+}
+
+.reason-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1.5px solid $border;
+  font-size: 0.88rem;
+  color: $dark;
+  resize: vertical;
+  min-height: 90px;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.15s;
+
+  &:focus {
+    border-color: #DC2626;
+  }
+}
+
+.error-msg {
+  font-size: 0.78rem;
+  color: #DC2626;
+  font-weight: 500;
+}
+
+.modal-footer {
+  padding: 16px 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  border-top: 1px solid $border;
+  background: #FAFAFA;
+}
+
+.btn-modal {
+  padding: 9px 18px;
+  border-radius: 9px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+
+  &--cancel {
+    background: #fff;
+    border-color: $border;
+    color: $dark;
+
+    &:hover:not(:disabled) {
+      background: $sand;
+    }
+  }
+
+  &--confirm {
+    background: #DC2626;
+    color: #fff;
+
+    &:hover:not(:disabled) {
+      background: #B91C1C;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}

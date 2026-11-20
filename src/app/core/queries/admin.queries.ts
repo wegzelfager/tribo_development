@@ -12,12 +12,16 @@ import {
   AdminUser,
   AdminUsersListResponse,
   AdminUserFilterParams,
+  AdminTripFilterParams,
+  AdminTripsListResponse,
 } from '../models/admin.model';
+import { Trip, TripApprovalStatus } from '../models/trip.model';
 
 export const adminQueryKeys = {
   all: ['admin'] as const,
   users: (params?: AdminUserFilterParams) => ['admin', 'users', params ?? {}] as const,
   detail: (id: string) => ['admin', 'users', 'detail', id] as const,
+  trips: (params?: AdminTripFilterParams) => ['admin', 'trips', params ?? {}] as const,
 };
 
 /** Fetches paginated/filtered admin users list */
@@ -92,6 +96,47 @@ export function injectToggleVerifyMutation(): CreateMutationResult<AdminUser, Er
     },
     onSuccess: (updatedUser) => {
       queryClient.setQueryData<AdminUser>(adminQueryKeys.detail(updatedUser._id), updatedUser);
+      queryClient.invalidateQueries({ queryKey: adminQueryKeys.all });
+    },
+  }));
+}
+
+/** Fetches paginated/filtered admin trips list */
+export function injectAdminTripsQuery(
+  paramsAccessor: () => AdminTripFilterParams
+): CreateQueryResult<AdminTripsListResponse['data'], Error> {
+  const adminService = inject(AdminService);
+
+  return injectQuery(() => {
+    const params = paramsAccessor();
+    return {
+      queryKey: adminQueryKeys.trips(params),
+      queryFn: async (): Promise<AdminTripsListResponse['data']> => {
+        const res = await firstValueFrom(adminService.getTrips(params));
+        return res.data;
+      },
+    };
+  });
+}
+
+/** Mutation to review a trip: approve, reject, or set pending */
+export function injectReviewTripMutation(): CreateMutationResult<
+  Trip,
+  Error,
+  { tripId: string; approvalStatus: TripApprovalStatus; message?: string }
+> {
+  const adminService = inject(AdminService);
+  const queryClient = injectQueryClient();
+
+  return injectMutation(() => ({
+    mutationFn: async ({ tripId, approvalStatus, message }): Promise<Trip> => {
+      const res = await firstValueFrom(
+        adminService.reviewTrip(tripId, { approvalStatus, message })
+      );
+      return res.data;
+    },
+    onSuccess: () => {
+      // Invalidate all admin queries so lists reflect updated trip status
       queryClient.invalidateQueries({ queryKey: adminQueryKeys.all });
     },
   }));
