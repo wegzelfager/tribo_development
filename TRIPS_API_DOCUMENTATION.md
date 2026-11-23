@@ -12,7 +12,7 @@
 | Environment | Base URL |
 | :--- | :--- |
 | **Development** | `http://localhost:5000/api/v1/trips` |
-| **Production** | `https://tribobackend-production.up.railway.app/api/v1/trips` |
+| **Production** | `https://tribobackend-production-f5280d85.up.railway.app/api/v1/trips` |
 
 ---
 
