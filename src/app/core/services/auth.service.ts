@@ -1,15 +1,21 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError, of } from 'rxjs';
-import { catchError, finalize, shareReplay, switchMap, tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable, throwError, of } from 'rxjs';
+import { catchError, finalize, map, shareReplay, switchMap, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+import { UserIdCard } from '../models/user.model';
 
 export interface AuthUser {
   id: string;
   name: string;
   email: string;
   role: string;
+  age: number | null;
+  birthDate: string | null;
+  profileImage?: string;
   isVerified: boolean;
+  idCard?: UserIdCard;
+  createdAt?: string;
 }
 
 export interface LoginResponse {
@@ -25,16 +31,72 @@ export interface RefreshTokenResponse {
   accessToken: string;
 }
 
+export interface VerifyIdentityResponse {
+  status: string;
+  message: string;
+  data: {
+    age?: number | null;
+    birthDate?: string | null;
+    idCard: UserIdCard;
+  };
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
   private readonly apiUrl = environment.apiUrl;
   private accessToken: string | null = null;
-  private currentUser: AuthUser | null = null;
+  private readonly currentUserSubject = new BehaviorSubject<AuthUser | null>(this.readStoredUser());
+  readonly currentUser$ = this.currentUserSubject.asObservable();
+  readonly currentUserSignal = signal<AuthUser | null>(this.currentUserSubject.value);
   private refreshInProgress$: Observable<RefreshTokenResponse> | null = null;
 
   constructor(private http: HttpClient) {}
+
+  private readStoredUser(): AuthUser | null {
+    try {
+      const stored = localStorage.getItem('user');
+      return stored ? (JSON.parse(stored) as AuthUser) : null;
+    } catch {
+      return null;
+    }
+  }
+
+  private toStoredUser(user: AuthUser): AuthUser {
+    return {
+      id: user.id,
+      name: user.name,
+      email: '',
+      role: user.role,
+      age: null,
+      birthDate: null,
+      profileImage: user.profileImage,
+      isVerified: user.isVerified,
+      idCard: user.idCard
+        ? {
+            frontImage: '',
+            backImage: '',
+            nationalId: null,
+            isVerified: user.idCard.isVerified,
+            verificationStatus: user.idCard.verificationStatus,
+            verificationError: user.idCard.verificationError,
+          }
+        : undefined,
+    };
+  }
+
+  private setCurrentUser(user: AuthUser | null): void {
+    this.currentUserSubject.next(user);
+    this.currentUserSignal.set(user);
+    try {
+      if (user) {
+        localStorage.setItem('user', JSON.stringify(this.toStoredUser(user)));
+      } else {
+        localStorage.removeItem('user');
+      }
+    } catch {}
+  }
 
   login(credentials: { email: string; password: string }): Observable<LoginResponse> {
     return this.http
@@ -43,12 +105,8 @@ export class AuthService {
         tap(res => {
           this.accessToken = res.accessToken;
           if (res.data?.user) {
-            this.currentUser = res.data.user;
-            try {
-              localStorage.setItem('user', JSON.stringify(res.data.user));
-            } catch {}
+            this.setCurrentUser(res.data.user);
           }
-          console.log('Login successful. refreshToken in HTTP-only cookie, accessToken in memory.');
         }),
         catchError(this.handleError)
       );
@@ -58,7 +116,6 @@ export class AuthService {
     return this.http
       .post<any>(`${this.apiUrl}/v1/auths/register`, userData, { withCredentials: true })
       .pipe(
-        tap(() => console.log('Registration successful. Verification email sent.')),
         catchError(this.handleError)
       );
   }
@@ -67,12 +124,53 @@ export class AuthService {
     return this.http
       .get<any>(`${this.apiUrl}/v1/auths/verify-email/${token}`, { withCredentials: true })
       .pipe(
-        tap(() => console.log('Email verified successfully.')),
         catchError(this.handleError)
       );
   }
 
+  verifyIdentityManual(nationalId: string): Observable<VerifyIdentityResponse> {
+    return this.http
+      .patch<VerifyIdentityResponse>(
+        `${this.apiUrl}/v1/auths/verify-identity`,
+        { nationalId },
+        { withCredentials: true }
+      )
+      .pipe(
+        tap(res => {
+          const existing = this.getCurrentUser();
+          if (existing && res.data) {
+            this.setCurrentUser({
+              ...existing,
+              age: res.data.age !== undefined ? res.data.age : existing.age,
+              birthDate: res.data.birthDate !== undefined ? res.data.birthDate : existing.birthDate,
+              idCard: res.data.idCard ?? existing.idCard,
+            });
+          }
+        }),
+        catchError(this.handleError)
+      );
+  }
 
+  verifyIdentityImages(formData: FormData): Observable<VerifyIdentityResponse> {
+    return this.http
+      .patch<VerifyIdentityResponse>(
+        `${this.apiUrl}/v1/auths/verify-identity`,
+        formData,
+        { withCredentials: true }
+      )
+      .pipe(
+        tap(res => {
+          const existing = this.getCurrentUser();
+          if (existing && res.data?.idCard) {
+            this.setCurrentUser({
+              ...existing,
+              idCard: res.data.idCard,
+            });
+          }
+        }),
+        catchError(this.handleError)
+      );
+  }
 
   refreshToken(): Observable<RefreshTokenResponse> {
     if (this.refreshInProgress$) {
@@ -84,7 +182,6 @@ export class AuthService {
       .pipe(
         tap(res => {
           this.accessToken = res.accessToken;
-          console.log('Access token refreshed.');
         }),
         finalize(() => {
           this.refreshInProgress$ = null;
@@ -103,10 +200,6 @@ export class AuthService {
     return this.accessToken;
   }
 
-  /**
-   * Checks whether the current in-memory access token is expired based on its JWT `exp` claim.
-   * Returns true if there is no token or if it is expired.
-   */
   isTokenExpired(token?: string | null): boolean {
     const t = token ?? this.accessToken;
     if (!t) return true;
@@ -117,7 +210,6 @@ export class AuthService {
       const padded = base64.padEnd(base64.length + (4 - (base64.length % 4)) % 4, '=');
       const payload = JSON.parse(atob(padded));
       if (!payload.exp) return false;
-      // 5-second buffer for network latency/clock skew
       return Date.now() >= (payload.exp * 1000) - 5000;
     } catch {
       return true;
@@ -125,15 +217,34 @@ export class AuthService {
   }
 
   getCurrentUser(): AuthUser | null {
-    if (!this.currentUser) {
-      try {
-        const stored = localStorage.getItem('user');
-        if (stored) {
-          this.currentUser = JSON.parse(stored);
-        }
-      } catch {}
+    if (!this.currentUserSubject.value) {
+      const stored = this.readStoredUser();
+      if (stored) {
+        this.currentUserSubject.next(stored);
+        this.currentUserSignal.set(stored);
+      }
     }
-    return this.currentUser;
+    return this.currentUserSubject.value;
+  }
+
+  refreshCurrentUser(): Observable<AuthUser | null> {
+    if (!this.getCurrentUser() && !this.accessToken) {
+      return of(null);
+    }
+
+    return this.http
+      .get<{ status: string; data: { user: AuthUser } }>(`${this.apiUrl}/v1/auths/me`, {
+        withCredentials: true,
+      })
+      .pipe(
+        tap(res => {
+          if (res?.data?.user) {
+            this.setCurrentUser(res.data.user);
+          }
+        }),
+        map(res => res?.data?.user ?? null),
+        catchError(() => of(null))
+      );
   }
 
   isAuthenticated(): boolean {
@@ -150,11 +261,9 @@ export class AuthService {
         .pipe(
           tap(() => {
             this.clearSession();
-            console.log('Logged out. Server session invalidated.');
           }),
-          catchError(err => {
+          catchError(() => {
             this.clearSession();
-            console.warn('Logout server request failed (session cleared locally):', err);
             return of({ status: 'success', message: 'Logged out locally' });
           })
         );
@@ -168,7 +277,6 @@ export class AuthService {
       switchMap(res => doLogout(res.accessToken)),
       catchError(() => {
         this.clearSession();
-        console.warn('No valid session found. Cleared locally.');
         return of({ status: 'success', message: 'No active session, cleared locally' });
       })
     );
@@ -176,17 +284,13 @@ export class AuthService {
 
   clearSession(): void {
     this.accessToken = null;
-    this.currentUser = null;
-    try {
-      localStorage.removeItem('user');
-    } catch {}
+    this.setCurrentUser(null);
   }
 
   forgotPassword(email: string): Observable<any> {
     return this.http
       .post<any>(`${this.apiUrl}/v1/auths/forgot-password`, { email }, { withCredentials: true })
       .pipe(
-        tap(() => console.log('Forgot-password email requested.')),
         catchError(this.handleError)
       );
   }
@@ -199,7 +303,6 @@ export class AuthService {
         { withCredentials: true }
       )
       .pipe(
-        tap(() => console.log('Password reset successfully.')),
         catchError(this.handleError)
       );
   }
@@ -212,6 +315,8 @@ export class AuthService {
     } else {
       if (error.status === 0) {
         errorMessage = 'Cannot connect to the backend server. Please ensure it is running.';
+      } else if (Array.isArray(error.error?.errors) && error.error.errors.length > 0) {
+        errorMessage = error.error.errors.map((e: any) => e.message).join(' ');
       } else if (error.error?.message) {
         errorMessage = error.error.message;
       } else if (error.status === 401) {
@@ -219,13 +324,14 @@ export class AuthService {
       } else if (error.status === 403) {
         errorMessage = 'Please verify your email before logging in.';
       } else if (error.status === 409) {
-        errorMessage = 'Email already exists. Please use a different email.';
+        errorMessage = 'Conflict: This record is already registered.';
+      } else if (error.status === 429) {
+        errorMessage = 'Too many attempts. Please try again after 15 minutes.';
       } else {
         errorMessage = `Server error: ${error.statusText}`;
       }
     }
 
-    console.error('Auth error:', errorMessage);
     return throwError(() => new Error(errorMessage));
   }
 }

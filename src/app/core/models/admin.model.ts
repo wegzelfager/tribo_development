@@ -1,19 +1,18 @@
-export type UserRole = 'traveller' | 'organizer' | 'admin';
+import { UserIdCard, VerificationStatus } from './user.model';
 
-export interface UserIdCard {
-  frontImage: string;
-  backImage: string;
-  isVerified: boolean;
-}
+export type { UserIdCard, VerificationStatus };
+
+export type UserRole = 'traveller' | 'organizer' | 'admin';
 
 export interface AdminUser {
   _id: string;
   name: string;
   email: string;
-  age: number;
+  age: number | null;
+  birthDate?: string | null;
   role: UserRole;
   profileImage: string;
-  idCard: UserIdCard;
+  idCard?: UserIdCard;
   isVerified: boolean;
   isBlocked: boolean;
   organizerProfile?: string | null;

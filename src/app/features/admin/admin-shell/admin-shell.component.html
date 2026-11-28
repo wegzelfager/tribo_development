@@ -31,10 +31,10 @@
     </nav>
 
     <div class="sidebar-footer">
-      <div class="user-info" *ngIf="user">
-        <div class="avatar">{{ user.name[0].toUpperCase() }}</div>
+      <div class="user-info" *ngIf="user() as u">
+        <div class="avatar">{{ u.name[0].toUpperCase() }}</div>
         <div class="user-meta">
-          <p class="user-name">{{ user.name }}</p>
+          <p class="user-name">{{ u.name }}</p>
           <p class="user-role">Administrator</p>
         </div>
       </div>

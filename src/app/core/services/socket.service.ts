@@ -17,11 +17,16 @@ export class SocketService {
   private socket: Socket | null = null;
 
   connect(): void {
-    if (this.socket && this.socket.connected) {
+    const token = this.authService.getAccessToken();
+
+    if (this.socket) {
+      if (this.socket.connected) {
+        return;
+      }
+      this.socket.auth = { token };
+      this.socket.connect();
       return;
     }
-
-    const token = this.authService.getAccessToken();
 
     this.socket = io(this.socketUrl, {
       auth: { token },

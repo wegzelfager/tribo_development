@@ -52,13 +52,6 @@
   to   { opacity: 1; transform: none; }
 }
 
-// ── Two-column layout (name + age) ────────────────────────────────────────────
-.two {
-  display: grid;
-  grid-template-columns: 1fr 120px;
-  gap: 14px;
-}
-
 // ── Role radio cards ──────────────────────────────────────────────────────────
 .roles {
   display: grid;

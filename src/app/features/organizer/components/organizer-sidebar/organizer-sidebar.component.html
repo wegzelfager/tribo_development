@@ -1,0 +1,106 @@
+<div class="drawer-backdrop"
+     [class.open]="drawerOpen()"
+     (click)="closeDrawer()"
+     aria-hidden="true"></div>
+
+<aside id="organizer-sidebar-aside"
+       class="sb"
+       [class.mini]="effectiveMini()"
+       [class.drawer-open]="drawerOpen()"
+       [attr.aria-hidden]="isMobile() && !drawerOpen() ? 'true' : null"
+       [attr.inert]="isMobile() && !drawerOpen() ? '' : null"
+       aria-label="Organizer navigation">
+  <div class="glow-layer" aria-hidden="true">
+    <div class="glow"></div>
+  </div>
+
+  <div class="brand">
+    <div class="mark" aria-hidden="true">T</div>
+    <div class="nm">
+      <b>{{ 'organizer.shell.brand_title' | translate }}</b>
+      <small>{{ 'organizer.shell.brand_eyebrow' | translate }}</small>
+    </div>
+    <button type="button"
+            class="lang"
+            (click)="toggleLang()"
+            [tabindex]="effectiveMini() ? -1 : 0"
+            [attr.aria-hidden]="effectiveMini() ? 'true' : null"
+            [title]="'organizer.shell.lang_switch_label' | translate"
+            [attr.aria-label]="'organizer.shell.lang_switch_label' | translate">
+      {{ isArabic() ? 'EN' : 'عربي' }}
+    </button>
+    <button type="button"
+            class="drawer-close"
+            (click)="closeDrawer()"
+            [attr.aria-label]="'nav.close_menu' | translate">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path [attr.d]="icons.close" />
+      </svg>
+    </button>
+  </div>
+
+  <nav class="nav" aria-label="Organizer sections">
+    <div class="ind" aria-hidden="true"></div>
+    <div class="grp">
+      @for (tab of tabs; track tab.path) {
+        <a [routerLink]="tab.path"
+           routerLinkActive="on"
+           [routerLinkActiveOptions]="{ exact: false }"
+           class="it"
+           (click)="onNavClick()"
+           #rlaSidebar="routerLinkActive"
+           [attr.aria-current]="rlaSidebar.isActive ? 'page' : null"
+           [attr.aria-label]="tab.labelKey | translate"
+           [attr.data-tip]="tab.labelKey | translate">
+          <span class="ic" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path [attr.d]="icons[tab.icon]" />
+            </svg>
+          </span>
+          <span class="tx">{{ tab.labelKey | translate }}</span>
+        </a>
+      }
+    </div>
+  </nav>
+
+  <button type="button"
+          class="it tog"
+          (click)="toggleCollapsed()"
+          [attr.aria-expanded]="!effectiveMini()"
+          [attr.aria-label]="(effectiveMini() ? 'organizer.shell.expand' : 'organizer.shell.collapse') | translate"
+          [attr.data-tip]="(effectiveMini() ? 'organizer.shell.expand' : 'organizer.shell.collapse') | translate">
+    <span class="ic" aria-hidden="true">
+      <svg viewBox="0 0 24 24">
+        <path [attr.d]="icons.chevron" />
+      </svg>
+    </span>
+    <span class="tx">{{ (effectiveMini() ? 'organizer.shell.expand' : 'organizer.shell.collapse') | translate }}</span>
+  </button>
+
+  @if (user(); as u) {
+    <div class="prof">
+      @if (u.profileImage) {
+        <img class="av av-img" [src]="u.profileImage" [alt]="u.name" />
+      } @else {
+        <div class="av" aria-hidden="true">{{ initials(u.name) }}</div>
+      }
+      <div class="meta">
+        <b>{{ u.name }}</b>
+        <small>{{ 'organizer.shell.role' | translate }}</small>
+      </div>
+      <button type="button"
+              class="out"
+              (click)="logout()"
+              [tabindex]="effectiveMini() ? -1 : 0"
+              [attr.aria-hidden]="effectiveMini() ? 'true' : null"
+              [title]="'organizer.profile.logout' | translate"
+              [attr.aria-label]="'organizer.profile.logout' | translate">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path [attr.d]="icons.logout" />
+        </svg>
+      </button>
+    </div>
+  }
+</aside>
+
+<div class="sb-tooltip" role="tooltip" aria-hidden="true"></div>

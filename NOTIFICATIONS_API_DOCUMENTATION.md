@@ -33,8 +33,8 @@ The Tribo Notification System consists of two synchronized layers:
 
 | Service | Development | Production |
 | :--- | :--- | :--- |
-| **REST API Base** | `http://localhost:5000/api/v1/notifications` | `https://tribobackend-production-f5280d85.up.railway.app/api/v1/notifications` |
-| **Socket.IO Server** | `http://localhost:5000` | `https://tribobackend-production-f5280d85.up.railway.app` |
+| **REST API Base** | `http://localhost:5000/api/v1/notifications` | `https://tribobackend-production.up.railway.app/api/v1/notifications` |
+| **Socket.IO Server** | `http://localhost:5000` | `https://tribobackend-production.up.railway.app` |
 
 ---
 
@@ -46,7 +46,7 @@ When connecting to Socket.IO, pass the user's `accessToken` in the `auth` object
 ```typescript
 import { io, Socket } from 'socket.io-client';
 
-const socket: Socket = io('https://tribobackend-production-f5280d85.up.railway.app', {
+const socket: Socket = io('https://tribobackend-production.up.railway.app', {
   transports: ['websocket', 'polling'],
   withCredentials: true,
   auth: {

@@ -27,32 +27,16 @@
             <!-- ── Step 0: About you ─────────────────────────────────────── -->
             <div class="reg-step" [class.on]="currentStep === 0">
 
-              <div class="two">
-                <!-- Name -->
-                <div class="field">
-                  <label for="reg-name">Full name</label>
-                  <div class="box">
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                      <circle cx="12" cy="8.5" r="3.5"/>
-                      <path d="M5 20c1-4 4-6 7-6s6 2 7 6"/>
-                    </svg>
-                    <input #nameInput id="reg-name" type="text" maxlength="50"
-                           autocomplete="name" placeholder="Your name"
-                           (input)="onInput()">
-                  </div>
-                </div>
-                <!-- Age -->
-                <div class="field">
-                  <label for="reg-age">Age</label>
-                  <div class="box">
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                      <rect x="4" y="5" width="16" height="15" rx="3"/>
-                      <path d="M4 10h16M9 3v4M15 3v4"/>
-                    </svg>
-                    <input #ageInput id="reg-age" type="number" min="18"
-                           inputmode="numeric" placeholder="18+"
-                           (input)="onInput()">
-                  </div>
+              <div class="field">
+                <label for="reg-name">Full name</label>
+                <div class="box">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="8.5" r="3.5"/>
+                    <path d="M5 20c1-4 4-6 7-6s6 2 7 6"/>
+                  </svg>
+                  <input #nameInput id="reg-name" type="text" maxlength="50"
+                         autocomplete="name" placeholder="Your name"
+                         (input)="onInput()">
                 </div>
               </div>
 
@@ -232,7 +216,7 @@
               </div>
             </div>
 
-            <p class="prog"><b>{{ readyCount }}</b> of 7 ready</p>
+            <p class="prog"><b>{{ readyCount }}</b> of 6 ready</p>
             <p class="claim">Sky. Sea. Land.<br>Paid only on arrival.</p>
           </div>
 

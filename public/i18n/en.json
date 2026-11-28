@@ -239,7 +239,9 @@
       "role": "ORGANIZER",
       "lang_switch_label": "Switch Language",
       "lang_ar": "العربية",
-      "lang_en": "English"
+      "lang_en": "English",
+      "collapse": "Collapse",
+      "expand": "Expand"
     },
     "topbar": {
       "breadcrumb_parent": "Expedition Management",
@@ -292,7 +294,17 @@
       "role": "Organizer",
       "since": "Since",
       "verified_license": "Verified License",
+      "id_verified": "Verified National ID",
+      "id_pending": "ID Verification Pending",
+      "id_failed": "ID Verification Failed",
       "trips_hosted": "Trips Hosted",
+      "published_trips": "Published",
+      "age": "Age",
+      "birth_date": "Birth Date",
+      "pending_verification": "Pending verification",
+      "national_id_title": "National ID Card",
+      "id_front": "Front",
+      "id_back": "Back",
       "rating": "Rating",
       "reviews": "Reviews",
       "edit_profile": "Edit Profile",
@@ -305,6 +317,10 @@
       "business_phone": "Business phone",
       "lifetime_revenue": "Lifetime revenue",
       "verified": "Verified",
+      "pending": "Pending",
+      "failed": "Action Required",
+      "refresh": "Refresh profile",
+      "logout": "Log out",
       "settings": "Settings"
     },
     "edit_trip": {

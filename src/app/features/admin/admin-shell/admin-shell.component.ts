@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  OnInit,
   inject,
   signal,
 } from '@angular/core';
@@ -16,12 +17,16 @@ import { AuthService } from '../../../core/services/auth.service';
   styleUrl: './admin-shell.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AdminShellComponent {
+export class AdminShellComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
   sidebarOpen = signal(true);
-  user = this.authService.getCurrentUser();
+  user = this.authService.currentUserSignal;
+
+  ngOnInit(): void {
+    this.authService.refreshCurrentUser().subscribe();
+  }
 
   toggleSidebar(): void {
     this.sidebarOpen.update(v => !v);

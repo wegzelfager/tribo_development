@@ -28,7 +28,8 @@
       <button class="btn btn-lang-toggle"
               type="button"
               (click)="toggleLang()"
-              [title]="'organizer.shell.lang_switch_label' | translate">
+              [title]="'organizer.shell.lang_switch_label' | translate"
+              [attr.aria-label]="'organizer.shell.lang_switch_label' | translate">
         <svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true">
           <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.8"/>
           <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" fill="none" stroke="currentColor" stroke-width="1.8"/>
@@ -63,7 +64,12 @@
     <div class="kpi-grid">
       <!-- 1: Active Trips -->
       <div class="kpi-card">
-        <span class="kpi-label">{{ 'organizer.my_trips.kpi_active_trips' | translate }}</span>
+        <div class="kpi-head">
+          <span class="kpi-label">{{ 'organizer.my_trips.kpi_active_trips' | translate }}</span>
+          <span class="kpi-icon" aria-hidden="true">
+            <svg class="i i-sm" viewBox="0 0 24 24"><path [attr.d]="icons.calendar" /></svg>
+          </span>
+        </div>
         <span class="kpi-value">{{ stats().activeTrips }}</span>
         <span class="kpi-caption text-success">
           <span class="status-dot-sm bg-success"></span>
@@ -73,21 +79,36 @@
 
       <!-- 2: Total Bookings -->
       <div class="kpi-card">
-        <span class="kpi-label">{{ 'organizer.my_trips.kpi_total_bookings' | translate }}</span>
+        <div class="kpi-head">
+          <span class="kpi-label">{{ 'organizer.my_trips.kpi_total_bookings' | translate }}</span>
+          <span class="kpi-icon" aria-hidden="true">
+            <svg class="i i-sm" viewBox="0 0 24 24"><path [attr.d]="icons.users" /></svg>
+          </span>
+        </div>
         <span class="kpi-value">{{ stats().totalBookings }}</span>
         <span class="kpi-caption text-muted">{{ 'organizer.my_trips.kpi_all_time' | translate }}</span>
       </div>
 
       <!-- 3: Spots Left -->
       <div class="kpi-card">
-        <span class="kpi-label">{{ 'organizer.my_trips.kpi_spots_left' | translate }}</span>
+        <div class="kpi-head">
+          <span class="kpi-label">{{ 'organizer.my_trips.kpi_spots_left' | translate }}</span>
+          <span class="kpi-icon" aria-hidden="true">
+            <svg class="i i-sm" viewBox="0 0 24 24"><path [attr.d]="icons.car" /></svg>
+          </span>
+        </div>
         <span class="kpi-value">{{ stats().spotsLeft }}</span>
         <span class="kpi-caption text-muted">{{ 'organizer.my_trips.kpi_across_active' | translate }}</span>
       </div>
 
       <!-- 4: Revenue (Dark Card) -->
       <div class="kpi-card kpi-card--dark">
-        <span class="kpi-label">{{ 'organizer.my_trips.kpi_revenue' | translate }}</span>
+        <div class="kpi-head">
+          <span class="kpi-label">{{ 'organizer.my_trips.kpi_revenue' | translate }}</span>
+          <span class="kpi-icon" aria-hidden="true">
+            <svg class="i i-sm" viewBox="0 0 24 24"><path [attr.d]="icons.coin" /></svg>
+          </span>
+        </div>
         <span class="kpi-value">{{ formatCurrency(revenue()) }}</span>
         <span class="kpi-caption">{{ 'organizer.my_trips.kpi_from_confirmed' | translate }}</span>
       </div>
@@ -103,7 +124,8 @@
               [class.active]="activeTab() === 'all'"
               [attr.aria-selected]="activeTab() === 'all'"
               (click)="setTab('all')">
-        {{ 'organizer.my_trips.tab_all' | translate }} · {{ tabCounts().all }}
+        <span>{{ 'organizer.my_trips.tab_all' | translate }}</span>
+        <span class="tab-count">{{ tabCounts().all }}</span>
       </button>
       <button type="button"
               role="tab"
@@ -111,7 +133,8 @@
               [class.active]="activeTab() === 'published'"
               [attr.aria-selected]="activeTab() === 'published'"
               (click)="setTab('published')">
-        {{ 'organizer.my_trips.tab_published' | translate }} · {{ tabCounts().published }}
+        <span>{{ 'organizer.my_trips.tab_published' | translate }}</span>
+        <span class="tab-count">{{ tabCounts().published }}</span>
       </button>
       <button type="button"
               role="tab"
@@ -119,7 +142,8 @@
               [class.active]="activeTab() === 'drafts'"
               [attr.aria-selected]="activeTab() === 'drafts'"
               (click)="setTab('drafts')">
-        {{ 'organizer.my_trips.tab_drafts' | translate }} · {{ tabCounts().drafts }}
+        <span>{{ 'organizer.my_trips.tab_drafts' | translate }}</span>
+        <span class="tab-count">{{ tabCounts().drafts }}</span>
       </button>
       <button type="button"
               role="tab"
@@ -127,7 +151,8 @@
               [class.active]="activeTab() === 'completed'"
               [attr.aria-selected]="activeTab() === 'completed'"
               (click)="setTab('completed')">
-        {{ 'organizer.my_trips.tab_completed' | translate }} · {{ tabCounts().completed }}
+        <span>{{ 'organizer.my_trips.tab_completed' | translate }}</span>
+        <span class="tab-count">{{ tabCounts().completed }}</span>
       </button>
     </div>
 
@@ -149,16 +174,20 @@
   } @else {
     <div class="trips-grid">
       @for (trip of filteredTrips(); track trip.id; let i = $index) {
-        <article class="trip-card">
-          <!-- 180px Image Header -->
+        <article class="trip-card" [style.--i]="i">
+          <!-- 200px Image Header -->
           <div class="trip-card-header"
                (click)="viewTripDetails(trip)"
-               [title]="'organizer.my_trips.card_click_details' | translate"
-               [style.background]="trip.coverImage ? 'url(' + trip.coverImage + ') center/cover no-repeat' : gradient(i)">
-            <div class="card-header-overlay"></div>
+               [title]="'organizer.my_trips.card_click_details' | translate">
+            <div class="img">
+              <div class="card-bg"
+                   [style.background]="trip.coverImage ? 'url(' + trip.coverImage + ') center/cover no-repeat' : gradient(i)"></div>
+              <div class="card-header-overlay"></div>
+            </div>
 
             <!-- Status badge -->
             <div class="status-pill"
+                 [class.pending]="singleBadge(trip).key === 'organizer.my_trips.status_pending'"
                  [style.background]="singleBadge(trip).bg"
                  [style.color]="singleBadge(trip).color">
               <span class="status-dot" [style.background]="singleBadge(trip).dotColor"></span>
@@ -199,24 +228,24 @@
                 </div>
               }
             </div>
-          </div>
 
-          <!-- Card Body -->
-          <div class="trip-card-body">
             <!-- Location -->
             @if (trip.location) {
-              <div class="trip-location">
+              <div class="trip-location" [title]="trip.location">
                 <svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true">
                   <path [attr.d]="icons.pin" />
                 </svg>
                 <span>{{ trip.location }}</span>
               </div>
             }
+          </div>
 
+          <!-- Card Body -->
+          <div class="trip-card-body">
             <!-- Title -->
             <h3 class="trip-title" (click)="viewTripDetails(trip)" [title]="trip.title">{{ trip.title }}</h3>
 
-            <!-- 1-line description -->
+            <!-- 2-line description -->
             <p class="trip-desc" [title]="trip.description || ''">
               {{ trip.description || ('organizer.my_trips.no_desc' | translate) }}
             </p>
@@ -231,19 +260,25 @@
               </span>
 
               @if (trip.price > 0) {
-                <span class="meta-pill">
+                <span class="meta-pill meta-pill--price">
                   <strong>${{ trip.price }}</strong>&nbsp;{{ 'organizer.my_trips.per_person' | translate }}
                 </span>
               }
             </div>
 
             <!-- Capacity & Progress Bar -->
-            <div class="capacity-block">
+            <div class="capacity-block"
+                 [class.low]="spotsLeft(trip) > 0 && progressPct(trip) >= 80"
+                 [class.full]="spotsLeft(trip) === 0">
               <div class="capacity-labels">
-                <span class="capacity-title">{{ 'organizer.my_trips.bookings_title' | translate }}</span>
-                <span class="capacity-count"><strong>{{ trip.booked }}</strong> / {{ trip.capacity }} {{ 'organizer.my_trips.booked_count' | translate }}</span>
+                <span class="capacity-count">
+                  <b>{{ trip.booked }}</b> / {{ trip.capacity }} {{ 'organizer.my_trips.booked_count' | translate }}
+                </span>
+                <span class="spots-badge">{{ formatSpots(spotsLeft(trip)) }}</span>
               </div>
-              <div class="progress-track" role="progressbar"
+              <div class="progress-track"
+                   role="progressbar"
+                   [attr.aria-label]="'organizer.my_trips.bookings_title' | translate"
                    [attr.aria-valuenow]="progressPct(trip)"
                    aria-valuemin="0" aria-valuemax="100">
                 <div class="progress-fill" [style.width.%]="progressPct(trip)"></div>
@@ -254,8 +289,14 @@
             <div class="card-actions">
               <button class="btn btn-gold-card" type="button" (click)="manageBookings(trip)">
                 <span>{{ 'organizer.my_trips.btn_manage_bookings' | translate }}</span>
+                <svg class="i i-sm arrow-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path [attr.d]="icons.arrow" />
+                </svg>
               </button>
               <button class="btn btn-outline-card" type="button" (click)="editTrip(trip)">
+                <svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true">
+                  <path [attr.d]="icons.edit" />
+                </svg>
                 <span>{{ 'organizer.my_trips.btn_edit_trip' | translate }}</span>
               </button>
             </div>
@@ -264,14 +305,26 @@
       }
 
       <!-- Dashed Plan Your Next Expedition Card -->
-      <div class="plan-next-card" (click)="goNewTrip()" role="button" tabindex="0" (keydown.enter)="goNewTrip()">
+      <div class="plan-next-card"
+           [style.--i]="filteredTrips().length"
+           (click)="goNewTrip()"
+           role="button"
+           tabindex="0"
+           (keydown.enter)="goNewTrip()">
         <div class="plan-next-icon">
           <svg class="i" viewBox="0 0 24 24" aria-hidden="true">
             <path [attr.d]="icons.plus" />
           </svg>
         </div>
-        <h3 class="plan-next-title">{{ 'organizer.my_trips.plan_next_title' | translate }}</h3>
-        <p class="plan-next-sub">{{ 'organizer.my_trips.plan_next_sub' | translate }}</p>
+        <div class="plan-next-text">
+          <h3 class="plan-next-title">{{ 'organizer.my_trips.plan_next_title' | translate }}</h3>
+          <p class="plan-next-sub">{{ 'organizer.my_trips.plan_next_sub' | translate }}</p>
+        </div>
+        <div class="plan-next-arrow" aria-hidden="true">
+          <svg class="i" viewBox="0 0 24 24">
+            <path [attr.d]="icons.arrow" />
+          </svg>
+        </div>
       </div>
     </div>
   }

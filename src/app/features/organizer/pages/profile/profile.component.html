@@ -3,8 +3,16 @@
   <!-- Header -->
   <header class="page-header">
     <h1 class="page-title">{{ 'organizer.profile.title' | translate }}</h1>
-    <button class="icon-btn" type="button" [attr.aria-label]="'organizer.profile.settings' | translate">
-      <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.settings"/></svg>
+    <button
+      class="icon-btn"
+      type="button"
+      [disabled]="refreshing()"
+      [attr.aria-label]="'organizer.profile.refresh' | translate"
+      (click)="refreshProfile()"
+    >
+      <svg class="i" [class.spin]="refreshing()" viewBox="0 0 24 24" aria-hidden="true">
+        <path [attr.d]="icons.refresh"/>
+      </svg>
     </button>
   </header>
 
@@ -12,147 +20,190 @@
     <div class="profile-layout">
       <div class="profile-col-left">
         <div class="skeleton-card" style="height: 290px;"></div>
-        <div class="skeleton-card" style="height: 124px;"></div>
+        <div class="skeleton-card" style="height: 150px;"></div>
         <div class="skeleton-card" style="height: 52px; border-radius: 100px;"></div>
       </div>
       <div class="profile-col-right">
-        <div class="skeleton-card" style="height: 180px;"></div>
-        <div class="skeleton-card" style="height: 72px;"></div>
+        <div class="skeleton-card" style="height: 220px;"></div>
       </div>
     </div>
   } @else {
-    @if (profile(); as p) {
+    @if (user(); as u) {
       <div class="profile-layout">
 
-        <!-- Left Column -->
-        <div class="profile-col-left">
+      <!-- Left Column -->
+      <div class="profile-col-left">
 
-          <!-- Main profile card -->
-          <div class="profile-card">
-            <div class="avatar-wrap">
-              @if (p.avatar) {
-                <img class="avatar" [src]="p.avatar" [alt]="p.name" />
-              } @else {
-                <div class="avatar avatar-fallback" aria-label="Profile photo">{{ initials(p.name) }}</div>
+        <!-- Main profile card -->
+        <div class="profile-card">
+          <div class="avatar-wrap">
+            @if (u.profileImage) {
+              <img class="avatar" [src]="u.profileImage" [alt]="u.name" />
+            } @else {
+              <div class="avatar avatar-fallback" aria-label="Profile photo">{{ initials(u.name) }}</div>
+            }
+          </div>
+
+          <div class="name-block">
+            <h2 class="profile-name">{{ u.name }}</h2>
+            <div class="chips-row">
+              <span class="chip">{{ 'organizer.profile.role' | translate }}</span>
+              @if (u.createdAt) {
+                <span class="since">{{ 'organizer.profile.since' | translate }} {{ u.createdAt | date:'MMM yyyy' }}</span>
               }
             </div>
 
-            <div class="name-block">
-              <h2 class="profile-name">{{ p.name }}</h2>
-              <div class="chips-row">
-                <span class="chip">{{ 'organizer.profile.role' | translate }}</span>
-                <span class="since">{{ 'organizer.profile.since' | translate }} {{ p.since }}</span>
+            @if (idStatus() === 'verified') {
+              <div class="verified-chip">
+                <svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.check"/></svg>
+                <span>{{ 'organizer.profile.id_verified' | translate }}</span>
               </div>
-              @if (p.isVerified) {
-                <div class="verified-chip">
-                  <svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.check"/></svg>
-                  <span>{{ 'organizer.profile.verified_license' | translate }}</span>
-                </div>
-              }
-            </div>
-
-            <div class="stats-divider-row">
-              <div class="stat-col">
-                <span class="stat-val">{{ p.tripsHosted }}</span>
-                <span class="stat-lbl">{{ 'organizer.profile.trips_hosted' | translate }}</span>
+            } @else if (idStatus() === 'pending') {
+              <div class="verified-chip verified-chip--pending">
+                <svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.clock"/></svg>
+                <span>{{ 'organizer.profile.id_pending' | translate }}</span>
               </div>
-              <div class="divider"></div>
-              <div class="stat-col">
-                <span class="stat-val">{{ p.reviews }}</span>
-                <span class="stat-lbl">{{ 'organizer.profile.reviews' | translate }}</span>
+            } @else {
+              <div class="verified-chip verified-chip--failed">
+                <svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.alert"/></svg>
+                <span>{{ 'organizer.profile.id_failed' | translate }}</span>
               </div>
-              <div class="divider"></div>
-              <div class="stat-col">
-                <span class="stat-val star-row">
-                  <svg class="i i-sm star-icon" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.star"/></svg>
-                  <span>{{ p.rating }}</span>
-                </span>
-                <span class="stat-lbl">{{ 'organizer.profile.rating' | translate }}</span>
-              </div>
-            </div>
+            }
           </div>
 
-          <!-- Info card -->
-          <div class="info-card">
-            <div class="info-row">
-              <div class="info-chip">
-                <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.mail"/></svg>
-              </div>
-              <div class="info-text">
-                <span class="info-label">{{ 'organizer.profile.business_email' | translate }}</span>
-                <span class="info-val">{{ p.email }}</span>
-              </div>
+          <div class="stats-divider-row">
+            <div class="stat-col">
+              <span class="stat-val">{{ tripsHostedCount() }}</span>
+              <span class="stat-lbl">{{ 'organizer.profile.trips_hosted' | translate }}</span>
             </div>
-            <div class="separator"></div>
-            <div class="info-row">
-              <div class="info-chip">
-                <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.phone"/></svg>
-              </div>
-              <div class="info-text">
-                <span class="info-label">{{ 'organizer.profile.business_phone' | translate }}</span>
-                <span class="info-val">{{ p.phone }}</span>
-              </div>
+            <div class="divider"></div>
+            <div class="stat-col">
+              <span class="stat-val">{{ publishedTripsCount() }}</span>
+              <span class="stat-lbl">{{ 'organizer.profile.published_trips' | translate }}</span>
+            </div>
+            <div class="divider"></div>
+            <div class="stat-col">
+              <span class="stat-val">{{ u.age ?? '—' }}</span>
+              <span class="stat-lbl">{{ 'organizer.profile.age' | translate }}</span>
             </div>
           </div>
-
-          <!-- Edit Profile button -->
-          <button class="edit-btn" type="button" [attr.aria-label]="'organizer.profile.edit_organizer_profile' | translate">
-            <span>{{ 'organizer.profile.edit_organizer_profile' | translate }}</span>
-            <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.edit"/></svg>
-          </button>
         </div>
 
-        <!-- Right Column -->
-        <div class="profile-col-right">
-
-          <!-- Revenue card -->
-          <div class="revenue-card" [attr.aria-label]="'organizer.profile.lifetime_revenue' | translate">
-            <div class="revenue-left">
-              <span class="revenue-label">{{ 'organizer.profile.lifetime_revenue' | translate }}</span>
-              <span class="revenue-val">{{ p.lifetimeRevenue }}</span>
-              <div class="trend-pill">
-                <svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.trendUp"/></svg>
-                <span>{{ p.revenueTrend }}</span>
-              </div>
+        <!-- Account Info card -->
+        <div class="info-card">
+          <div class="info-row">
+            <div class="info-chip">
+              <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.mail"/></svg>
             </div>
-            <div class="sparkline-wrap" aria-hidden="true">
-              <svg class="sparkline-svg" viewBox="0 0 100 40" preserveAspectRatio="none">
-                <defs>
-                  <filter id="sparkGlow" x="-20%" y="-20%" width="140%" height="140%">
-                    <feGaussianBlur stdDeviation="1.8" result="blur"/>
-                    <feMerge>
-                      <feMergeNode in="blur"/>
-                      <feMergeNode in="SourceGraphic"/>
-                    </feMerge>
-                  </filter>
-                </defs>
-                <polyline
-                  [attr.points]="sparklinePoints(p.sparklinePoints)"
-                  class="spark-line"
-                  filter="url(#sparkGlow)" />
-              </svg>
+            <div class="info-text">
+              <span class="info-label">{{ 'organizer.profile.email' | translate }}</span>
+              <span class="info-val">{{ u.email }}</span>
             </div>
           </div>
 
-          <!-- Business License card -->
-          <div class="license-card">
+          <div class="separator"></div>
+
+          <div class="info-row">
+            <div class="info-chip">
+              <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.user"/></svg>
+            </div>
+            <div class="info-text">
+              <span class="info-label">{{ 'organizer.profile.age' | translate }}</span>
+              <span class="info-val">
+                @if (u.age !== null && u.age !== undefined) {
+                  {{ u.age }}
+                } @else {
+                  {{ 'organizer.profile.pending_verification' | translate }}
+                }
+              </span>
+            </div>
+          </div>
+
+          <div class="separator"></div>
+
+          <div class="info-row">
+            <div class="info-chip">
+              <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.calendar"/></svg>
+            </div>
+            <div class="info-text">
+              <span class="info-label">{{ 'organizer.profile.birth_date' | translate }}</span>
+              <span class="info-val">
+                @if (u.birthDate) {
+                  {{ u.birthDate | date:'mediumDate' }}
+                } @else {
+                  {{ 'organizer.profile.pending_verification' | translate }}
+                }
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Logout button -->
+        <button
+          class="edit-btn logout-action"
+          type="button"
+          [disabled]="loggingOut()"
+          (click)="logout()"
+        >
+          <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.logout"/></svg>
+          <span>{{ 'organizer.profile.logout' | translate }}</span>
+        </button>
+      </div>
+
+      <!-- Right Column -->
+      <div class="profile-col-right">
+
+        <!-- National ID Verification Card -->
+        <div class="id-card-panel">
+          <div class="id-card-panel__head">
             <div class="info-chip">
               <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.shield"/></svg>
             </div>
             <div class="license-text">
-              <span class="license-name">{{ p.licenseName }}</span>
-              @if (p.isVerified) {
-                <div class="verified-chip verified-chip--sm">
-                  <svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.check"/></svg>
-                  <span>{{ 'organizer.profile.verified' | translate }}</span>
+              <span class="license-name">{{ 'organizer.profile.national_id_title' | translate }}</span>
+              <span class="id-card-number">{{ maskNationalId(u.idCard?.nationalId) }}</span>
+            </div>
+
+            @if (idStatus() === 'verified') {
+              <div class="verified-chip verified-chip--sm">
+                <svg class="i i-sm" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.check"/></svg>
+                <span>{{ 'organizer.profile.verified' | translate }}</span>
+              </div>
+            } @else if (idStatus() === 'pending') {
+              <div class="verified-chip verified-chip--sm verified-chip--pending">
+                <span>{{ 'organizer.profile.pending' | translate }}</span>
+              </div>
+            } @else {
+              <div class="verified-chip verified-chip--sm verified-chip--failed">
+                <span>{{ 'organizer.profile.failed' | translate }}</span>
+              </div>
+            }
+          </div>
+
+          @if (idStatus() === 'failed' && u.idCard?.verificationError) {
+            <p class="id-card-error">{{ u.idCard?.verificationError }}</p>
+          }
+
+          @if (u.idCard?.frontImage || u.idCard?.backImage) {
+            <div class="id-thumbs">
+              @if (u.idCard?.frontImage) {
+                <div class="id-thumb">
+                  <span>{{ 'organizer.profile.id_front' | translate }}</span>
+                  <img [src]="u.idCard!.frontImage" alt="National ID front" />
+                </div>
+              }
+              @if (u.idCard?.backImage) {
+                <div class="id-thumb">
+                  <span>{{ 'organizer.profile.id_back' | translate }}</span>
+                  <img [src]="u.idCard!.backImage" alt="National ID back" />
                 </div>
               }
             </div>
-            <svg class="i chevron" viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="icons.chevron"/></svg>
-          </div>
+          }
         </div>
-
       </div>
+
+    </div>
     }
   }
 </div>

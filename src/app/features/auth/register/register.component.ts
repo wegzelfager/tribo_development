@@ -68,7 +68,6 @@ export class RegisterComponent implements AfterViewInit, OnDestroy {
   // ── ViewChilds ────────────────────────────────────────────────────────────
   @ViewChild('formEl')    formEl!:    ElementRef<HTMLFormElement>;
   @ViewChild('nameInput') nameInput!: ElementRef<HTMLInputElement>;
-  @ViewChild('ageInput')  ageInput!:  ElementRef<HTMLInputElement>;
   @ViewChild('emailInput')emailInput!:ElementRef<HTMLInputElement>;
   @ViewChild('pwInput')   pwInput!:   ElementRef<HTMLInputElement>;
   @ViewChild('photoInput')photoInput!:ElementRef<HTMLInputElement>;
@@ -132,9 +131,6 @@ export class RegisterComponent implements AfterViewInit, OnDestroy {
       { s:0, el: this.nameInput?.nativeElement,
         ok: v => v.trim().length > 0 && v.trim().length <= 50,
         msg: 'Enter your name (up to 50 characters).' },
-      { s:0, el: this.ageInput?.nativeElement,
-        ok: v => v !== '' && +v >= 18 && Math.floor(+v) === +v,
-        msg: 'You must be 18 or older to join.' },
       { s:1, el: this.emailInput?.nativeElement,
         ok: v => /^\S+@\S+\.\S+$/.test(v.trim()),
         msg: 'Enter a valid email address.' },
@@ -357,7 +353,6 @@ export class RegisterComponent implements AfterViewInit, OnDestroy {
     // Build FormData exactly as the backend expects
     const fd = new FormData();
     fd.append('name',     this.nameInput.nativeElement.value.trim());
-    fd.append('age',      this.ageInput.nativeElement.value);
     fd.append('email',    this.emailInput.nativeElement.value.trim());
     fd.append('password', this.pwInput.nativeElement.value);
     fd.append('role',     this.selectedRole);

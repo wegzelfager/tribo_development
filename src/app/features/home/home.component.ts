@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { IdentityVerificationBannerComponent } from '../../shared/components/identity-verification-banner/identity-verification-banner.component';
 
 // ── Icons (24x24 stroke paths, rendered in the template) ─────────────────────
 const ICONS = {
@@ -44,22 +45,29 @@ export interface Trip {
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [RouterLink, DecimalPipe],
+  imports: [RouterLink, DecimalPipe, IdentityVerificationBannerComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly cdr = inject(ChangeDetectorRef);
 
   readonly icons = ICONS;
 
-  user = {
-    name: this.authService.getCurrentUser()?.name || 'Yossif',
-    avatar: ''
-  };
+  ngOnInit(): void {
+    this.authService.refreshCurrentUser().subscribe();
+  }
+
+  get user(): { name: string; avatar: string } {
+    const current = this.authService.currentUserSignal();
+    return {
+      name: current?.name || 'Traveler',
+      avatar: current?.profileImage || ''
+    };
+  }
 
   isLoggingOut = false;
 

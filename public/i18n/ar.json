@@ -239,7 +239,9 @@
       "role": "منظم",
       "lang_switch_label": "تغيير اللغة",
       "lang_ar": "العربية",
-      "lang_en": "English"
+      "lang_en": "English",
+      "collapse": "تصغير",
+      "expand": "توسيع"
     },
     "topbar": {
       "breadcrumb_parent": "إدارة الرحلات",
@@ -292,7 +294,17 @@
       "role": "منظم",
       "since": "عضو منذ",
       "verified_license": "ترخيص موثق",
+      "id_verified": "البطاقة الشخصية موثقة",
+      "id_pending": "جاري مراجعة البطاقة",
+      "id_failed": "فشل التحقق من البطاقة",
       "trips_hosted": "رحلات منظمة",
+      "published_trips": "منشورة",
+      "age": "العمر",
+      "birth_date": "تاريخ الميلاد",
+      "pending_verification": "قيد التحقق",
+      "national_id_title": "بطاقة الرقم القومي",
+      "id_front": "الوجه الأمامي",
+      "id_back": "الوجه الخلفي",
       "rating": "التقييم",
       "reviews": "المراجعات",
       "edit_profile": "تعديل الملف الشخصي",
@@ -305,6 +317,10 @@
       "business_phone": "هاتف العمل",
       "lifetime_revenue": "إجمالي الإيرادات",
       "verified": "موثق",
+      "pending": "قيد المراجعة",
+      "failed": "مطلوب إجراء",
+      "refresh": "تحديث البيانات",
+      "logout": "تسجيل الخروج",
       "settings": "الإعدادات"
     },
     "edit_trip": {

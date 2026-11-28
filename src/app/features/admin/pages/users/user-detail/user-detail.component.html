@@ -45,7 +45,7 @@
         <div class="profile-meta">
           <div class="meta-item">
             <span class="meta-label">Age</span>
-            <span class="meta-value">{{ u.age || '—' }}</span>
+            <span class="meta-value">{{ u.age ?? (u.idCard?.verificationStatus === 'pending' ? 'Pending verification' : '—') }}</span>
           </div>
           <div class="meta-item">
             <span class="meta-label">Joined</span>
